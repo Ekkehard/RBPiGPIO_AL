@@ -42,7 +42,7 @@ class to indicate that something went wrong and detailing exactly what and
 how severe it was.
 
 For a complete documentation of this Python module, please see the docs 
-directory.
+directory https://ekkehard.github.io/RBPiGPIO_AL/.
 
 
 Version History
