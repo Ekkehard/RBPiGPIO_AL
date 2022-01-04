@@ -164,12 +164,11 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_DATA_PIN</b> =
 int&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_CLOCK_PIN</b> = 9</td></tr>
 <tr class="memdesc:aba3325d8733e6f8e2f7b9b11ae5f5696"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Pin number for scl (Different for different architectures) <br /></td></tr>
 <tr class="separator:aba3325d8733e6f8e2f7b9b11ae5f5696"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1f202250f62036a2229f5556eb14a31"><td class="memItemLeft" align="right" valign="top"><a id="aa1f202250f62036a2229f5556eb14a31" name="aa1f202250f62036a2229f5556eb14a31"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_MODE</b> = <a class="el" href="class_g_p_i_o___a_l_1_1_i2_cbus.html#a31cb90533f469fb1eba0e9baaeed0b63">HARDWARE_MODE</a></td></tr>
-<tr class="memdesc:aa1f202250f62036a2229f5556eb14a31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default operating mode (different for different architectures) <br /></td></tr>
+<tr class="memitem:aa1f202250f62036a2229f5556eb14a31"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_g_p_i_o___a_l_1_1_i2_cbus.html#aa1f202250f62036a2229f5556eb14a31">DEFAULT_MODE</a> = <a class="el" href="class_g_p_i_o___a_l_1_1_i2_cbus.html#a31cb90533f469fb1eba0e9baaeed0b63">HARDWARE_MODE</a></td></tr>
+<tr class="memdesc:aa1f202250f62036a2229f5556eb14a31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default operating mode on the Pico is software so as not to overburden the CPU with thasks the hardware can do.  <a href="class_g_p_i_o___a_l_1_1_i2_cbus.html#aa1f202250f62036a2229f5556eb14a31">More...</a><br /></td></tr>
 <tr class="separator:aa1f202250f62036a2229f5556eb14a31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad23cf155eae3ec12a8c755f13c758e15"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_g_p_i_o___a_l_1_1_i2_cbus.html#ad23cf155eae3ec12a8c755f13c758e15">DEFAULT_I2C_FREQ</a> = 100000</td></tr>
-<tr class="memdesc:ad23cf155eae3ec12a8c755f13c758e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default frequency for I<sup>2</sup>C bus communicationsis on Raspberry Pi Pico 100 kHz.  <a href="class_g_p_i_o___a_l_1_1_i2_cbus.html#ad23cf155eae3ec12a8c755f13c758e15">More...</a><br /></td></tr>
+<tr class="memdesc:ad23cf155eae3ec12a8c755f13c758e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default frequency for I<sup>2</sup>C bus communications on the Raspberry Pi Pico is 100 kHz.  <a href="class_g_p_i_o___a_l_1_1_i2_cbus.html#ad23cf155eae3ec12a8c755f13c758e15">More...</a><br /></td></tr>
 <tr class="separator:ad23cf155eae3ec12a8c755f13c758e15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -178,6 +177,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_MODE</b> = <a 
 <p >Since many targets can be connected on an I<sup>2</sup>C bus, one <a class="el" href="class_g_p_i_o___a_l_1_1_i2_cbus.html" title="Class to handle I2C bus communication.">I2Cbus</a> object must be able to handle them all. Therefore, <a class="el" href="class_g_p_i_o___a_l_1_1_i2_cbus.html" title="Class to handle I2C bus communication.">I2Cbus</a> objects are created one per I<sup>2</sup>C bus, which is uniquely defined by the sda and scl Pins - NOT one such object per target on that bus. Every I<sup>2</sup>C I/O operation therefore needs to be given the I<sup>2</sup>C address of the target this communication is meant for.</p>
 <p >On the Raspberries running under Linux-like operating systems, it is mandatory that the user be part of the group i2c to be able to use the I<sup>2</sup>C bus. This can be accomplished by issuing the command (in a terminal window) </p><div class="fragment"><div class="line">sudo usermod -a -G i2c &lt;user name&gt;</div>
 </div><!-- fragment --><p> and then logging out and back in again. Otherwise, access to the I<sup>2</sup>C device requires elevated privileges (sudo), and the practice of using those when not strictly necessary is strongly discouraged.</p>
+<p >Also, the pigpiod daemon needs to run on Raspberry Pis running under an operating system in order to use GPIO Pins. Either use </p><div class="fragment"><div class="line">sudo pigpiod</div>
+</div><!-- fragment --><p> whenever you want to use it or enable the daemon at boot time using </p><div class="fragment"><div class="line">sudo systemctl enable pigpiod</div>
+</div><!-- fragment --><p> to have the GPIO daemon start every time the Raspberry Pi OS boots.</p>
 <p >It is worth noting that the defaults for the operating mode are different between the Raspberry Pi 3 and the Raspberry Pi Pico. This is because the Broadcomm BCM2835 chip, which the Raspberry Pi 3 uses for hardware I<sup>2</sup>C, is broken and does not (reliably) support clock stretching when requested by a target. This was found through measurements and also confirmed online at <a href="https://www.advamation.com/knowhow/raspberrypi/rpi-i2c-bug.html">https://www.advamation.com/knowhow/raspberrypi/rpi-i2c-bug.html</a>. The software mode supports clock stretching properly on the Raspberry Pi 3. Naturally, the software-generated I<sup>2</sup>C clock on a non-real-time OS is not very consistent, but targets will tolerate a non-consistent clock better, albeit not always completely, than a broken clock-stretch mechanism when they need it. Therefore, the default operating mode on a Raspberry Pi 3 is software, but since the Raspberry Pi Pico works just fine with hardware I<sup>2</sup>C, the default operating mode there is hardware to free the CPU from the task of generating I<sup>2</sup>C signals. This software still allows the caller to select hardware mode also on the Raspberry Pi 3, but the user is strongly advised to make sure that no target on the I<sup>2</sup>C bus requires clock stretching in such cases. Moreover, the user is much more likely to run into error conditions on a Raspberry Pi 3 I<sup>2</sup>C bus than on any other system, and it is a very good idea to write "robust" code that checks error conditions continuously and deals with them appropriately when the I<sup>2</sup>C bus and clock stretching has to be used on a Raspberry Pi 3, even in software mode. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af7e5d76107b544edcd4a6d3e1e251458" name="af7e5d76107b544edcd4a6d3e1e251458"></a>
@@ -555,8 +557,34 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_MODE</b> = <a 
 </table>
 </div><div class="memdoc">
 
-<p>Default frequency for I<sup>2</sup>C bus communicationsis on Raspberry Pi Pico 100 kHz. </p>
-<p >Default frequency for I<sup>2</sup>C bus communicationsis on Raspberry Pi 3 75 kHz. </p>
+<p>Default frequency for I<sup>2</sup>C bus communications on the Raspberry Pi Pico is 100 kHz. </p>
+<p >Default frequency for I<sup>2</sup>C bus communications on chips other than the BCM2835 is 100 kHz.</p>
+<p >Default frequency for I<sup>2</sup>C bus communications with this chip is reduced to 75 kHz. </p>
+
+</div>
+</div>
+<a id="aa1f202250f62036a2229f5556eb14a31" name="aa1f202250f62036a2229f5556eb14a31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1f202250f62036a2229f5556eb14a31">&#9670;&nbsp;</a></span>DEFAULT_MODE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int GPIO_AL.I2Cbus.DEFAULT_MODE = <a class="el" href="class_g_p_i_o___a_l_1_1_i2_cbus.html#a31cb90533f469fb1eba0e9baaeed0b63">HARDWARE_MODE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Default operating mode on the Pico is software so as not to overburden the CPU with thasks the hardware can do. </p>
+<p >The BCM2835 chip is broken and the default operating mode for it is therefore set to software. </p>
 
 </div>
 </div>

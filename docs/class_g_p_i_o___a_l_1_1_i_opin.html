@@ -166,7 +166,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>RISING</b> = 1</td></t
 </div><!-- fragment --><p> to work on all Raspberry Pi architectures.</p>
 <p >Pins' voltage levels are examined and set via setters and getters for the level property of this class, i.e. if myPin is an <a class="el" href="class_g_p_i_o___a_l_1_1_i_opin.html" title="Class to encapsulate single Pin I/O.">IOpin</a> object via the statements </p><div class="fragment"><div class="line">value = myPin.level</div>
 </div><!-- fragment --><p> to examine the Pin's voltage level and store it in the variable value, and </p><div class="fragment"><div class="line">myPin.level = value</div>
-</div><!-- fragment --><p> to set the voltage level of the Pin to whatever the variable value contains, which should be either <a class="el" href="class_g_p_i_o___a_l_1_1_i_opin.html#a16b7091e3ab6b13a21aaca8348eb803f" title="High voltage level.">IOpin.HIGH</a> or <a class="el" href="class_g_p_i_o___a_l_1_1_i_opin.html#abe18d070e5038825a77361b29e891ddc" title="Low voltage level.">IOpin.LOW</a>. </p>
+</div><!-- fragment --><p> to set the voltage level of the Pin to whatever the variable value contains, which should be either <a class="el" href="class_g_p_i_o___a_l_1_1_i_opin.html#a16b7091e3ab6b13a21aaca8348eb803f" title="High voltage level.">IOpin.HIGH</a> or <a class="el" href="class_g_p_i_o___a_l_1_1_i_opin.html#abe18d070e5038825a77361b29e891ddc" title="Low voltage level.">IOpin.LOW</a>.</p>
+<p >Also, the pigpiod daemon needs to run on Raspberry Pis running under an operating system in order to use GPIO Pins. Either use </p><div class="fragment"><div class="line">sudo pigpiod</div>
+</div><!-- fragment --><p> whenever you want to use it or enable the daemon at boot time using </p><div class="fragment"><div class="line">sudo systemctl enable pigpiod</div>
+</div><!-- fragment --><p> to have the GPIO daemon start every time the Raspberry Pi OS boots. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a28a2c588675a4c5b29ef2f4c64a6f14d" name="a28a2c588675a4c5b29ef2f4c64a6f14d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a28a2c588675a4c5b29ef2f4c64a6f14d">&#9670;&nbsp;</a></span>__init__()</h2>
