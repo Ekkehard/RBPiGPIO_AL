@@ -1,0 +1,77 @@
+#! /usr/bin/env python3
+#
+# Python Script Implementation: closei2c
+#
+# Version   : 1.0.0
+#
+# Purpose   : Close am I2C bus that was open for software (bit banging) use and
+#             has not been properly closed.
+#
+# Synopsis  : closei2c
+#
+# Comments  : This code only works on the raspberry Pi.
+#             Moreover, for this code to work without elevated privileges,
+#             the user must be a member of the group i2c, which can be joined
+#             via
+#                 sudo usermod -a -G i2c <user name>
+#
+# Known Bugs: none
+#
+# @author
+# W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
+#
+# @copyright
+# Copyright 2021 W. Ekkehard Blanz
+# See NOTICE.md and LICENSE.md files that come with this distribution.
+
+#
+# File history:
+#
+#     Date         | Author         | Modification
+# -----------------+----------------+-------------------------------------------
+#  Tue Oct 19 2021 | Ekkehard Blanz | created
+#                  |                |
+#
+
+import sys
+import getopt
+import pigpio
+try:
+    from smbus2 import SMBus
+except ModuleNotFoundError:
+    from smbus import SMBus
+
+def main( argv ):
+    
+    try:
+        flags, args = getopt.getopt( argv, 'hV', ['help', 'Version'] )
+    except:
+        print( 'Wrong command line arguments specified' )
+        return 1
+    for flag, arg in flags:
+        if flag in ('-h', '--help'):
+            print( 'Issue command closei2c to close all open software '
+                   'I2C busses.' )
+            return 0
+        elif flag in ('-V', '--Version'):
+            print( 'Version = 1.0.0' )
+            return 0
+    i2cObj = pigpio.pi()
+    try:
+        i2cObj.bb_i2c_close( 2 )
+        print( 'Closed open bit bang I2C on GPIO' )
+    except Exception as e:
+        print( e )
+    i2cObj.stop()
+
+    bus = SMBus( 1 )
+    try:
+        bus.close()
+    except Exception as e:
+        print( e )
+
+    return 0
+    
+if __name__ == '__main__':
+    sys.exit( main( sys.argv[1:] ) or 0 )
+

@@ -2,9 +2,9 @@
 ##
 # @file       GPIO_AL.py
 #
-# @version    1.1.1
-#
 # @mainpage   Raspberry Pi GPIO Abstraction Layer
+#
+# @version    2.0.0
 #
 # @par Purpose
 # This module provides an abstraction layer for the Raspberry Pi General Purpose
@@ -31,7 +31,7 @@
 # W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
 #
 # @copyright
-# Copyright (C) 2021 W. Ekkehard Blanz\n
+# Copyright (C) 2021 - 2022 W. Ekkehard Blanz\n
 # See NOTICE.md and LICENSE.md files that come with this distribution.
 
 # File history:
@@ -43,6 +43,7 @@
 #                   |                | Raspberry Pi to Software
 #   Sat Dec 18 2021 | Ekkehard Blanz | fixed bug in writeByteReg and 
 #                   |                | writeBlockReg for RB Pi Software I2C
+#   Sun Jan 02 2022 | Ekkehard Blanz | replaced ARCHITECTURE with CPU_INFO
 #                   |                |
 
 # first define our exception class so we can throw it from anywhere
@@ -92,22 +93,64 @@ class GPIOError( Exception ):
 
 
 
-# determine platform and import appropriate module for GPIO access
-from sys import platform
-if platform == 'rp2':
-    ARCHITECTURE = 'RaspberryPiPico'
-    import machine
-elif platform.startswith( 'linux' ):
-    import platform as pltfrm
-    if pltfrm.machine() == 'armv7l':
-        ARCHITECTURE = 'RaspberryPi'
-    else:
-        raise GPIOError( '{0} architecture not '
-                         'supported'.format(pltfrm.machine() ) )
-    import pigpio
-else:
-    raise GPIOError( '{0} architecture not supported'.format( platform ) )
+def _cpuInfo():
+    """!
+    @brief Get some information from /proc/cpuinfo.
 
+    If more information needs to be extracted from /proc/cpuinfo, this can be
+    easily done.  However, existing keys should be kept for backward
+    compatibility with other modules.
+    @return cpuInfo dict - description see below
+    """
+    cpuInfo = {'numCores' : None,
+               'processor' : None,
+               'chip' : None,
+               'revision' : None,
+               'model' : None}
+    
+    from sys import platform
+    if platform == 'rp2':
+        cpuInfo['numCores'] = 2
+        cpuInfo['processor'] = 'Arm Cortex-M0+'
+        cpuInfo['chip'] = 'RP2040'
+        cpuInfo['revision'] = ''
+        cpuInfo['model'] = 'Raspberry Pi Pico'
+    else:
+        try:
+            f = open( '/proc/cpuinfo', 'r' )
+        except FileNotFoundError:
+            return cpuInfo
+        for line in f:
+            if line.startswith( 'processor' ):
+                cpuInfo['numCores'] = int( line.split( ':' )[1].strip() )
+            elif line.startswith( 'model name' ):
+                cpuInfo['processor'] = line.split( ':' )[1].strip()
+            elif line.startswith( 'Hardware' ):
+                cpuInfo['chip'] = line.split( ':' )[1].strip()
+            elif line.startswith( 'Revision' ):
+                cpuInfo['revision'] = line.split( ':' )[1].strip()
+            elif line.startswith( 'Model' ):
+                cpuInfo['model'] = line.split( ':' )[1].strip()
+        f.close()
+        cpuInfo['numCores'] += 1
+        
+    return cpuInfo
+
+## CPU_INFO dict has the following str keys:
+#   - 'numCores'  - number of processor cores as int
+#   - 'processor' - name of the processor architecture as str
+#   - 'chip'      - name of the processor chip as str
+#   - 'revision'  - revision of the processor chip as str
+#   - 'model'     - Raspberry Pi model as str
+CPU_INFO = _cpuInfo()
+
+# determine platform and import appropriate module for GPIO access
+if not CPU_INFO['model']:
+    raise GPIOError( 'Current architecture not supported by GPIO_AI' )
+elif CPU_INFO['model'].find( 'Pico' ) != -1:
+    import machine
+else:
+    import pigpio
 
 
 class IOpin( object ):
@@ -146,6 +189,17 @@ class IOpin( object ):
     @endcode
     to set the voltage level of the Pin to whatever the variable value contains,
     which should be either IOpin.HIGH or IOpin.LOW.
+    
+    Also, the pigpiod daemon needs to run on Raspberry Pis running under an
+    operating system in order to use GPIO Pins.  Either use
+    @code
+        sudo pigpiod
+    @endcode
+    whenever you want to use it or enable the daemon at boot time using
+    @code
+        sudo systemctl enable pigpiod
+    @endcode
+    to have the GPIO daemon start every time the Raspberry Pi OS boots.
     """
 
     ## Input mode without resistors pulling up or down
@@ -213,12 +267,10 @@ class IOpin( object ):
                                                    'output Pins' ) )
 
         # initialize host-specific libraries and hardware
-        if ARCHITECTURE == 'RaspberryPi':
-            self.__setupRP()
-        elif ARCHITECTURE == 'RaspberryPiPico':
+        if CPU_INFO['model'].find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
-            raise GPIOError( 'Internal Error' )
+            self.__setupRP()
 
         self.__open = True
 
@@ -480,6 +532,17 @@ class I2Cbus( object ):
     and then logging out and back in again.  Otherwise, access to the
     I<sup>2</sup>C device requires elevated privileges (sudo), and the
     practice of using those when not strictly necessary is strongly discouraged.
+    
+    Also, the pigpiod daemon needs to run on Raspberry Pis running under an
+    operating system in order to use GPIO Pins.  Either use
+    @code
+        sudo pigpiod
+    @endcode
+    whenever you want to use it or enable the daemon at boot time using
+    @code
+        sudo systemctl enable pigpiod
+    @endcode
+    to have the GPIO daemon start every time the Raspberry Pi OS boots.
         
     It is worth noting that the defaults for the operating mode are different
     between the Raspberry Pi 3 and the Raspberry Pi Pico.  This is because
@@ -513,24 +576,34 @@ class I2Cbus( object ):
     SOFTWARE_MODE = 1
     ## Number of I/O attempts in I/O methods before throwing an exception
     ATTEMPTS = 5
-    if ARCHITECTURE == 'RaspberryPiPico':
+    if CPU_INFO['model'].find( 'Pico' ) != -1:
         ## Default Pin number for sda (Different for different architectures)
         DEFAULT_DATA_PIN = 8
         ## Default Pin number for scl (Different for different architectures)
         DEFAULT_CLOCK_PIN = 9
-        ## Default operating mode (different for different architectures)
+        ## Default operating mode on the Pico is software so as not to
+        ## overburden the CPU with thasks the hardware can do
         DEFAULT_MODE = HARDWARE_MODE
-        ## Default frequency for I<sup>2</sup>C bus communicationsis on
-        ## Raspberry Pi Pico 100 kHz
+        ## Default frequency for I<sup>2</sup>C bus communications on the
+        ## Raspberry Pi Pico is 100 kHz
         DEFAULT_I2C_FREQ = 100000
-    elif ARCHITECTURE == 'RaspberryPi':
+    else:
         DEFAULT_DATA_PIN = 2
         DEFAULT_CLOCK_PIN = 3
-        ## Default operating mode (different for different architectures)
-        DEFAULT_MODE = SOFTWARE_MODE
-        ## Default frequency for I<sup>2</sup>C bus communicationsis on
-        ## Raspberry Pi 3 75 kHz
-        DEFAULT_I2C_FREQ = 75000
+        if CPU_INFO['chip'] == 'BCM2835':
+            ## The BCM2835 chip is broken and the default operating mode for it
+            ## is therefore set to software
+            DEFAULT_MODE = SOFTWARE_MODE
+            ## Default frequency for I<sup>2</sup>C bus communications with this
+            ## chip is reduced to 75 kHz
+            DEFAULT_I2C_FREQ = 75000
+        else:
+            # TODO is that Raspberry Pi 4?
+            DEFAULT_MODE = HARDWARE_MODE
+            ## Default frequency for I<sup>2</sup>C bus communications on chips
+            ## other than the BCM2835 is 100 kHz
+            DEFAULT_I2C_FREQ = 100000
+
 
 
     def __init__( self,
@@ -562,12 +635,10 @@ class I2Cbus( object ):
         self.__i2cObj = None
 
         # initialize host-specific libraries and hardware
-        if ARCHITECTURE == 'RaspberryPi':
-            self.__setupRP()
-        elif ARCHITECTURE == 'RaspberryPiPico':
+        if CPU_INFO['model'].find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
-            raise GPIOError( 'Internal Error' )
+            self.__setupRP()
 
         self.__open = True
         return
@@ -602,17 +673,17 @@ class I2Cbus( object ):
                properly close the pigpio object in software mode.
         """
         if self.__open:
-            if ARCHITECTURE == 'RaspberryPi':
+            if CPU_INFO['model'].find( 'Pico' ) != -1:
+                try:
+                    self.__i2cObj.deinit()
+                except AttributeError:
+                    pass
+            else:
                 if self.__mode == self.SOFTWARE_MODE:
                     self.__i2cObj.bb_i2c_close( self.__sdaPin )
                     self.__i2cObj.stop()
                 else:
                     self.__i2cObj.close()
-            else:
-                try:
-                    self.__i2cObj.deinit()
-                except AttributeError:
-                    pass
             self.__open = False
         return
 
@@ -969,6 +1040,7 @@ if __name__ == "__main__":
         @brief Main program - to save some resources, we do not include the 
                Unit Test here.
         """
+        print( 'cpu info: {0}\n'.format( CPU_INFO ) )
         print( 'Please use included GPIO_ALUnitTest.py for Unit Test' )
         return 0
 

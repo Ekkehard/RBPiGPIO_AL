@@ -48,17 +48,14 @@ if __name__ == "__main__":
 
     import sys
 
-    if ARCHITECTURE == 'RaspberryPi':
+    try:
         import traceback
         exitChar = 'Ctrl-C'
-    elif ARCHITECTURE == 'RaspberryPiPico':
+    except:
         traceback = None
         # keyboard interrupt on Raspberry Pi Pico is broken and gets "stuck"
         # so new inputs are also interrupted - use 'q' instead
         exitChar = 'q'
-    else:
-        print( 'unsupported architecture' )
-        sys.exit( -1 )
 
     DEBUG = True
 
