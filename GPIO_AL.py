@@ -4,7 +4,7 @@
 #
 # @mainpage   Raspberry Pi GPIO Abstraction Layer
 #
-# @version    2.0.0
+# @version    3.0.0
 #
 # @par Purpose
 # This module provides an abstraction layer for the Raspberry Pi General Purpose
@@ -44,6 +44,8 @@
 #   Sat Dec 18 2021 | Ekkehard Blanz | fixed bug in writeByteReg and 
 #                   |                | writeBlockReg for RB Pi Software I2C
 #   Sun Jan 02 2022 | Ekkehard Blanz | replaced ARCHITECTURE with CPU_INFO
+#   Wed Apr 27 2022 | Ekkehard Blanz | streamlined cpuInfo() and platform()
+#                   |                | with common.py
 #                   |                |
 
 # first define our exception class so we can throw it from anywhere
@@ -92,68 +94,71 @@ class GPIOError( Exception ):
         return self.__severity
 
 
-
-def _cpuInfo():
+def platform():
     """!
-    @brief Get some information from /proc/cpuinfo.
-
-    If more information needs to be extracted from /proc/cpuinfo, this can be
-    easily done.  However, existing keys should be kept for backward
-    compatibility with other modules.
-    @return cpuInfo dict - description see below
+    @brief Obtain the name of the platform we are running under.
+    @return content of /sys/firmware/devicetree/base/model or Raspberry Pi Pico
     """
-    cpuInfo = {'numCores' : None,
-               'processor' : None,
-               'chip' : None,
-               'revision' : None,
-               'model' : None}
-    
-    from sys import platform
-    if platform == 'rp2':
-        cpuInfo['numCores'] = 2
-        cpuInfo['processor'] = 'Arm Cortex-M0+'
-        cpuInfo['chip'] = 'RP2040'
-        cpuInfo['revision'] = ''
-        cpuInfo['model'] = 'Raspberry Pi Pico'
-    else:
-        try:
-            f = open( '/proc/cpuinfo', 'r' )
-        except FileNotFoundError:
-            return cpuInfo
-        for line in f:
-            if line.startswith( 'processor' ):
-                cpuInfo['numCores'] = int( line.split( ':' )[1].strip() )
-            elif line.startswith( 'model name' ):
-                cpuInfo['processor'] = line.split( ':' )[1].strip()
-            elif line.startswith( 'Hardware' ):
-                cpuInfo['chip'] = line.split( ':' )[1].strip()
-            elif line.startswith( 'Revision' ):
-                cpuInfo['revision'] = line.split( ':' )[1].strip()
-            elif line.startswith( 'Model' ):
-                cpuInfo['model'] = line.split( ':' )[1].strip()
-        f.close()
-        cpuInfo['numCores'] += 1
-        
-    return cpuInfo
+    from sys import platform as sysplatform
+    if sysplatform.lower() == 'rp2':
+        return 'Raspberry Pi Pico'
+    with open( "/sys/firmware/devicetree/base/model",
+               "r",
+               encoding="utf-8" ) as f:
+        line = f.read()
+    return line
 
-## CPU_INFO dict has the following str keys:
-#   - 'numCores'  - number of processor cores as int
-#   - 'processor' - name of the processor architecture as str
-#   - 'chip'      - name of the processor chip as str
-#   - 'revision'  - revision of the processor chip as str
-#   - 'model'     - Raspberry Pi model as str
-CPU_INFO = _cpuInfo()
+
+def cpuInfo():
+    """!
+    @brief Get some information about the CPU.
+    @return cpuInfo dict with the following keys:
+            numCores - number of processor cores
+            processor - name of processor architecture
+            bitDepth - bit depth of this architecture
+            chip - name of the CPU chip
+    """
+    # the first time we get called we construct the "static constant" _CPU_INFO
+    if not hasattr( cpuInfo, "_CPU_INFO" ):
+        cpuInfo._CPU_INFO = {'numCores': None,
+                             'processor': None,
+                             'bitDepth': None,
+                             'chip': None}
+
+        if platform().find( 'Pico' ) != -1:
+            cpuInfo._CPU_INFO['numCores'] = 2
+            cpuInfo._CPU_INFO['processor'] = 'ARM Cortex-M0+'
+            cpuInfo._CPU_INFO['bitDepth'] = 32
+            cpuInfo._CPU_INFO['chip'] = 'RP2040'
+        else:
+            import platform
+            cpuInfo._CPU_INFO["bitDepth"] = \
+                int( platform.architecture()[0][:-3] )
+            with open( '/proc/cpuinfo', 'r', encoding='utf-8' ) as f:
+                for line in f:
+                    if line.startswith( 'processor' ):
+                        cpuInfo._CPU_INFO['numCores'] = \
+                            int( line.split( ':' )[1].strip() )
+                    elif line.startswith( 'model name' ):
+                        cpuInfo._CPU_INFO['processor'] = \
+                            line.split( ':' )[1].strip()
+                    elif line.startswith( 'Hardware' ):
+                        cpuInfo._CPU_INFO['chip'] = line.split( ':' )[1].strip()
+                f.close()
+            cpuInfo._CPU_INFO['numCores'] += 1
+    return cpuInfo._CPU_INFO
+
 
 # determine platform and import appropriate module for GPIO access
-if not CPU_INFO['model']:
-    raise GPIOError( 'Current architecture not supported by GPIO_AI' )
-elif CPU_INFO['model'].find( 'Pico' ) != -1:
+if platform().find( 'Raspberry' ) == -1:
+    raise GPIOError( 'Not running on a Raspberry Pi' )
+if platform().find( 'Pico' ) != -1:
     import machine
 else:
     import pigpio
 
 
-class IOpin( object ):
+class IOpin():
     """!
     @brief Class to encapsulate single Pin I/O.
 
@@ -267,7 +272,7 @@ class IOpin( object ):
                                                    'output Pins' ) )
 
         # initialize host-specific libraries and hardware
-        if CPU_INFO['model'].find( 'Pico' ) != -1:
+        if cpuInfo()['model'].find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
             self.__setupRP()
@@ -428,8 +433,8 @@ class IOpin( object ):
             self.__close()
             self.__open = False
         return
-    
-    
+
+
     @property
     def pin( self ):
         """!
@@ -438,8 +443,8 @@ class IOpin( object ):
         @return pin number associated with this class
         """
         return self.__pin
-    
-    
+
+
     @property
     def mode( self ):
         """!
@@ -449,8 +454,8 @@ class IOpin( object ):
                 IOpin.INPUT_PULLDOWN, IOpin.OUTPUT or IOpin.OPEN_DRAIN
         """
         return self.__mode
-    
-    
+
+
     @property
     def callback( self ):
         """!
@@ -462,8 +467,8 @@ class IOpin( object ):
             return self.__isr.__name__
         else:
             return ''
-        
-        
+
+
     @property
     def triggerEdge( self ):
         """!
@@ -498,7 +503,7 @@ class IOpin( object ):
 
 
 
-class I2Cbus( object ):
+class I2Cbus():
     """!
     @brief Class to handle I<sup>2</sup>C bus communication.
 
@@ -514,14 +519,14 @@ class I2Cbus( object ):
     20 for clock, GPIO 21 for data and GPIO 22 for clock, GPIO 24 for data
     and GPIO 25 for clock, GPIO 26 for data and GPIO 27 for clock, or GPIO 31
     for data and GPIO 32 for clock.
-    
+
     Since many targets can be connected on  an I<sup>2</sup>C bus, one I2Cbus
     object must be able to handle them all.  Therefore, I2Cbus objects are
     created one per I<sup>2</sup>C bus, which is uniquely defined by the sda
     and scl Pins - NOT one such object per target on that bus.  Every
     I<sup>2</sup>C I/O operation therefore needs to be given the
     I<sup>2</sup>C address of the target this communication is meant for.
-    
+
     On the Raspberries running under Linux-like operating systems, it is 
     mandatory that the user be part of the group i2c to be able to use the
     I<sup>2</sup>C bus.  This can be accomplished by issuing the command (in a
@@ -532,7 +537,7 @@ class I2Cbus( object ):
     and then logging out and back in again.  Otherwise, access to the
     I<sup>2</sup>C device requires elevated privileges (sudo), and the
     practice of using those when not strictly necessary is strongly discouraged.
-    
+
     Also, the pigpiod daemon needs to run on Raspberry Pis running under an
     operating system in order to use GPIO Pins.  Either use
     @code
@@ -543,7 +548,7 @@ class I2Cbus( object ):
         sudo systemctl enable pigpiod
     @endcode
     to have the GPIO daemon start every time the Raspberry Pi OS boots.
-        
+
     It is worth noting that the defaults for the operating mode are different
     between the Raspberry Pi 3 and the Raspberry Pi Pico.  This is because
     the Broadcomm BCM2835 chip, which the Raspberry Pi 3 uses for hardware
@@ -576,7 +581,7 @@ class I2Cbus( object ):
     SOFTWARE_MODE = 1
     ## Number of I/O attempts in I/O methods before throwing an exception
     ATTEMPTS = 5
-    if CPU_INFO['model'].find( 'Pico' ) != -1:
+    if cpuInfo()['model'].find( 'Pico' ) != -1:
         ## Default Pin number for sda (Different for different architectures)
         DEFAULT_DATA_PIN = 8
         ## Default Pin number for scl (Different for different architectures)
@@ -590,7 +595,7 @@ class I2Cbus( object ):
     else:
         DEFAULT_DATA_PIN = 2
         DEFAULT_CLOCK_PIN = 3
-        if CPU_INFO['chip'] == 'BCM2835':
+        if cpuInfo()['chip'] == 'BCM2835':
             ## The BCM2835 chip is broken and the default operating mode for it
             ## is therefore set to software
             DEFAULT_MODE = SOFTWARE_MODE
@@ -603,7 +608,6 @@ class I2Cbus( object ):
             ## Default frequency for I<sup>2</sup>C bus communications on chips
             ## other than the BCM2835 is 100 kHz
             DEFAULT_I2C_FREQ = 100000
-
 
 
     def __init__( self,
@@ -635,7 +639,7 @@ class I2Cbus( object ):
         self.__i2cObj = None
 
         # initialize host-specific libraries and hardware
-        if CPU_INFO['model'].find( 'Pico' ) != -1:
+        if cpuInfo()['model'].find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
             self.__setupRP()
@@ -665,7 +669,7 @@ class I2Cbus( object ):
                           self.__sclPin,
                           self.__frequency / 1000.,
                           modeStr[self.__mode] )
-    
+
 
     def close( self ):
         """!
@@ -673,7 +677,7 @@ class I2Cbus( object ):
                properly close the pigpio object in software mode.
         """
         if self.__open:
-            if CPU_INFO['model'].find( 'Pico' ) != -1:
+            if cpuInfo()['model'].find( 'Pico' ) != -1:
                 try:
                     self.__i2cObj.deinit()
                 except AttributeError:
@@ -744,7 +748,6 @@ class I2Cbus( object ):
                     raise GPIOError( 'Opening Software I2C failed' )
             except Exception as e:
                 raise GPIOError( str( e ) )
-                    
 
             # override the i2c duds with corresponding bb_i2c_zip calls
             self.__readByte = \
@@ -856,15 +859,15 @@ class I2Cbus( object ):
                 self.__i2cObj.writeto_mem( addr, reg, bytearray( data ) ))
 
         return
-    
-    
+
+
     def clearFailedAttempts( self ):
         """!
         @brief Clear the number of internally recorded failed attempts.
         """
         self.__failedAttempts = 0
-    
-    
+
+
     @property
     def failedAttempts( self ):
         """!
@@ -872,8 +875,8 @@ class I2Cbus( object ):
                recorded failed attempts.
         """
         return self.__failedAttempts
-    
-    
+
+
     @property
     def frequency( self ):
         """!
@@ -881,8 +884,8 @@ class I2Cbus( object ):
                operating at in Hz.
         """
         return self.__frequency
-    
-    
+
+
     @property
     def mode( self ):
         """!
@@ -890,16 +893,16 @@ class I2Cbus( object ):
                (I2Cbus.SOFTWARE_MODE or I2Cbus.HARDWARE_MODE).
         """
         return self.__mode
-    
-    
+
+
     @property
     def sda( self ):
         """!
         @brief Works as read-only property to get the sda Pin number.
         """
         return self.__sdaPin
-    
-    
+
+
     @property
     def scl( self ):
         """!
@@ -911,7 +914,7 @@ class I2Cbus( object ):
     # The following methods are wrappers around the internal methods allowing
     # for multiple attempts in case of errors, which proved necessary on the
     # Raspberry Pi
-    
+
     def readByte( self, i2cAddress ):
         """!
         @brief Read a single general byte from an I<sup>2</sup>C device.
@@ -928,7 +931,7 @@ class I2Cbus( object ):
                 self.__failedAttempts += 1
         raise GPIOError( 'exceeded {0} attempts '.format( self.__attempts )
                          + 'in readByte' )
-    
+
 
     def readByteReg( self, i2cAddress, register ):
         """!
@@ -1032,7 +1035,7 @@ class I2Cbus( object ):
 #  main program - NO Unit Test - Unit Test is in separate file
 
 if __name__ == "__main__":
-    
+
     import sys
 
     def main():
@@ -1040,9 +1043,9 @@ if __name__ == "__main__":
         @brief Main program - to save some resources, we do not include the 
                Unit Test here.
         """
-        print( 'cpu info: {0}\n'.format( CPU_INFO ) )
+        print( 'platform: {0}'.format( platform() ) )
+        print( 'cpu info: {0}\n'.format( cpuInfo() ) )
         print( 'Please use included GPIO_ALUnitTest.py for Unit Test' )
         return 0
 
-    
     sys.exit( int( main() or 0 ) )
