@@ -551,10 +551,10 @@ class I2Cbus():
 
     It is worth noting that the defaults for the operating mode are different
     between the Raspberry Pi 3 and the Raspberry Pi Pico.  This is because
-    the Broadcomm BCM2835 chip, which the Raspberry Pi 3 uses for hardware
-    I<sup>2</sup>C, is broken and does not (reliably) support clock
-    stretching when requested by a target.  This was found through
-    measurements and also confirmed online at
+    either the Broadcomm BCM2835 chip, which the Raspberry Pi 3 uses for
+    hardware I<sup>2</sup>C, or the standard Raspberry Pi driver smbus is
+    broken and does not (reliably) support clock stretching when requested by
+    a target.  This was found through measurements and also confirmed online at
     https://www.advamation.com/knowhow/raspberrypi/rpi-i2c-bug.html.  The
     software mode supports clock stretching properly on the Raspberry Pi 3.
     Naturally, the software-generated I<sup>2</sup>C clock on a non-real-time
@@ -596,8 +596,9 @@ class I2Cbus():
         DEFAULT_DATA_PIN = 2
         DEFAULT_CLOCK_PIN = 3
         if cpuInfo()['chip'] == 'BCM2835':
-            ## The BCM2835 chip is broken and the default operating mode for it
-            ## is therefore set to software
+            ## The BCM2835 chip or the standard Raspberry Pi driver smbus is
+            ## broken and the default operating mode for it is therefore set to
+            ## software
             DEFAULT_MODE = SOFTWARE_MODE
             ## Default frequency for I<sup>2</sup>C bus communications with this
             ## chip is reduced to 75 kHz
@@ -880,8 +881,8 @@ class I2Cbus():
     @property
     def frequency( self ):
         """!
-        @brief Works as read-only property to get the frequency the I<sup>2</sup>C bus is
-               operating at in Hz.
+        @brief Works as read-only property to get the frequency the
+               I<sup>2</sup>C bus is operating at in Hz.
         """
         return self.__frequency
 
@@ -889,7 +890,7 @@ class I2Cbus():
     @property
     def mode( self ):
         """!
-        @brief Works as read-only property to get the I2Cbus mode
+        @brief Works as read-only property to get the I<sup>2</sup>C bus mode
                (I2Cbus.SOFTWARE_MODE or I2Cbus.HARDWARE_MODE).
         """
         return self.__mode

@@ -51,7 +51,7 @@ if __name__ == "__main__":
     try:
         import traceback
         exitChar = 'Ctrl-C'
-    except:
+    except (ImportError, ModuleNotFoundError):
         traceback = None
         # keyboard interrupt on Raspberry Pi Pico is broken and gets "stuck"
         # so new inputs are also interrupted - use 'q' instead
@@ -138,7 +138,7 @@ if __name__ == "__main__":
                                            '{1}'.format( pin, ioPin.level ) )
                             else:
                                 try:
-                                    ioPin.level
+                                    _ = ioPin.level
                                     raise ValueError( 'Failed to detect read '
                                                       'from write only Pin' )
                                 except GPIOError:
