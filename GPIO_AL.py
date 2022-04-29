@@ -4,7 +4,7 @@
 #
 # @mainpage   Raspberry Pi GPIO Abstraction Layer
 #
-# @version    3.0.0
+# @version    3.1.0
 #
 # @par Purpose
 # This module provides an abstraction layer for the Raspberry Pi General Purpose
@@ -46,6 +46,9 @@
 #   Sun Jan 02 2022 | Ekkehard Blanz | replaced ARCHITECTURE with CPU_INFO
 #   Wed Apr 27 2022 | Ekkehard Blanz | streamlined cpuInfo() and platform()
 #                   |                | with common.py
+#   Thu Apr 28 2022 | Ekkehard Blanz | added attempts parameter to __init__()
+#                   |                | of I2Cbus abd improved performance of
+#                   |                | platform()
 #                   |                |
 
 # first define our exception class so we can throw it from anywhere
@@ -99,14 +102,16 @@ def platform():
     @brief Obtain the name of the platform we are running under.
     @return content of /sys/firmware/devicetree/base/model or Raspberry Pi Pico
     """
-    from sys import platform as sysplatform
-    if sysplatform.lower() == 'rp2':
-        return 'Raspberry Pi Pico'
-    with open( "/sys/firmware/devicetree/base/model",
-               "r",
-               encoding="utf-8" ) as f:
-        line = f.read()
-    return line
+    if not hasattr( platform, '_PLATFORM' ):
+        from sys import platform as sysplatform
+        if sysplatform.lower() == 'rp2':
+            platform._PLATFORM = 'Raspberry Pi Pico'
+        else:
+            with open( "/sys/firmware/devicetree/base/model",
+                       "r",
+                       encoding="utf-8" ) as f:
+                platform._PLATFORM = f.read()
+    return platform._PLATFORM
 
 
 def cpuInfo():
@@ -272,7 +277,7 @@ class IOpin():
                                                    'output Pins' ) )
 
         # initialize host-specific libraries and hardware
-        if cpuInfo()['model'].find( 'Pico' ) != -1:
+        if platform().find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
             self.__setupRP()
@@ -581,7 +586,7 @@ class I2Cbus():
     SOFTWARE_MODE = 1
     ## Number of I/O attempts in I/O methods before throwing an exception
     ATTEMPTS = 5
-    if cpuInfo()['model'].find( 'Pico' ) != -1:
+    if platform().find( 'Pico' ) != -1:
         ## Default Pin number for sda (Different for different architectures)
         DEFAULT_DATA_PIN = 8
         ## Default Pin number for scl (Different for different architectures)
@@ -601,7 +606,7 @@ class I2Cbus():
             ## software
             DEFAULT_MODE = SOFTWARE_MODE
             ## Default frequency for I<sup>2</sup>C bus communications with this
-            ## chip is reduced to 75 kHz
+            ## chip and this driver is reduced to 75 kHz
             DEFAULT_I2C_FREQ = 75000
         else:
             # TODO is that Raspberry Pi 4?
@@ -615,7 +620,8 @@ class I2Cbus():
                   sdaPin=DEFAULT_DATA_PIN,
                   sclPin=DEFAULT_CLOCK_PIN,
                   frequency=DEFAULT_I2C_FREQ,
-                  mode=DEFAULT_MODE ):
+                  mode=DEFAULT_MODE,
+                  attempts=ATTEMPTS ):
         """!
         @brief Constructor for class I<sup>2</sup>Cbus.
 
@@ -628,19 +634,21 @@ class I2Cbus():
         @param mode one of I2<Cbus.HARDWARE_MODE or I2Cbus.SOFTWARE_MODE
                AKA bit banging (default I2Cbus.SOFTWARE for Raspberry Pi and
                I2Cbus.HARDWARE for Raspberry Pi Pico)
+        @param attempts number of read or write attempts before throwing an
+               exception (default 5)
         """
         # store our incoming parameters
         self.__sdaPin = sdaPin
         self.__sclPin = sclPin
         self.__frequency = frequency
         self.__mode = mode
-        self.__attempts = self.ATTEMPTS
+        self.__attempts = attempts
         self.__failedAttempts = 0
 
         self.__i2cObj = None
 
         # initialize host-specific libraries and hardware
-        if cpuInfo()['model'].find( 'Pico' ) != -1:
+        if platform().find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
             self.__setupRP()
@@ -678,7 +686,7 @@ class I2Cbus():
                properly close the pigpio object in software mode.
         """
         if self.__open:
-            if cpuInfo()['model'].find( 'Pico' ) != -1:
+            if platform().find( 'Pico' ) != -1:
                 try:
                     self.__i2cObj.deinit()
                 except AttributeError:
