@@ -1,0 +1,105 @@
+#!/bin/bash
+#
+# Bash Script Implementation: lsi2c
+#
+# Version   : 1.0.0
+#
+# Purpose   : List all I2C devices on I2C hardware bus.
+#
+# Synopsis  : lsi2c [bus]
+#             the bus can be 0 or 1; 1 is the default.  The usual flags -h, 
+#             --help -V and --Version are supported.
+#
+# Comments  : This code only works on the raspberry Pi.
+#             Moreover, for this code to work without elevated privileges,
+#             the user must be a member of the group i2c, which can be joined
+#             via
+#                 sudo usermod -a -G i2c <user name>
+#
+# Known Bugs: none
+#
+# @author
+# W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
+#
+# @copyright
+# Copyright 2021 W. Ekkehard Blanz
+# See README.md and LICENSE.md files that come with this distribution.
+
+#
+# File history:
+#
+#     Date         | Author         | Modification
+# -----------------+----------------+-------------------------------------------
+#  Tue Oct 19 2021 | Ekkehard Blanz | created
+#                  |                |
+#
+
+
+# @brief Print a given header section to stdout.
+# @param Name of header section (Revision, Purpose, ...)
+printHeaderKey()
+{
+    declare line
+    declare -i printLine=0
+    exec 3< $0
+    while read line <&3 ; do
+        if [[ -n $line ]]; then
+            if [[ ${line:0:1} = \# ]]; then
+                line=${line:1}
+                if [[ $line = [[:space:]]*$1[[:space:]]* ]]; then
+                    printLine=1;
+                fi
+                if [[ $printLine -eq 1 ]]; then
+                    if [[ -z $line ]]; then return; fi
+                    printf "%s\n" "$line"
+                fi
+            fi
+        fi
+    done
+}
+
+declare bus=1
+
+
+while [[ $# -gt 0 ]]; do
+
+    case "$1" in
+
+   -h | --help )
+        printf "\n%s:\n\n" ${0##*/}
+        printHeaderKey Version
+        printf "\n"
+        printHeaderKey Purpose
+        printf "\n"
+        printHeaderKey Synopsis
+        printf "\n"
+        printHeaderKey Comments
+        printf "\n\n"
+        exit 0
+        ;;
+
+      -V | --Version )
+        printf "\n%s:\n\n" ${0##*/}
+        printHeaderKey Version
+        exit 0
+        ;;
+
+    -* )
+        printf "lsi2c: Switch %s not supported\n" "$1"
+        exit 1
+        ;;
+
+    * )
+        bus=$1
+	;;
+
+    esac
+
+    shift
+
+done
+
+i2cdetect -y $bus
+
+exit $?
+
