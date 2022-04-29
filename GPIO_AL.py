@@ -136,9 +136,9 @@ def cpuInfo():
             cpuInfo._CPU_INFO['bitDepth'] = 32
             cpuInfo._CPU_INFO['chip'] = 'RP2040'
         else:
-            import platform
+            import platform as plt
             cpuInfo._CPU_INFO["bitDepth"] = \
-                int( platform.architecture()[0][:-3] )
+                int( plt.architecture()[0][:-3] )
             with open( '/proc/cpuinfo', 'r', encoding='utf-8' ) as f:
                 for line in f:
                     if line.startswith( 'processor' ):
