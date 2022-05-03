@@ -644,6 +644,7 @@ class I2Cbus():
         self.__mode = mode
         self.__attempts = attempts
         self.__failedAttempts = 0
+        self.__open = False
 
         self.__i2cObj = None
 
