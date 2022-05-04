@@ -97,22 +97,29 @@ class GPIOError( Exception ):
         return self.__severity
 
 
+# Micro Python does not know function attributes, use globale variables instead
+_PLATFORM = None
+
 def platform():
     """!
     @brief Obtain the name of the platform we are running under.
     @return content of /sys/firmware/devicetree/base/model or Raspberry Pi Pico
     """
-    if not hasattr( platform, '_PLATFORM' ):
+    global _PLATFORM
+    if not _PLATFORM:
         from sys import platform as sysplatform
         if sysplatform.lower() == 'rp2':
-            platform._PLATFORM = 'Raspberry Pi Pico'
+            _PLATFORM = 'Raspberry Pi Pico'
         else:
             with open( "/sys/firmware/devicetree/base/model",
                        "r",
                        encoding="utf-8" ) as f:
-                platform._PLATFORM = f.read()
-    return platform._PLATFORM
+                _PLATFORM = f.read()
+    return _PLATFORM
 
+
+# Micro Python does not know function attributes, use globale variables instead
+_CPU_INFO = None
 
 def cpuInfo():
     """!
@@ -123,35 +130,36 @@ def cpuInfo():
             bitDepth - bit depth of this architecture
             chip - name of the CPU chip
     """
+    global _CPU_INFO
     # the first time we get called we construct the "static constant" _CPU_INFO
-    if not hasattr( cpuInfo, "_CPU_INFO" ):
-        cpuInfo._CPU_INFO = {'numCores': None,
-                             'processor': None,
-                             'bitDepth': None,
-                             'chip': None}
+    if not _CPU_INFO:
+        _CPU_INFO = {'numCores': None,
+                     'processor': None,
+                     'bitDepth': None,
+                     'chip': None}
 
         if platform().find( 'Pico' ) != -1:
-            cpuInfo._CPU_INFO['numCores'] = 2
-            cpuInfo._CPU_INFO['processor'] = 'ARM Cortex-M0+'
-            cpuInfo._CPU_INFO['bitDepth'] = 32
-            cpuInfo._CPU_INFO['chip'] = 'RP2040'
+            _CPU_INFO['numCores'] = 2
+            _CPU_INFO['processor'] = 'ARM Cortex-M0+'
+            _CPU_INFO['bitDepth'] = 32
+            _CPU_INFO['chip'] = 'RP2040'
         else:
             import platform as plt
-            cpuInfo._CPU_INFO["bitDepth"] = \
+            _CPU_INFO["bitDepth"] = \
                 int( plt.architecture()[0][:-3] )
             with open( '/proc/cpuinfo', 'r', encoding='utf-8' ) as f:
                 for line in f:
                     if line.startswith( 'processor' ):
-                        cpuInfo._CPU_INFO['numCores'] = \
+                        _CPU_INFO['numCores'] = \
                             int( line.split( ':' )[1].strip() )
                     elif line.startswith( 'model name' ):
-                        cpuInfo._CPU_INFO['processor'] = \
+                        _CPU_INFO['processor'] = \
                             line.split( ':' )[1].strip()
                     elif line.startswith( 'Hardware' ):
-                        cpuInfo._CPU_INFO['chip'] = line.split( ':' )[1].strip()
+                        _CPU_INFO['chip'] = line.split( ':' )[1].strip()
                 f.close()
-            cpuInfo._CPU_INFO['numCores'] += 1
-    return cpuInfo._CPU_INFO
+            _CPU_INFO['numCores'] += 1
+    return _CPU_INFO
 
 
 # determine platform and import appropriate module for GPIO access
