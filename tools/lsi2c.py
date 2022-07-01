@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Python Implementation: lsu2c
 ##
 # @file       lsi2c.py
@@ -39,7 +38,21 @@
 #                   |                |
 
 import sys
-from GPIO_AL import I2Cbus, platform, GPIOError
+try:
+    import os.path
+    sys.path.append( os.path.join( os.path.dirname( __file__ ),
+                                   os.path.pardir ) )
+    import pigpio
+    havePigpio = True
+except (ImportError, ModuleNotFoundError):
+    havePigpio = False
+try:
+    from GPIO_AL import I2Cbus, GPIOError
+except ValueError as valexp:
+    print( "\nError: {0}\n".format( valexp ) )
+    sys.exit( 1 )
+
+debug = False
 
 if __name__ == "__main__":
 
@@ -47,58 +60,165 @@ if __name__ == "__main__":
         """!
         @brief Print very simple use message.
         """
-        print( "Synopsis:\n" )
-        print( "\tlsi2c [<flags>] [<bus>]" )
-        print( "if not given, bus defaults to 1." )
-        print( "\nthe flags -h and --help as well as -V and --Version "
-               "are supported as usual." )
+        print( "List I2C devices attached to a specified I2C bus.\n" )
+        print( "Synopsis:" )
+        print( "\tlsi2c [<flags>] [<bus>] [<range>]\n" )
+        print( "If not given, bus defaults to {0}. Range is given as two "
+               "hexadecimal addresses\nbetween which to list devices with a "
+               "hyphen (but no blanks) between them; if not\ngiven '0x03-0x77' "
+               "is used as default.".format( I2Cbus.DEFAULT_BUS ) )
+        print( "In addition to the flag -l or --long, which lists additional "
+               "information about\neach device (if provided), the flags -h and "
+               "--help as well as -V and --Version\nare supported as usual." )
         return
 
+
+    def info( i2cbus, address ):
+        """!
+        @brief Obtains ID info from device.
+        @param i2cbus I2C bus object
+        @param address I2C address to probe
+        @return string with human-readable device information
+        """
+        manufacturer = ["NXP Semiconductors",
+                        "NXP Semiconductors (reserved)",
+                        "NXP Semiconductors (reserved)",
+                        "NXP Semiconductors (reserved)",
+                        "Ramtron International",
+                        "Analog Devices",
+                        "STMicroelectronics",
+                        "ON Semiconductor",
+                        "Sprintek Corporation",
+                        "ESPROS Photonics AG",
+                        "Fujitsu Semiconductor",
+                        "Flir",
+                        "O2Micro",
+                        "Atmel",
+                        "DIODES Incorporated",
+                        "Pericom",
+                        "Marvell Semiconductors Inc",
+                        "ForteMedia",
+                        "Sanju LLC",
+                        "Intel",
+                        "Pericom",
+                        "Arctic Sand Technologies",
+                        "Micron Technology",
+                        "Semtech Corporation",
+                        "IDT",
+                        "TT Electronics",
+                        "Alien Technology",
+                        "LAPIS semiconductor",
+                        "Qorvo",
+                        "Wuxi Chipown Micro-electronics",
+                        "KOA CORPORATION",
+                        "Prevo Technologies Inc."]
+
+        global debug
+        try:
+            manufacturerId, deviceId, dieRevision = i2cbus.readId( address )
+            return "Manufacturer: {0}, Part ID: 0x{1:02X}, die " \
+                   "rev.: 0x{2:02X}".format( manufacturer[manufacturerId],
+                                             deviceId,
+                                             dieRevision )
+        except GPIOError as e:
+            if debug:
+                return "device info not supplied ({0})".format( e )
+            else:
+                return "device info not supplied"
 
 
     def main():
         """!
         @brief Main program.
         """
-        if len( sys.argv ) > 1:
-            arg = sys.argv[1]
+
+        global debug
+
+        # default parameters
+        long = False
+        bus = I2Cbus.DEFAULT_BUS
+        addressLow = 0x03
+        addressHigh = 0x77
+        mode = I2Cbus.HARDWARE_MODE
+        frequency = 100000
+        attempts = 1
+        usePEC = False
+
+        for arg in sys.argv[1:]:
             if arg in ("-h", "--help"):
                 printUsage()
                 return 0
             if arg in ("-V", "--Version"):
-                print( "lsi2c Rev 1.00" )
+                print( "lsi2c Rev 1.0.0" )
                 return 0
-            try:
-                bus = int( arg )
-            except ValueError:
-                print( "Wrong I2C bus specified" )
-                return 1
-        else:
-            bus = 1
+            if arg in ("-d", "--debug"):
+                debug = True
+            elif arg in ("-l", "--long"):
+                long = True
+            elif arg.find( "-" ) != -1:
+                try:
+                    addressLow = int( arg.split( "-" )[0], 16 )
+                    addressHigh = int( arg.split( "-" )[1], 16 )
+                except ValueError:
+                    print( "Error: Wrong parameter specified: {0}"
+                           "".format( arg ) )
+                    return 1
+            elif arg.startswith( "f=" ):
+                try:
+                    frequency = int( arg[2:] )
+                except ValueError:
+                    print( "Error: Wrong parameter specified: {0}"
+                           "".format( arg ) )
+                    return 1
+            else:
+                try:
+                    bus = int( arg )
+                except ValueError:
+                    print( "Error: Wrong parameter specified: {0}"
+                           "".format( arg ) )
+                    return 1
 
-        if bus == 0:
+        if bus == I2Cbus.DEFAULT_BUS:
+            sdaPin = I2Cbus.DEFAULT_DATA_PIN
+            sclPin = I2Cbus.DEFAULT_CLOCK_PIN
+        elif bus == 0:
             sdaPin = 0
             sclPin = 1
-        elif bus == 1:
-            sdaPin = 2
-            sclPin = 3
         else:
-            print( "Wrong I2C bus specified" )
+            print( "Error: Wrong I2C bus specified: {0}".format( bus ) )
             return 1
 
-        i2cbus = I2Cbus( sdaPin,
-                         sclPin,
-                         100000,
-                         I2Cbus.HARDWARE_MODE,
-                         1 )
+        try:
+            i2cbus = I2Cbus( sdaPin,
+                             sclPin,
+                             mode,
+                             frequency,
+                             attempts,
+                             usePEC )
+        except FileNotFoundError:
+            print( "Error: Hardware I2C bus {0} does not exist".format( bus ) )
+            return 1
 
-        for address in range( 0x03, 0x78 ):
+        deviceList = []
+        for address in range( addressLow, addressHigh + 1 ):
             try:
-                _ = i2cbus.readByte( address )
-                print( "0x{0:02X}".format( address ) )
+                if (0x30 <= address <= 0x37) or (0x50 <= address <= 0x5F):
+                    _ = i2cbus.readByte( address )
+                else:
+                    i2cbus.writeQuick( address )
+                deviceList.append( address )
             except GPIOError:
                 pass
 
+        if long:
+            for address in deviceList:
+                print( "0x{0:2X} - {1}".format( address,
+                                                info( i2cbus, address ) ) )
+        else:
+            for i, address in enumerate( deviceList ):
+                print( "0x{0:02X}".format( address ), end="  " )
+                if ((i + 1) % 10 == 0) or (i == len( deviceList ) - 1):
+                    print()
         i2cbus.close()
 
         return 0

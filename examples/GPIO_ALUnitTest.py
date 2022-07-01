@@ -8,7 +8,7 @@
 # This module provides the Unit Test for the GPIO_AL module.  It has been
 # separated from the GPIO_AL module to conserve some resources, as this code is
 # intended to also run on an Raspberry Pi Pico MCU.  On this architecture, it is
-# mandatory that the GPIO_AL.py file reside in the Raspberry Pi Pico's flash 
+# mandatory that the GPIO_AL.py file reside in the Raspberry Pi Pico's flash
 # drive.
 #
 # Because of the nature of the class under test, this Unit Test cannot be
@@ -159,30 +159,45 @@ if __name__ == "__main__":
         try:
             while True:
                 print( '\nBegin I2C bus test' )
-                print( '------------------' )
+                print(   '------------------' )
                 print( 'Again, enter {0} to end all tests an return '
                        'to the next higher test level'.format( exitChar ) )
                 sdaPin = int( input( '\nsda Pin ({0}): '
                                      ''.format( I2Cbus.DEFAULT_DATA_PIN ) ) )
                 sclPin = int( input( 'scl Pin ({0}): '
                                      ''.format( I2Cbus.DEFAULT_CLOCK_PIN ) ) )
-                frequency = int( input( 'frequency in Hz: ' ) )
                 mode = int( input( 'mode (HW {0}, SW {1} - '
                                    ' HW not recommended for Raspberry Pi): '
                                    ''.format( I2Cbus.HARDWARE_MODE,
                                               I2Cbus.SOFTWARE_MODE ) ) )
-                i2cBus = I2Cbus( sdaPin, sclPin, frequency, mode )
-                print( '\nI2C Bus set up at Pin pair {0}'.format( i2cBus ) )
+                if mode == I2Cbus.SOFTWARE_MODE or isPico():
+                    frequency = int( input( 'frequency in Hz: ' ) )
+                else:
+                    frequency = 100000
+                attempts = int( input( 'number of read/write attempts: ' ) )
+                usePEC = bool( input( 'Use PEC: ' ) )
                 print( '\nChoices made:' )
                 print( 'sda Pin: {0}'.format( i2cBus.sda ) )
                 print( 'scl Pin: {0}'.format( i2cBus.scl ) )
-                print( 'frequency {0} kHz'.format( i2cBus.frequency / 1000. ) )
                 print( 'operating in ', end='' )
                 if i2cBus.mode == I2Cbus.HARDWARE_MODE:
                     print( 'hard', end='' )
                 else:
                     print( 'soft', end='' )
-                print( 'ware mode\n' )
+                print( 'ware mode' )
+                print( 'at {0} kHz'.format( i2cBus.frequency / 1000. ) )
+                if not usePEC:
+                    print( 'not ', end='' )
+                print( 'requesting PEC\n' )
+
+                i2cBus = I2Cbus( sdaPin,
+                                 sclPin,
+                                 mode,
+                                 frequency,
+                                 attempts,
+                                 usePEC )
+                print( 'I2C Bus set up as {0}\n'.format( i2cBus ) )
+                print( 'I2C Functions: 0x{0:08X}'.format( i2cBus.funcs ) )
 
                 try:
                     while True:
@@ -206,7 +221,7 @@ if __name__ == "__main__":
                                     reg = int( input( 'register (hex): ' ), 16 )
                                 else:
                                     reg = None
-                                print( 'I/O operation: {0}'.format( choice ) )  
+                                print( 'I/O operation: {0}'.format( choice ) )
                                 if choice != 0 and choice != 3:
                                     print( 'device reg: '
                                            '0x{0:02X}'.format( reg ) )
@@ -270,5 +285,5 @@ if __name__ == "__main__":
         print( '\nExiting...\n' )
         return 0
 
-    
+
     sys.exit( int( main() or 0 ) )
