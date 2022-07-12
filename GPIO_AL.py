@@ -13,7 +13,8 @@
 # common functionality of the GPIO shared by all Raspberry Pi architectures
 # without modifications on all Raspberry Pi architectures.
 #
-# This code has been tested on a Raspberry Pi 3 and a Raspberry Pi Pico.
+# This code has been tested on a Raspberry Pi 3, a Raspberry Pi Zero 2, and a
+# Raspberry Pi Pico.
 #
 # @par Comments
 # This is Python 3 code!  PEP 8 guidelines are decidedly NOT followed in some
