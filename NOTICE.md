@@ -20,7 +20,7 @@ CONTRACTUAL AGREEMENT
    of such contracts, none of My employers, former or present, can claim any
    rights to the Program based on such employment contracts.  Hence, the
    copyright to the Program or the part of the Program that was authored solely 
-   by Me belongs to me and the rights to use, distribute, or modify it are 
+   by Me belongs to Me and the rights to use, distribute, or modify it are 
    determined by Me, and they are as stated below.
 
 3. The Program is free and open source software: You can redistribute it and/or 
