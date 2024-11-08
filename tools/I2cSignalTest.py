@@ -53,8 +53,7 @@ try:
 except ImportError:
     # on the Pico there is no os.path but all modules are in the same directory
     pass
-
-from GPIO_AL import GPIOError, I2Cbus, platform, isPico
+from GPIO_AL import GPIOError, I2Cbus
 
 # Constants for CCS811 chip (from CCS811 class)
 CCS811_ADDR = 0x5B
@@ -108,7 +107,6 @@ if __name__ == "__main__":
         try:
             for _ in range( i2cBus.attempts ):
                 status = i2cBus.readByteReg( CCS811_ADDR, STATUS_REG )
-                print( 'Read status: 0x{0:02X}'.format( status ) )
                 if (status & (1 << ERROR_BIT)) == 0:
                     return False
             return True
@@ -135,28 +133,13 @@ if __name__ == "__main__":
         """!
         @brief main program - I2C bus Signal Generator for Logic Analyzer.
         """
-        try:
-            mode = int( input( 'Enter mode ({0} hardware mode, {1} software '
-                               'mode):'.format( I2Cbus.HARDWARE_MODE,
-                                                I2Cbus.SOFTWARE_MODE ) ) )
-        except ValueError:
-            mode = 0
-        if mode == I2Cbus.SOFTWARE_MODE or isPico():
-            try:
-                frequency = int( input( 'Enter I2C bus frequency in Hz: ' ) )
-            except ValueError:
-                frequency = 100000
-        else:
-            frequency = 100000
-        try:
-            attempts = int( input( 'Enter number of communication attempts to '
-                                   'be made: ' ) )
-        except ValueError:
-            attempts = 1
-        try:
-            n = int( input( 'Enter number of reads to be made: ' ) )
-        except ValueError:
-            n = 5
+        frequency = int( input( 'Enter I2C bus frequency in Hz: ' ) )
+        mode = int( input( 'Enter mode ({0} hardware mode, {1} software mode): '
+                           ''.format( I2Cbus.HARDWARE_MODE,
+                                      I2Cbus.SOFTWARE_MODE ) ) )
+        attempts = int( input( 'Enter number of communication attempts to be '
+                               'made: ' ) )
+        n = int( input( 'Enter number of reads to be made: ' ) )
 
         _ = input( 'Arm Logic Analyzer - hit Enter when done' )
         print()

@@ -105,7 +105,6 @@ def platform():
     """!
     @brief Obtain the name of the platform we are running under.
     @return content of /sys/firmware/devicetree/base/model or Raspberry Pi Pico
-    (otherwise something like 'Raspberry Pi 3 Model B Rev 1.2'
     """
     global _PLATFORM
     if not _PLATFORM:
@@ -126,9 +125,6 @@ def platform():
 # Micro Python does not know function attributes, use global variables instead
 _CPU_INFO = None
 
-# Convenience function to see whether we run on Pico
-isPico = lambda: platform().find( 'Pico' ) != -1
-
 def cpuInfo():
     """!
     @brief Get some information about the CPU.
@@ -146,7 +142,7 @@ def cpuInfo():
                      'bitDepth': None,
                      'chip': None}
 
-        if isPico():
+        if platform().find( 'Pico' ) != -1:
             _CPU_INFO['numCores'] = 2
             _CPU_INFO['processor'] = 'ARM Cortex-M0+'
             _CPU_INFO['bitDepth'] = 32
@@ -173,7 +169,7 @@ def cpuInfo():
 # determine platform and import appropriate module for GPIO access
 if platform().find( 'Raspberry' ) == -1:
     raise ValueError( 'Not running on a Raspberry Pi' )
-if isPico():
+if platform().find( 'Pico' ) != -1:
     import machine
 else:
     import pigpio
@@ -297,7 +293,7 @@ class IOpin():
         self.__open = False
 
         # initialize host-specific libraries and hardware
-        if isPico():
+        if platform().find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
             self.__setupRP()
@@ -604,9 +600,11 @@ class I2Cbus():
     HARDWARE_MODE = 0
     ## Operate I<sup>2</sup>C bus in software (bit banging) mode
     SOFTWARE_MODE = 1
+    ## Number of I/O attempts in I/O methods before throwing an exception
+    ATTEMPTS = 5
     ## Default Bus (or I2cID on Pico) - bus for default Pins
     DEFAULT_BUS = 1
-    if isPico():
+    if platform().find( 'Pico' ) != -1:
         ## Default Pin number for sda (Different for different architectures)
         DEFAULT_DATA_PIN = 8
         ## Default Pin number for scl (Different for different architectures)
@@ -614,8 +612,6 @@ class I2Cbus():
         ## Default operating mode on the Pico is software so as not to
         ## overburden the CPU with thasks the hardware can do
         DEFAULT_MODE = HARDWARE_MODE
-        ## Number of I/O attempts in I/O methods before throwing an exception
-        ATTEMPTS = 1
         ## Default frequency for I<sup>2</sup>C bus communications on the
         ## Raspberry Pi Pico is 100 kHz
         DEFAULT_I2C_FREQ = 100000
@@ -627,17 +623,12 @@ class I2Cbus():
             ## broken and the default operating mode for it is therefore set to
             ## software
             DEFAULT_MODE = SOFTWARE_MODE
-            ## Number of I/O attempts in I/O methods before throwing exception
-            ## and since this is also not super reliable, we set it to 5
-            ATTEMPTS = 5
-            ## Default frequency for I<sup>2</sup>C bus communications for
-            ## software mode on this chipe is set to 75 kHz
+            ## Default frequency for I<sup>2</sup>C bus communications with this
+            ## chip and this driver is reduced to 75 kHz
             DEFAULT_I2C_FREQ = 75000
         else:
             # TODO is that Raspberry Pi 4?
             DEFAULT_MODE = HARDWARE_MODE
-            ## Number of I/O attempts in I/O methods before throwing exception
-            ATTEMPTS = 1
             ## Default frequency for I<sup>2</sup>C bus communications on chips
             ## other than the BCM2835 is 100 kHz
             DEFAULT_I2C_FREQ = 100000
@@ -646,10 +637,9 @@ class I2Cbus():
     def __init__( self,
                   sdaPin=DEFAULT_DATA_PIN,
                   sclPin=DEFAULT_CLOCK_PIN,
-                  mode=DEFAULT_MODE,
                   frequency=DEFAULT_I2C_FREQ,
-                  attempts=ATTEMPTS,
-                  usePEC=False ):
+                  mode=DEFAULT_MODE,
+                  attempts=ATTEMPTS ):
         """!
         @brief Constructor for class I<sup>2</sup>Cbus.
 
@@ -657,24 +647,19 @@ class I2Cbus():
                Raspberry Pi and 8 on Raspberry Pi Pico)
         @param sclPin GPIO Pin number for I<sup>2</sup>C clock (default 2 on
                Raspberry Pi and 9 on Raspberry Pi Pico)
+        @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
+               Raspberry Pi and 100 kHz for Raspbberry Pi Pico)
         @param mode one of I2<Cbus.HARDWARE_MODE or I2Cbus.SOFTWARE_MODE
                AKA bit banging (default I2Cbus.SOFTWARE for Raspberry Pi and
                I2Cbus.HARDWARE for Raspberry Pi Pico)
-        @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
-               Raspberry Pi in Software mode and 100 kHz for Raspbberry Pi Pico
-               in all modes).  This parameter is ignored for Raspberry Pi in
-               hardeware mode, where the frequency is always 100 kHz.
         @param attempts number of read or write attempts before throwing an
-               exception (default 1 for Pico and 5 for Pi software)
-        @param usePEC set True to use Packet Error Checking (default False).
-               This parameter is ignored when PEC is not supported.
+               exception (default 5)
         """
         # store our incoming parameters
         self.__sdaPin = sdaPin
         self.__sclPin = sclPin
-        self.__mode = mode
-        self.__usePEC = usePEC
         self.__frequency = frequency
+        self.__mode = mode
         self.__attempts = attempts
         self.__failedAttempts = 0
         self.__open = False
@@ -682,7 +667,7 @@ class I2Cbus():
         self.__i2cObj = None
 
         # initialize host-specific libraries and hardware
-        if isPico():
+        if platform().find( 'Pico' ) != -1:
             self.__setupRPPico()
         else:
             self.__setupRP()
@@ -707,14 +692,11 @@ class I2Cbus():
         @brief String representing initialization parameters used by this class.
         """
         modeStr = ['HW', 'SW']
-        return 'sda Pin: {0}, scl Pin: {1}, mode: {2}, f: {3} kHz, '\
-               'num. attempts: {4}, PEC: {5}' \
+        return 'sda Pin: {0}, scl Pin: {1}, f: {2} kHz, mode: {3}' \
                ''.format( self.__sdaPin,
                           self.__sclPin,
-                          modeStr[self.__mode],
                           self.__frequency / 1000.,
-                          self.__attempts,
-                          self.__usePEC )
+                          modeStr[self.__mode] )
 
 
     def close( self ):
@@ -723,7 +705,7 @@ class I2Cbus():
                properly close the pigpio object in software mode.
         """
         if self.__open:
-            if isPico():
+            if platform().find( 'Pico' ) != -1:
                 try:
                     self.__i2cObj.deinit()
                 except AttributeError:
@@ -752,16 +734,16 @@ class I2Cbus():
         i2cObj = pigpio.pi()
         try:
             i2cObj.bb_i2c_close( 2 )
-            i2cObj.stop()
         except Exception:
             pass
+        i2cObj.stop()
 
         if self.__mode == self.HARDWARE_MODE:
             # in hardware mode, use SMBus - prefer smbus2 over smbus
             try:
-                from smbus2 import SMBus
+                from smbus2 import SMBus, i2c_msg
             except ModuleNotFoundError:
-                from smbus import SMBus
+                from smbus import SMBus, i2c_msg
 
             if self.__sdaPin == 0 and self.__sclPin == 1:
                 i2cBus = 0
@@ -769,14 +751,8 @@ class I2Cbus():
                 i2cBus = 1
             else:
                 raise GPIOError( 'Wrong I2C Pins specified' )
-            # SMBus's __init__() does an open() internally
+            # __init__() does an open() internally
             self.__i2cObj = SMBus( i2cBus )
-            try:
-                self.__i2cObj.enable_pec( self.__usePEC )
-            except IOError:
-                self.__usePEC = False
-            # on Raspberry Pi in HW mode the frequency is fixed at 100 kHz
-            self.__frequency = 100000
 
             # override the i2c duds with corresponding smbus methods
             # (they are 100 % compatible)
@@ -812,7 +788,6 @@ class I2Cbus():
                                               self.__sclPin,
                                               self.__frequency ) != 0:
                     raise GPIOError( 'Opening Software I2C failed' )
-                self.__usePEC = False
             except Exception as e:
                 raise GPIOError( str( e ) )
 
@@ -897,9 +872,6 @@ class I2Cbus():
                well as lambda functions to read from and write to an
                I<sup>2</sup>C bus.
         """
-
-        self.__usePEC = False
-
         if self.__mode == self.SOFTWARE_MODE:
             self.__i2cObj = machine.SoftI2C(
                 sda=machine.Pin( self.__sdaPin ),
@@ -980,7 +952,6 @@ class I2Cbus():
         @brief Clear the number of internally recorded failed attempts.
         """
         self.__failedAttempts = 0
-        return
 
 
     @property
@@ -1008,31 +979,6 @@ class I2Cbus():
                (I2Cbus.SOFTWARE_MODE or I2Cbus.HARDWARE_MODE).
         """
         return self.__mode
-
-
-    @property
-    def usePEC( self ):
-        """!
-        @brief Return current status of Packet Error Checking.
-        """
-        return self.__usePEC
-
-
-    @usePEC.setter
-    def usePEC( self, flag ):
-        """!
-        @brief Setter for usePEC (Packet Error Checking) property.
-
-        If the I<sup>2</sup>C bus does not support PEC, the method does nothing
-        and ignores the request silently.
-        @param flag boolean flag to set or unset PEC.
-        """
-        try:
-            self.__i2cObj.enable_pec( flag )
-            self.__usePEC = flag
-        except:
-            self.__usePEC = False
-        return
 
 
     @property
@@ -1189,20 +1135,6 @@ class I2Cbus():
                 lastException = e
         raise GPIOError( 'exceeded {0} attempts '.format( self.__attempts )
                          + 'in writeBlockReg ({0})'.format( lastException ) )
-
-
-    @property
-    def funcs( self ):
-        """!
-        @brief Obtain the functionality supported by this I<sup>2</sup>C bus.
-
-        If the I<sup>2</sup>C does not support this property, the method
-        returns 0.
-        """
-        try:
-            return self.__i2cObj.funcs
-        except AttributeError:
-            return 0
 
 
     def readId( self, i2cAddress ):
