@@ -21,7 +21,7 @@
 # W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
 #
 # @copyright
-# Copyright 2021 W. Ekkehard Blanz
+# Copyright 2021-2025 W. Ekkehard Blanz
 # See NOTICE.md and LICENSE.md files that come with this distribution.
 
 #
@@ -30,6 +30,7 @@
 #     Date         | Author         | Modification
 # -----------------+----------------+-------------------------------------------
 #  Tue Oct 19 2021 | Ekkehard Blanz | created
+#  Thu Jan 23 2025 | Ekkehard Blanz | now survives execution on a RB Pi 5
 #                  |                |
 #
 
@@ -40,6 +41,7 @@ try:
     from smbus2 import SMBus
 except ModuleNotFoundError:
     from smbus import SMBus
+from GPIO_AL.tools import isPi5
 
 def main( argv ):
 
@@ -56,13 +58,18 @@ def main( argv ):
         elif flag in ('-V', '--Version'):
             print( 'Version = 1.0.0' )
             return 0
-    i2cObj = pigpio.pi()
-    try:
-        i2cObj.bb_i2c_close( 2 )
-        print( 'Closed open bit bang I2C on GPIO' )
-    except Exception as e:
-        print( e )
-    i2cObj.stop()
+    if isPi5():
+        print( 'pigpio does not work on a Raspberry pi 5.' )
+        print( "Therefore, pigpio-based bit bang I2C busses won't be open." )
+        print( 'Continuing closing SMbus...' )
+    else:
+        i2cObj = pigpio.pi()
+        try:
+            i2cObj.bb_i2c_close( 2 )
+            print( 'Closed open bit bang I2C on GPIO' )
+        except Exception as e:
+            print( e )
+        i2cObj.stop()
 
     bus = SMBus( 1 )
     try:

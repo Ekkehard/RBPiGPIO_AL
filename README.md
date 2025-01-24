@@ -53,5 +53,5 @@ License Information
 -------------------
 This code is _**Free and Open Source Software**_! 
 
-Please see the LICENSE.md and CNOTICE.md files for more detailed license 
+Please see the LICENSE.md and NOTICE.md files for more detailed license 
 information. 
