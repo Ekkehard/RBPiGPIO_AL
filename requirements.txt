@@ -1,0 +1,11 @@
+gpiod
+smbus2
+glob
+time
+threading
+os
+sys
+platform
+typing
+enum
+abc
