@@ -86,3 +86,9 @@ from .PinIO import PinIO
 from .Pulse import Pulse
 from .I2Cbus import I2Cbus
 from .tools import platform, isPico, isPi5, cpuInfo, isHWpulsePin, hwPWMlines
+
+
+
+__version__ = '2.0.0'
+__all__ = ['GPIOError', 'PinIO', 'Pulse', 'I2Cbus', 'platform', 'isPico', 
+           'isPi5', 'cpuInfo', 'isHWpulsePin', 'hwPWMlines']
