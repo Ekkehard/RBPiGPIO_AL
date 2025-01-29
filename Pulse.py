@@ -191,7 +191,7 @@ class Pulse( _PulseAPI ):
     pulses are therefore not guaranteed to be stable and not meant for precise 
     measurements.  In particular, if the pulses are used to control servo
     motors, software-generated pulses can cause the motors to move erratically,
-    especially under heavy CPU load on the Raspberry Pi.
+    especially under heavy CPU load on a Raspberry Pi.
     
     This module can provide a list of pins that support hardware-generated 
     pulses, if they exist and the needed modules are loaded.  Minimal and 
@@ -284,7 +284,7 @@ class Pulse( _PulseAPI ):
 
     def  __enter__( self ):
         """!
-        @brief Enter method for conext management.
+        @brief Enter method for context management.
         @return an object that is used in the "as" construct, here it is self
         """
         return self
@@ -294,7 +294,7 @@ class Pulse( _PulseAPI ):
         @brief Exit method for context management.
         @param excType type of exception ending the context
         @param excValue value of the exception ending the context
-        @param excTraceback traceback of excweption ending the context
+        @param excTraceback traceback of exception ending the context
         @return False (will re-raise the exception)
         """
         # we could just let the destruction of the classes take care of properly
