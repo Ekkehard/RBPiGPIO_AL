@@ -1,4 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,5,81,32"/>
-<area shape="rect" id="node2" href="$classGPIO__AL_1_1PinIO_1_1PinIO_1_1Level.html" title=" " alt="" coords="129,5,321,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,139,95,165"/>
+<area shape="rect" id="node2" href="$classGPIO__AL_1_1Pulse_1_1__PulseAPI.html" title="Abstract base class provides API for pulse classes." alt="" coords="143,107,325,133"/>
+<area shape="rect" id="node6" href="$classGPIO__AL_1_1__I2CbusAPI_1_1__I2CbusAPI.html" title="Abstract base class provides API for I2C classes." alt="" coords="155,187,313,229"/>
+<area shape="rect" id="node3" href="$classGPIO__AL_1_1Pulse_1_1Pulse.html" title="Class to create arbitrary pulses on arbitrary pins." alt="" coords="389,5,543,32"/>
+<area shape="rect" id="node4" href="$classGPIO__AL_1_1Pulse_1_1__HWPulse.html" title="Internal child class to implement hardware PWM pulses." alt="" coords="373,56,559,83"/>
+<area shape="rect" id="node5" href="$classGPIO__AL_1_1Pulse_1_1__SWPulse.html" title="Internal child class to implement software PWM pulses." alt="" coords="375,107,557,133"/>
+<area shape="rect" id="node7" href="$classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html" title="Class to handle I2C bus communication." alt="" coords="379,224,553,251"/>
+<area shape="rect" id="node8" href="$classGPIO__AL_1_1__PiI2Cbus_1_1__PiHWI2C.html" title="Class dedicated to I2C hardware operations on the Raspberry Pi." alt="" coords="392,275,540,317"/>
+<area shape="rect" id="node9" href="$classGPIO__AL_1_1__PiI2Cbus_1_1__PiSWI2C.html" title="Class dedicated to I2C software operations on the Raspberry Pi." alt="" coords="392,341,540,382"/>
+<area shape="rect" id="node10" href="$classGPIO__AL_1_1__PicoI2Cbus_1_1__PicoI2Cbus.html" title="Class dedicated to I2C hardware and software operations on the Raspberry Pi Pico." alt="" coords="385,158,547,199"/>
+<area shape="rect" id="node11" title=" " alt="" coords="9,191,91,217"/>
 </map>

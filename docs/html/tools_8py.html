@@ -90,6 +90,12 @@ Functions</h2></td></tr>
 <tr class="memitem:af63c3a6ef6bc479c497fb1109c88a56b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tools_8py.html#af63c3a6ef6bc479c497fb1109c88a56b">GPIO_AL.tools.isHWpulsePin</a> (Union[int, str] pin)</td></tr>
 <tr class="memdesc:af63c3a6ef6bc479c497fb1109c88a56b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine whether a given pin is capable of producing HW pulses.  <a href="tools_8py.html#af63c3a6ef6bc479c497fb1109c88a56b">More...</a><br /></td></tr>
 <tr class="separator:af63c3a6ef6bc479c497fb1109c88a56b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4340d28ac7545942737034060f009bb"><td class="memItemLeft" align="right" valign="top">Union[list, None]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tools_8py.html#ab4340d28ac7545942737034060f009bb">GPIO_AL.tools.hwI2CLinePairs</a> ()</td></tr>
+<tr class="memdesc:ab4340d28ac7545942737034060f009bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtain a list of line pairs that support hardware I2C.  <a href="tools_8py.html#ab4340d28ac7545942737034060f009bb">More...</a><br /></td></tr>
+<tr class="separator:ab4340d28ac7545942737034060f009bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a65b6d1129c7934351b2eb9ff70e250"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tools_8py.html#a9a65b6d1129c7934351b2eb9ff70e250">GPIO_AL.tools.isHWI2CPinPair</a> (Union[int, str] sdaPin, Union[int, str] sclPin)</td></tr>
+<tr class="memdesc:a9a65b6d1129c7934351b2eb9ff70e250"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine whether a given pin is capable of producing HW pulses.  <a href="tools_8py.html#a9a65b6d1129c7934351b2eb9ff70e250">More...</a><br /></td></tr>
+<tr class="separator:a9a65b6d1129c7934351b2eb9ff70e250"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a4c68a5461544f231dd44a086a4266d"><td class="memItemLeft" align="right" valign="top"><a id="a0a4c68a5461544f231dd44a086a4266d" name="a0a4c68a5461544f231dd44a086a4266d"></a>
 def&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.main</b> ()</td></tr>
 <tr class="memdesc:a0a4c68a5461544f231dd44a086a4266d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main program - to save some resources, we do not include the Unit Test here. <br /></td></tr>
@@ -211,6 +217,26 @@ str&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.isPi5</b
 
 </div>
 </div>
+<a id="ab4340d28ac7545942737034060f009bb" name="ab4340d28ac7545942737034060f009bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4340d28ac7545942737034060f009bb">&#9670;&nbsp;</a></span>hwI2CLinePairs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> Union[list, None] GPIO_AL.tools.hwI2CLinePairs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Obtain a list of line pairs that support hardware I2C. </p>
+<dl class="section return"><dt>Returns</dt><dd>list of GPIO line pairs that support hardware PWM </dd></dl>
+
+</div>
+</div>
 <a id="ab03d8a4a16724c9177e8bad5392645a6" name="ab03d8a4a16724c9177e8bad5392645a6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab03d8a4a16724c9177e8bad5392645a6">&#9670;&nbsp;</a></span>hwPWMlines()</h2>
 
@@ -228,6 +254,44 @@ str&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.isPi5</b
 
 <p>Obtain a list of lines that support hardware PWM. </p>
 <dl class="section return"><dt>Returns</dt><dd>list of GPIO lines that support hardware PWM </dd></dl>
+
+</div>
+</div>
+<a id="a9a65b6d1129c7934351b2eb9ff70e250" name="a9a65b6d1129c7934351b2eb9ff70e250"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a65b6d1129c7934351b2eb9ff70e250">&#9670;&nbsp;</a></span>isHWI2CPinPair()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool GPIO_AL.tools.isHWI2CPinPair </td>
+          <td>(</td>
+          <td class="paramtype">Union[int, str]&#160;</td>
+          <td class="paramname"><em>sdaPin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Union[int,str] &#160;</td>
+          <td class="paramname"><em>sclPin</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Determine whether a given pin is capable of producing HW pulses. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sdaPin</td><td>GPIO argument representing pin or line number (int is pin number in GPIO header, GPIO{n} is line number) os sda </td></tr>
+    <tr><td class="paramname">sclPin</td><td>GPIO argument representing pin or line number (int is pin number in GPIO header, GPIO{n} is line number) of scl </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if given pin is capable of HW pulses, False otherwise </dd></dl>
 
 </div>
 </div>

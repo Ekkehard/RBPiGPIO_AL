@@ -1,0 +1,6 @@
+<map id="GPIO_AL._PiI2Cbus._PiSWI2C" name="GPIO_AL._PiI2Cbus._PiSWI2C">
+<area shape="rect" id="node1" title="Class dedicated to I2C software operations on the Raspberry Pi." alt="" coords="31,169,179,211"/>
+<area shape="rect" id="node2" href="$classGPIO__AL_1_1__I2CbusAPI_1_1__I2CbusAPI.html" title="Abstract base class provides API for I2C classes." alt="" coords="26,80,183,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,95,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="119,5,202,32"/>
+</map>

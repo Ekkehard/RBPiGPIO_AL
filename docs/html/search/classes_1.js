@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['edge_0',['Edge',['../classGPIO__AL_1_1PinIO_1_1PinIO_1_1Edge.html',1,'GPIO_AL::PinIO::PinIO']]]
+  ['bbmode_0',['BBMode',['../classGPIO__AL_1_1__PiI2Cbus_1_1__PiSWI2C_1_1BBMode.html',1,'GPIO_AL::_PiI2Cbus::_PiSWI2C']]]
 ];

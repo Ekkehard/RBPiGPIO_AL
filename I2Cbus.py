@@ -47,9 +47,9 @@
 #
 
 from enum import Enum
-from GPIO_AL.tools import isPico, isPi5
-from GPIO_AL import GPIOError
-from _I2CbusAPI import _I2CbusAPI
+from GPIO_AL.tools import isPico, isPi5, isHWI2CPinPair
+from GPIO_AL.GPIOError import GPIOError
+from GPIO_AL._I2CbusAPI import _I2CbusAPI
 
 
 
@@ -127,19 +127,20 @@ class I2Cbus( _I2CbusAPI ):
     stretching has to be used on a Raspberry Pi 3, even in software mode.
     """
     
-    class Mode( Enum ):
-        ## Operate I<sup>2</sup>C bus in hardware mode
-        HARDWARE = 0
-        ## Operate I<sup>2</sup>C bus in software (bit banging) mode
-        SOFTWARE = 1
+    # make Mode available to our callers
+    Mode = _I2CbusAPI._Mode
     
     def __init__( self, *args, **kwargs ):
         """!
         @brief Constructor for class I<sup>2</sup>Cbus.
-        @param sdaPin GPIO Pin number for I<sup>2</sup>C data (default GPIO2 on
-               Raspberry Pi and 8 on Raspberry Pi Pico)
-        @param sclPin GPIO Pin number for I<sup>2</sup>C clock (default GPIO3 on
-               Raspberry Pi and 9 on Raspberry Pi Pico)
+        @param sdaPin header pin or GPIO line number for I<sup>2</sup>C data 
+               (default GPIO2 on Raspberry Pi and 8 on Raspberry Pi Pico).
+               Ints are interpreted as header pin numbers, strings starting with
+               GPIO as line numbers.
+        @param sclPin header pin or GPIO line number for I<sup>2</sup>C clock 
+               (default GPIO3 on Raspberry Pi and 9 on Raspberry Pi Pico).
+               Ints are interpreted as header pin numbers, strings starting with
+               GPIO as line numbers.
         @param mode one of I2<Cbus.HARDWARE_MODE or I2Cbus.SOFTWARE_MODE
                AKA bit banging (default I2Cbus.SOFTWARE for Raspberry Pi and
                I2Cbus.HARDWARE for Raspberry Pi Pico)
@@ -147,6 +148,7 @@ class I2Cbus( _I2CbusAPI ):
                Software mode and 100 kHz for hardware mode and Raspbberry Pi 
                Pico in all modes).  This parameter is ignored for Raspberry Pi 
                in hardeware mode, where the frequency is always 100 kHz.
+               Also accepts PObjects of Unit Hz.
         @param attempts number of read or write attempts before throwing an
                exception (default 1 for Pico in all modes and 5 for Pi in 
                software mode)
@@ -154,30 +156,47 @@ class I2Cbus( _I2CbusAPI ):
                This parameter is ignored when PEC is not supported.
         @throws GPIOException in case of parameter error
         """
-        if len( args ) > 2:
-            mode = args[2]
-        else:
-            try:
-                mode = kwargs['mode']
-            except KeyError:
-                if isPi5() or isPico():
-                    mode = self.Mode.HARDWARE
-                else:
-                    mode = self.Mode.SOFTWARE
-        if not isinstance( mode, self.Mode ):
-            raise GPIOError( 'Wrong mode specified: {0}'.format( mode ) )
+
+        self.__actor = None
         
         if isPico():
-            from _PicoI2Cbus import _PicoI2Cbus
+            from GPIO_AL._PicoI2Cbus import _PicoI2Cbus
             self.__actor = _PicoI2Cbus( *args, **kwargs )
-            if mode == self.Mode.SOFTWARE:
-                self.__actor.switchToSoftware()
         else:
+            # for RB Pis we must get or infer mode as we'll call specific actors
+            if len( args ) > 2:
+                mode = args[2]
+            else:
+                try:
+                    mode = kwargs['mode']
+                except KeyError:
+                    # mode is not given in parameters - check Pins
+                    sda = None
+                    scl = None
+                    if len( args ) > 1:
+                        sda = args[0]
+                        scl = args[1]
+                    else:
+                        try:
+                            sda = kwargs['sdaPin']
+                            scl = kwargs['sclPin']
+                        except KeyError:
+                            pass
+                    # if pins are not given they default to HW pins
+                    hwPins = (sda is None and scl is None) or \
+                             isHWI2CPinPair( sda, scl )
+                    if hwPins and isPi5():
+                        mode = self.Mode.HARDWARE
+                    else:
+                        # RB Pis other than Pi 5 default to software mode
+                        mode = self.Mode.SOFTWARE
+            if not isinstance( mode, self.Mode ):
+                raise GPIOError( 'Wrong mode specified: {0}'.format( mode ) )
             if mode == self.Mode.SOFTWARE:
-                from _PicoI2Cbus import _PiSWI2C
+                from GPIO_AL._PiI2Cbus import _PiSWI2C
                 self.__actor = _PiSWI2C( *args, **kwargs )
             else:
-                from _PicoI2Cbus import _PiHWI2C
+                from GPIO_AL._PiI2Cbus import _PiHWI2C
                 self.__actor = _PiHWI2C( *args, **kwargs )
         self.__failedAttempts = 0
         return
@@ -185,7 +204,7 @@ class I2Cbus( _I2CbusAPI ):
     def __del__( self ):
         """!
         @brief Destructor.
-        Closes the software I<sup>2</sup>C bus on the Raspberry Pi.
+        Also closes the software I<sup>2</sup>C bus on the Raspberry Pi.
         """
         self.close()
         if self.__actor:
@@ -211,13 +230,6 @@ class I2Cbus( _I2CbusAPI ):
         self.close()
         return False
         
-    def __str__( self ):
-        """!
-        @brief String representation of this class - returns all settable
-               parameters.
-        """
-        return self.__actor.__str__()
-        
     def close( self ):
         """!
         @brief On the Raspberry Pi other than Raspberry Pi 5, it is important to
@@ -234,7 +246,7 @@ class I2Cbus( _I2CbusAPI ):
         @param i2cAddress address of I<sup>2</sup>C device to read ID from
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
                 self.__actor.writeQuick( 0x7C )
             except Exception as e:
@@ -251,7 +263,7 @@ class I2Cbus( _I2CbusAPI ):
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readId ({0})'.format( lastException ) )
 
     def readByte( self, i2cAddress ):
@@ -261,14 +273,14 @@ class I2Cbus( _I2CbusAPI ):
         @return int with byte read
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
                 return self.__actor.readByte( i2cAddress )
             except Exception as e:
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
         
     def readByteReg( self, i2cAddress, register ):
@@ -279,14 +291,14 @@ class I2Cbus( _I2CbusAPI ):
         @return int with byte read
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
                 return self.__actor.readByteReg( i2cAddress, register )
             except Exception as e:
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
         
 
@@ -299,27 +311,27 @@ class I2Cbus( _I2CbusAPI ):
         @return list of ints with bytes read
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
-                return self.__actor.readBlockRegister( i2cAddress,
-                                                       register,
-                                                       length )
+                return self.__actor.readBlockReg( i2cAddress,
+                                                  register,
+                                                  length )
             except Exception as e:
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
         
 
     def writeQuick( self, i2cAddress ):
         """!
-        @brief Issue an I<sup>2</sup>C  device address with the write bit set
-        and check the acknowledge signal but do not write anything else.
+        @brief Issue an I<sup>2</sup>C device address with the write bit set
+               and check the acknowledge signal but do not write anything else.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
                 self.__actor.writeQuick( i2cAddress )
                 return
@@ -327,7 +339,7 @@ class I2Cbus( _I2CbusAPI ):
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
 
     def writeByte( self, i2cAddress, value ):
@@ -337,7 +349,7 @@ class I2Cbus( _I2CbusAPI ):
         @param value value of byte to be written as an int
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
                 self.__actor.writeByte( i2cAddress, value )
                 return
@@ -345,18 +357,18 @@ class I2Cbus( _I2CbusAPI ):
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
 
     def writeByteReg( self, i2cAddress, register, value ):
         """!
         @brief Write a single byte to an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
-        @param register device register to start reading
+        @param register device register to write to
         @param value value of byte to be written as an int
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
                 self.__actor.writeByteReg( i2cAddress, register, value )
                 return
@@ -364,7 +376,7 @@ class I2Cbus( _I2CbusAPI ):
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
         self.__actor.writeBlockReg( i2cAddress, register, block )
         return
@@ -374,11 +386,11 @@ class I2Cbus( _I2CbusAPI ):
         @brief Write a block of bytes to an I<sup>2</sup>C device starting at
                register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
-        @param register device register to start reading
+        @param register device register to start writing
         @param block list of ints with bytes to be written
         """
         count = 0
-        while count < self._attempts:
+        while count < self.__actor.attempts:
             try:
                 self.__actor.writeBlockReg( i2cAddress, register, block )
                 return
@@ -386,7 +398,7 @@ class I2Cbus( _I2CbusAPI ):
                 count += 1
                 self.__failedAttempts += 1
                 lastException = e
-        raise GPIOError( 'exceeded {0} attempts '.format( self._attempts )
+        raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
 
     @property
@@ -394,44 +406,44 @@ class I2Cbus( _I2CbusAPI ):
         """!
         @brief Works as read-only property to get the sda Pin number.
         """
-        return self._sdaPin
+        return self.__actor.sda
 
     @property
     def scl( self ):
         """!
         @brief Works as read-only property to get the scl Pin number.
         """
-        return self._sclPin
+        return self.__actor.scl
 
     @property
     def mode( self ):
         """!
         @brief Works as read-only property to get the I<sup>2</sup>C bus mode
-               (I2Cbus.SOFTWARE_MODE or I2Cbus.HARDWARE_MODE).
+               (I2Cbus.Mode.SOFTWARE or I2Cbus.Mode.HARDWARE).
         """
-        return self._mode
+        return self.__actor.mode
 
     @property
     def frequency( self ):
         """!
         @brief Works as read-only property to get the frequency the
-               I<sup>2</sup>C bus is operating at in Hz.
+               I<sup>2</sup>C bus is operating at.
         """
-        return self._orgFrequency
+        return self.__actor.frequency
 
     @property
     def attempts( self ):
         """!
         @brief Obtain the user-supplied number of communication attempts.
         """
-        return self._attempts
+        return self.__actor.attempts
 
     @property
     def usePEC( self ):
         """!
         @brief Return current status of Packet Error Checking.
         """
-        return self._usePEC
+        return self.__actor.usePEC
     
     def clearFailedAttempts( self ):
         """!
@@ -447,3 +459,34 @@ class I2Cbus( _I2CbusAPI ):
                recorded failed attempts.
         """
         return self.__failedAttempts
+
+
+if "__main__" == __name__:
+    import sys
+    
+    def main():
+        """!
+        @brief No unit test - coarse Python syntax test only.
+        """
+        
+        b1 = I2Cbus( 'GPIO2', 'GPIO3' )
+        print( b1 )
+        del b1
+                
+        try:
+            b2 = I2Cbus( 'GPIO2', 'GPIO3', I2Cbus.Mode.SOFTWARE )
+            print( b2 )
+            del b2
+        except GPIOError as e:
+            # on Pi 5 software mode may not yet be implemented
+            if isPi5():
+                print( 'Software mode could not be tested on RB Pi 5' )
+            else:
+                raise e
+        
+        print( '\nSUCCESS: no Python syntax errors detected\n' )
+        
+        return 0
+
+    sys.exit( int( main() or 0 ) )
+

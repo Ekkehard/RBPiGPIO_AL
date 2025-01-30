@@ -1,6 +1,6 @@
 <map id="GPIO_AL.Pulse._HWPulse" name="GPIO_AL.Pulse._HWPulse">
 <area shape="rect" id="node1" title="Internal child class to implement hardware PWM pulses." alt="" coords="12,155,197,181"/>
-<area shape="rect" id="node2" href="$classGPIO__AL_1_1Pulse_1_1__PulseAPI.html" title=" " alt="" coords="13,80,196,107"/>
+<area shape="rect" id="node2" href="$classGPIO__AL_1_1Pulse_1_1__PulseAPI.html" title="Abstract base class provides API for pulse classes." alt="" coords="13,80,196,107"/>
 <area shape="rect" id="node3" title=" " alt="" coords="5,5,95,32"/>
 <area shape="rect" id="node4" title=" " alt="" coords="119,5,202,32"/>
 </map>

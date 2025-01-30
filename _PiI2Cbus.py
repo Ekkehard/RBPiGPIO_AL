@@ -37,16 +37,20 @@
 #   Mon Jan 27 2025 | Ekkehard Blanz | extracted from I2Cbus.py
 #                   |                |
 #
-from ._I2CbusAPI import _I2CbusAPI
-from .GPIOError import GPIOError
+
+from enum import IntEnum
+from GPIO_AL.GPIOError import GPIOError
+from GPIO_AL.tools import isPi5
+from GPIO_AL._I2CbusAPI import _I2CbusAPI
 
 class _PiHWI2C( _I2CbusAPI ):
     """!
+    @brief Class dedicated to I2C hardware operations on the Raspberry Pi.
     """
     DEFAULT_BUS = 1
     DEFAULT_DATA_PIN = 'GPIO2'
     DEFAULT_CLOCK_PIN = 'GPIO3'
-    DEFAULT_MODE = self.Mode.HARDWARE
+    DEFAULT_MODE = _I2CbusAPI._Mode.HARDWARE
     ## Number of I/O attempts in I/O methods before throwing exception
     ATTEMPTS = 1
     ## Default frequency for I<sup>2</sup>C bus communications on chips
@@ -63,27 +67,19 @@ class _PiHWI2C( _I2CbusAPI ):
                   usePEC=False ):
         """!
         @brief Constructor for class _PiHWI2C.
-
-        @param sdaPin GPIO Pin number for I<sup>2</sup>C data (default GPIO2 on
-               Raspberry Pi and 8 on Raspberry Pi Pico)
-        @param sclPin GPIO Pin number for I<sup>2</sup>C clock (default GPIO3 on
-               Raspberry Pi and 9 on Raspberry Pi Pico)
-        @param mode one of I2<Cbus.HARDWARE_MODE or I2Cbus.SOFTWARE_MODE
-               AKA bit banging (default I2Cbus.SOFTWARE for Raspberry Pi and
-               I2Cbus.HARDWARE for Raspberry Pi Pico)
-        @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
-               Software mode and 100 kHz for hardware mode and Raspbberry Pi 
-               Pico in all modes).  This parameter is ignored for Raspberry Pi 
-               in hardeware mode, where the frequency is always 100 kHz.
+        @param sdaPin GPIO Pin number for I<sup>2</sup>C data
+        @param sclPin GPIO Pin number for I<sup>2</sup>C cloc
+        @param mode operational mode
+        @param frequency I<sup>2</sup>C frequency in Hz
         @param attempts number of read or write attempts before throwing an
-               exception (default 1 for Pico in all modes and 5 for Pi in 
-               software mode)
-        @param usePEC set True to use Packet Error Checking (default False).
-               This parameter is ignored when PEC is not supported.
+               exception
+        @param usePEC set True to use Packet Error Checking
         """
-        if mode != self.Mode.SOFTWARE:
+        self.__open = False
+        if mode != self._Mode.HARDWARE:
             raise GPIOError( 'Internal Error: '
-                             'Called software mode with wrong mode' )
+                             'Called hardware mode with wrong mode: {0}'
+                             .format( mode ) )
 
         super().__init__( sdaPin, sclPin, mode, frequency, attempts, usePEC )
         # if bit banging buses are left open they cause problems even for
@@ -105,14 +101,14 @@ class _PiHWI2C( _I2CbusAPI ):
         except ModuleNotFoundError:
             from smbus import SMBus
 
-        if self._sdaPin == 0 and self._sclPin == 1 and not isPi5():
+        if self._sdaLine == 0 and self._sclLine == 1 and not isPi5():
             i2cBus = 0
-        elif self._sdaPin == 2 and self._sclPin == 3:
+        elif self._sdaLine == 2 and self._sclLine == 3:
             i2cBus = 1
         else:
             raise GPIOError( 'Wrong I2C Pins specified' )
             
-        if self._frequency != DEFAULT_I2C_FREQ:
+        if self._frequency != self.DEFAULT_I2C_FREQ:
             raise GPIOError( 'Wrong frequency specified: {0}'
                              .format( self.orgFrequency ) )
                              
@@ -127,34 +123,16 @@ class _PiHWI2C( _I2CbusAPI ):
         self.__failedAttempts = 0
         return
 
-
     def __del__( self ):
         """!
-        @brief Destructor - only meaningful on the Raspberry Pi and
-               potentially during Unit Tests on the Raspberry Pi Pico.
-
-        Closes the software I<sup>2</sup>C bus on the Raspberry Pi.
+        @brief Destructor.
         """
         self.close()
         return
 
-
-    def __str__( self ):
-        """!
-        @brief String representing initialization parameters used by this class.
-        """
-        return 'sda Pin: GPIO{0}, scl Pin: GPIO{1}, mode: HW, f: {2} kHz, ' \
-               'num. attempts: {3}, usePEC: {4}' \
-               .format( self._sdaPin,
-                        self._sclPin,
-                        self._frequency / 1000.,
-                        self._attempts,
-                        self._usePEC )
-
     def close( self ):
         """!
-        @brief On the Raspberry Pi, it is important to call this method to
-               properly close the pigpio object in software mode.
+        @brief Closes the I2C device.
         """
         if self.__open:
             self.__i2cObj.close()
@@ -213,7 +191,7 @@ class _PiHWI2C( _I2CbusAPI ):
         """!
         @brief Write a single byte to an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
-        @param register device register to start reading
+        @param register device register to write to
         @param value value of byte to be written as an int
         """
         self.__i2cObj.write_byte_data( i2cAddress, register, value )
@@ -224,7 +202,7 @@ class _PiHWI2C( _I2CbusAPI ):
         @brief Write a block of bytes to an I<sup>2</sup>C device starting at
                register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
-        @param register device register to start reading
+        @param register device register to start writing
         @param block list of ints with bytes to be written
         """
         self.__i2cObj.write_i2c_block_data( i2cAddress, register, block )
@@ -233,12 +211,13 @@ class _PiHWI2C( _I2CbusAPI ):
               
 class _PiSWI2C( _I2CbusAPI ):
     """!
+    @brief Class dedicated to I2C software operations on the Raspberry Pi.
     """
-        DEFAULT_DATA_PIN = 'GPIO2'
-        DEFAULT_CLOCK_PIN = 'GPIO3'
-        DEFAULT_MODE = self.Mode.SOFTWARE
-        DEFAULT_I2C_FREQ = 75000
-        ATTEMPTS = 5
+    DEFAULT_DATA_PIN = 'GPIO2'
+    DEFAULT_CLOCK_PIN = 'GPIO3'
+    DEFAULT_MODE = _I2CbusAPI._Mode.SOFTWARE
+    DEFAULT_I2C_FREQ = 75000
+    ATTEMPTS = 5
 
     class BBMode( IntEnum ):
         # bb_i2c_zip commands:
@@ -251,39 +230,30 @@ class _PiSWI2C( _I2CbusAPI ):
         WRITE = 7
 
     def __init__( self,
-                  sdaPin: Optional[Union[int, str]]=DEFAULT_DATA_PIN,
-                  sclPin: Optional[Union[int, str]]=DEFAULT_CLOCK_PIN,
-                  mode: Optional[int]=DEFAULT_MODE,
-                  frequency: Optional[Union[float,object]]=DEFAULT_I2C_FREQ,
-                  attempts: Optional[int]=ATTEMPTS,
-                  usePEC: Optional[bool]=False ):
+                  sdaPin=DEFAULT_DATA_PIN,
+                  sclPin=DEFAULT_CLOCK_PIN,
+                  mode=DEFAULT_MODE,
+                  frequency=DEFAULT_I2C_FREQ,
+                  attempts=ATTEMPTS,
+                  usePEC=False ):
         """!
         @brief Constructor for class _PiSWI2C.
-
-        @param sdaPin GPIO Pin number for I<sup>2</sup>C data (default GPIO2 on
-               Raspberry Pi and 8 on Raspberry Pi Pico)
-        @param sclPin GPIO Pin number for I<sup>2</sup>C clock (default GPIO3 on
-               Raspberry Pi and 9 on Raspberry Pi Pico)
-        @param mode one of I2<Cbus.HARDWARE_MODE or I2Cbus.SOFTWARE_MODE
-               AKA bit banging (default I2Cbus.SOFTWARE for Raspberry Pi and
-               I2Cbus.HARDWARE for Raspberry Pi Pico)
-        @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
-               Software mode and 100 kHz for hardware mode and Raspbberry Pi 
-               Pico in all modes).  This parameter is ignored for Raspberry Pi 
-               in hardeware mode, where the frequency is always 100 kHz.
+        @param sdaPin GPIO Pin number for I<sup>2</sup>C data
+        @param sclPin GPIO Pin number for I<sup>2</sup>C cloc
+        @param mode operational mode
+        @param frequency I<sup>2</sup>C frequency in Hz
         @param attempts number of read or write attempts before throwing an
-               exception (default 1 for Pico in all modes and 5 for Pi in 
-               software mode)
-        @param usePEC set True to use Packet Error Checking (default False).
-               This parameter is ignored when PEC is not supported.
+               exception
+        @param usePEC set True to use Packet Error Checking
         """
-        
+        self.__open = False
         if isPi5():
             raise GPIOError( 'Software mode not yet implemented '
-                             'for RB Pi 5 is pigpio is not working here' )
-        if mode != self.Mode.SOFTWARE:
+                             'for RB Pi 5 as pigpio is not working here' )
+        if mode != self._Mode.SOFTWARE:
             raise GPIOError( 'Internal Error: '
-                             'Called software mode with wrong mode' )
+                             'Called software mode with wrong mode: {0}'
+                             .format( mode ) )
         super().__init__( sdaPin, sclPin, mode, frequency, attempts, usePEC )
         import pigpio
         self.__i2cObj = pigpio.pi()
@@ -291,14 +261,14 @@ class _PiSWI2C( _I2CbusAPI ):
             raise GPIOError( 'Could not connect to GPIO via pigpio' )
         try:
             # in case somebody didn't close it properly...
-            self.__i2cObj.bb_i2c_close( self._sdaPin )
+            self.__i2cObj.bb_i2c_close( self._sdaLine )
         except:
             pass
 
 
         try:
-            if self.__i2cObj.bb_i2c_open( self._sdaPin,
-                                          self._sclPin,
+            if self.__i2cObj.bb_i2c_open( self._sdaLine,
+                                          self._sclLine,
                                           self._frequency ) != 0:
                 raise GPIOError( 'Opening Software I2C failed' )
             self._usePEC = False
@@ -309,34 +279,18 @@ class _PiSWI2C( _I2CbusAPI ):
 
     def __del__( self ):
         """!
-        @brief Destructor - only meaningful on the Raspberry Pi and
-               potentially during Unit Tests on the Raspberry Pi Pico.
-
-        Closes the software I<sup>2</sup>C bus on the Raspberry Pi.
+        @brief Destructor.
         """
         self.close()
         return
 
-    def __str__( self ):
-        """!
-        @brief String representing initialization parameters used by this class.
-        """
-        return 'sda Pin: GPIO{0}, scl Pin: GPIO{1}, mode: SW, f: {2} kHz, '\
-               'num. attempts: {3}, PEC: {4}' \
-               .format( self._sdaPin,
-                        self._sclPin,
-                        self._frequency / 1000.,
-                        self._attempts,
-                        self._usePEC )
-
     def close( self ):
         """!
-        @brief On the Raspberry Pi, it is important to call this method to
-               properly close the pigpio object in software mode.
+        @brief Close the I2C device.
         """
         if self.__open:
             try:
-                self.__i2cObj.bb_i2c_close( self._sdaPin )
+                self.__i2cObj.bb_i2c_close( self._sdaLine )
             except:
                 pass
             self.__i2cObj.stop()
@@ -349,7 +303,7 @@ class _PiSWI2C( _I2CbusAPI ):
         @param i2cAddress address of I<sup>2</sup>C device to be read from
         @return int with byte read
         """
-        return list( self.__i2cObj.bb_i2c_zip( self._sdaPin,
+        return list( self.__i2cObj.bb_i2c_zip( self._sdaLine,
                                                [self.BBMode.START,
                                                 self.BBMode.ADDRESS, i2cAddress,
                                                 self.BBMode.READ, 1,
@@ -363,7 +317,7 @@ class _PiSWI2C( _I2CbusAPI ):
         @param register device register to read from
         @return int with byte read
         """
-        return  list( self.__i2cObj.bb_i2c_zip( self._sdaPin,
+        return  list( self.__i2cObj.bb_i2c_zip( self._sdaLine,
                                                 [self.BBMode.START,
                                                 self.BBMode.ADDRESS, i2cAddress,
                                                  self.BBMode.WRITE, 1, register,
@@ -381,7 +335,7 @@ class _PiSWI2C( _I2CbusAPI ):
         @param length number of bytes to be read
         @return list of ints with bytes read
         """
-        return list( self.__i2cObj.bb_i2c_zip( self._sdaPin,
+        return list( self.__i2cObj.bb_i2c_zip( self._sdaLine,
                                                [self.BBMode.START,
                                                 self.BBMode.ADDRESS, i2cAddress,
                                                 self.BBMode.WRITE, 1, register,
@@ -389,7 +343,7 @@ class _PiSWI2C( _I2CbusAPI ):
                                                 self.BBMode.ADDRESS, i2cAddress,
                                                 self.BBMode.READ, length,
                                                 self.BBMode.STOP,
-                                                self.BBMode.END] )[1] ))
+                                                self.BBMode.END] ) )[1]
 
     def writeQuick( self, i2cAddress ):
         """!
@@ -400,7 +354,7 @@ class _PiSWI2C( _I2CbusAPI ):
         acknowledge is sent 
         @param i2cAddress address of I<sup>2</sup>C device to be read from
         """
-        self.__i2cObj.bb_i2c_zip( self._sdaPin,
+        self.__i2cObj.bb_i2c_zip( self._sdaLine,
                                   [self.BBMode.START,
                                    self.BBMode.ADDRESS, i2cAddress,
                                    self.BBMode.WRITE, 0,
@@ -414,7 +368,7 @@ class _PiSWI2C( _I2CbusAPI ):
         @param i2cAddress address of I<sup>2</sup>C device to be written to
         @param value value of byte to be written as an int
         """
-        self.__i2cObj.bb_i2c_zip( self._sdaPin,
+        self.__i2cObj.bb_i2c_zip( self._sdaLine,
                                   [self.BBMode.START,
                                    self.BBMode.ADDRESS, i2cAddress,
                                    self.BBMode.WRITE, 1, value,
@@ -426,10 +380,10 @@ class _PiSWI2C( _I2CbusAPI ):
         """!
         @brief Write a single byte to an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
-        @param register device register to start reading
+        @param register device register to write to
         @param value value of byte to be written as an int
         """
-        self.__i2cObj.bb_i2c_zip( self._sdaPin,
+        self.__i2cObj.bb_i2c_zip( self._sdaLine,
                                   [self.BBMode.START,
                                    self.BBMode.ADDRESS, i2cAddress,
                                    self.BBMode.WRITE, 2,
@@ -444,10 +398,10 @@ class _PiSWI2C( _I2CbusAPI ):
         @brief Write a block of bytes to an I<sup>2</sup>C device starting at
                register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
-        @param register device register to start reading
+        @param register device register to start writing
         @param block list of ints with bytes to be written
         """
-        self.__i2cObj.bb_i2c_zip( self._sdaPin,
+        self.__i2cObj.bb_i2c_zip( self._sdaLine,
                                   [self.BBMode.START,
                                    self.BBMode.ADDRESS, addr,
                                    self.BBMode.WRITE, 1 + len( block ),

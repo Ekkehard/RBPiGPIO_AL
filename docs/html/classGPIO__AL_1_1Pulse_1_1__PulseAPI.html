@@ -72,12 +72,15 @@ $(function() {
   <div class="headertitle"><div class="title">GPIO_AL.Pulse._PulseAPI Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Abstract base class provides API for pulse classes.  
+ <a href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for GPIO_AL.Pulse._PulseAPI:</div>
 <div class="dyncontent">
 <div class="center"><img src="classGPIO__AL_1_1Pulse_1_1__PulseAPI__inherit__graph.png" border="0" usemap="#aGPIO__AL_8Pulse_8__PulseAPI_inherit__map" alt="Inheritance graph"/></div>
 <map name="aGPIO__AL_8Pulse_8__PulseAPI_inherit__map" id="aGPIO__AL_8Pulse_8__PulseAPI_inherit__map">
-<area shape="rect" title=" " alt="" coords="186,80,369,107"/>
+<area shape="rect" title="Abstract base class provides API for pulse classes." alt="" coords="186,80,369,107"/>
 <area shape="rect" href="classGPIO__AL_1_1Pulse_1_1Pulse.html" title="Class to create arbitrary pulses on arbitrary pins." alt="" coords="5,155,160,181"/>
 <area shape="rect" href="classGPIO__AL_1_1Pulse_1_1__HWPulse.html" title="Internal child class to implement hardware PWM pulses." alt="" coords="185,155,370,181"/>
 <area shape="rect" href="classGPIO__AL_1_1Pulse_1_1__SWPulse.html" title="Internal child class to implement software PWM pulses." alt="" coords="394,155,577,181"/>
@@ -90,7 +93,7 @@ Collaboration diagram for GPIO_AL.Pulse._PulseAPI:</div>
 <div class="dyncontent">
 <div class="center"><img src="classGPIO__AL_1_1Pulse_1_1__PulseAPI__coll__graph.png" border="0" usemap="#aGPIO__AL_8Pulse_8__PulseAPI_coll__map" alt="Collaboration graph"/></div>
 <map name="aGPIO__AL_8Pulse_8__PulseAPI_coll__map" id="aGPIO__AL_8Pulse_8__PulseAPI_coll__map">
-<area shape="rect" title=" " alt="" coords="13,80,196,107"/>
+<area shape="rect" title="Abstract base class provides API for pulse classes." alt="" coords="13,80,196,107"/>
 <area shape="rect" title=" " alt="" coords="5,5,95,32"/>
 <area shape="rect" title=" " alt="" coords="119,5,202,32"/>
 </map>
@@ -98,9 +101,9 @@ Collaboration diagram for GPIO_AL.Pulse._PulseAPI:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa79c02f82d58ed74f3cfce41c88734ea"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#aa79c02f82d58ed74f3cfce41c88734ea">__init__</a> (self, Union[int, str, object] pulsePin, Union[float, object] <a class="el" href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#ac7d660249a9e5c40170c8e14c98381d1">frequency</a>, Optional[float] <a class="el" href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#a842c99ab4d85915e86007826a5bdb5f0">dutyCycle</a>=0.5, Optional[int] bursts=None)</td></tr>
-<tr class="memdesc:aa79c02f82d58ed74f3cfce41c88734ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor - sets up parameters and determines mode (hard- or software)  <a href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#aa79c02f82d58ed74f3cfce41c88734ea">More...</a><br /></td></tr>
-<tr class="separator:aa79c02f82d58ed74f3cfce41c88734ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4222c572fabf0e91a8b2d20c4ba20da7"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#a4222c572fabf0e91a8b2d20c4ba20da7">__init__</a> (self, Union[int, str, <a class="el" href="classGPIO__AL_1_1PinIO_1_1PinIO.html">PinIO</a>] pulsePin, Union[float, object] <a class="el" href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#ac7d660249a9e5c40170c8e14c98381d1">frequency</a>, Optional[float] <a class="el" href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#a842c99ab4d85915e86007826a5bdb5f0">dutyCycle</a>=0.5, Optional[int] bursts=None)</td></tr>
+<tr class="memdesc:a4222c572fabf0e91a8b2d20c4ba20da7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor - sets up common parameter for both modes.  <a href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#a4222c572fabf0e91a8b2d20c4ba20da7">More...</a><br /></td></tr>
+<tr class="separator:a4222c572fabf0e91a8b2d20c4ba20da7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af1a6224f726bd0bf7847017de06a0640"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#af1a6224f726bd0bf7847017de06a0640">__del__</a> (self)</td></tr>
 <tr class="memdesc:af1a6224f726bd0bf7847017de06a0640"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#af1a6224f726bd0bf7847017de06a0640">More...</a><br /></td></tr>
 <tr class="separator:af1a6224f726bd0bf7847017de06a0640"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,9 +129,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ada6a48ec86c9c03247a9680633485a46"><td class="mdescLeft">&#160;</td><td class="mdescRight">setter of a frequency property to be implemented by child.  <a href="classGPIO__AL_1_1Pulse_1_1__PulseAPI.html#ada6a48ec86c9c03247a9680633485a46">More...</a><br /></td></tr>
 <tr class="separator:ada6a48ec86c9c03247a9680633485a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aa79c02f82d58ed74f3cfce41c88734ea" name="aa79c02f82d58ed74f3cfce41c88734ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa79c02f82d58ed74f3cfce41c88734ea">&#9670;&nbsp;</a></span>__init__()</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p >Abstract base class provides API for pulse classes. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a4222c572fabf0e91a8b2d20c4ba20da7" name="a4222c572fabf0e91a8b2d20c4ba20da7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4222c572fabf0e91a8b2d20c4ba20da7">&#9670;&nbsp;</a></span>__init__()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -142,7 +147,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Union[int,str,object]&#160;</td>
+          <td class="paramtype">Union[int,str,<a class="el" href="classGPIO__AL_1_1PinIO_1_1PinIO.html">PinIO</a>]&#160;</td>
           <td class="paramname"><em>pulsePin</em>, </td>
         </tr>
         <tr>
@@ -171,10 +176,10 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Constructor - sets up parameters and determines mode (hard- or software) </p>
+<p>Constructor - sets up common parameter for both modes. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pulsePin</td><td>integer with pin number in GPIO header or string with GPIO&lt;lineNumber&gt; </td></tr>
+    <tr><td class="paramname">pulsePin</td><td>integer with pin number in GPIO header, string with GPIO&lt;lineNumber&gt; or PinIO object. </td></tr>
     <tr><td class="paramname">frequency</td><td>pulse frequency in Hz or a PObject with unit Hz </td></tr>
     <tr><td class="paramname">dutyCycle</td><td>0 &lt;= dutyCycle &lt;= 1 duty cycle of pulse (default: 0.5) </td></tr>
     <tr><td class="paramname">bursts</td><td>number of impulses to generate or None for continuous (default: None) </td></tr>
@@ -182,7 +187,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classGPIO__AL_1_1Pulse_1_1__SWPulse.html#a411c68801dc93657e88209fef7af9533">GPIO_AL.Pulse._SWPulse</a>, <a class="el" href="classGPIO__AL_1_1Pulse_1_1Pulse.html#afb588447c44c570b6788e71e82aa5ed7">GPIO_AL.Pulse.Pulse</a>, and <a class="el" href="classGPIO__AL_1_1Pulse_1_1__HWPulse.html#a19d088483e4b85de1103f1f6afa9d34f">GPIO_AL.Pulse._HWPulse</a>.</p>
+<p>Reimplemented in <a class="el" href="classGPIO__AL_1_1Pulse_1_1__SWPulse.html#af08a1868085c9c0ee61a8338dca4f136">GPIO_AL.Pulse._SWPulse</a>, <a class="el" href="classGPIO__AL_1_1Pulse_1_1Pulse.html#acd62682157b87bcd5bb2ab8d679633a2">GPIO_AL.Pulse.Pulse</a>, and <a class="el" href="classGPIO__AL_1_1Pulse_1_1__HWPulse.html#a19d088483e4b85de1103f1f6afa9d34f">GPIO_AL.Pulse._HWPulse</a>.</p>
 
 </div>
 </div>
