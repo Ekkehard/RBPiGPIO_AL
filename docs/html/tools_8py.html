@@ -75,8 +75,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:a7d4c7b35d7f88cdfae19336fe5bf1491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtain the name of the platform we are running under.  <a href="tools_8py.html#a7d4c7b35d7f88cdfae19336fe5bf1491">More...</a><br /></td></tr>
 <tr class="separator:a7d4c7b35d7f88cdfae19336fe5bf1491"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94abb78774aca3ce9609a59c8e3347f3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tools_8py.html#a94abb78774aca3ce9609a59c8e3347f3">GPIO_AL.tools.argToLine</a> (Union[int, str] pinArg)</td></tr>
+<tr class="memdesc:a94abb78774aca3ce9609a59c8e3347f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a GPIO_AL pin argument to an RB Pi GPIO chip "line" or "offset" numbers (2 .  <a href="tools_8py.html#a94abb78774aca3ce9609a59c8e3347f3">More...</a><br /></td></tr>
 <tr class="separator:a94abb78774aca3ce9609a59c8e3347f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8d04870c17428f0763ae4d7ed004325"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tools_8py.html#ac8d04870c17428f0763ae4d7ed004325">GPIO_AL.tools.argToPin</a> (Union[int, str] pinArg)</td></tr>
+<tr class="memdesc:ac8d04870c17428f0763ae4d7ed004325"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a GPIO_AL pin argument to an RB Pi header Pin number (1 .  <a href="tools_8py.html#ac8d04870c17428f0763ae4d7ed004325">More...</a><br /></td></tr>
 <tr class="separator:ac8d04870c17428f0763ae4d7ed004325"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af507ba242f9c172a91cbd5fe1055419c"><td class="memItemLeft" align="right" valign="top">dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tools_8py.html#af507ba242f9c172a91cbd5fe1055419c">GPIO_AL.tools.cpuInfo</a> ()</td></tr>
 <tr class="memdesc:af507ba242f9c172a91cbd5fe1055419c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get some information about the CPU.  <a href="tools_8py.html#af507ba242f9c172a91cbd5fe1055419c">More...</a><br /></td></tr>
@@ -105,12 +107,22 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.main</b>
 Variables</h2></td></tr>
 <tr class="memitem:a41d106a12f2fe79e26aff286e9920688"><td class="memItemLeft" align="right" valign="top"><a id="a41d106a12f2fe79e26aff286e9920688" name="a41d106a12f2fe79e26aff286e9920688"></a>
 str&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.isPico</b> = -1</td></tr>
+<tr class="memdesc:a41d106a12f2fe79e26aff286e9920688"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="tools_8py.html#a41d106a12f2fe79e26aff286e9920688" title="isPico() returns True if the hos is a Raspberry Pi Pico">isPico()</a> returns True if the hos is a Raspberry Pi Pico <br /></td></tr>
 <tr class="separator:a41d106a12f2fe79e26aff286e9920688"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfe45e1c75217c47697ab5c36d7327bd"><td class="memItemLeft" align="right" valign="top"><a id="adfe45e1c75217c47697ab5c36d7327bd" name="adfe45e1c75217c47697ab5c36d7327bd"></a>
 str&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.isPi5</b> = -1</td></tr>
+<tr class="memdesc:adfe45e1c75217c47697ab5c36d7327bd"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="tools_8py.html#adfe45e1c75217c47697ab5c36d7327bd" title="isPi5() returns True if the hos is a Raspberry Pi Pi 5">isPi5()</a> returns True if the hos is a Raspberry Pi Pi 5 <br /></td></tr>
 <tr class="separator:adfe45e1c75217c47697ab5c36d7327bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><dl class="section version"><dt>Version</dt><dd>1.0.0</dd></dl>
+<dl class="section user"><dt>Purpose</dt><dd>This module provides common tools used throughout this package.</dd></dl>
+<dl class="section user"><dt>Comments</dt><dd></dd></dl>
+<dl class="section user"><dt>Known Bugs</dt><dd>None</dd></dl>
+<dl class="section author"><dt>Author</dt><dd>W. Ekkehard Blanz <a href="#" onclick="location.href='mai'+'lto:'+'Ekk'+'eh'+'ard'+'.B'+'lan'+'z@'+'gma'+'il'+'.co'+'m'; return false;">Ekkeh<span class="obfuscator">.nosp@m.</span>ard.<span class="obfuscator">.nosp@m.</span>Blanz<span class="obfuscator">.nosp@m.</span>@gma<span class="obfuscator">.nosp@m.</span>il.co<span class="obfuscator">.nosp@m.</span>m</a></dd></dl>
+<dl class="section copyright"><dt>Copyright</dt><dd>Copyright (C) 2021 - 2024 W. Ekkehard Blanz<br  />
+ See NOTICE.md and LICENSE.md files that come with this distribution. </dd></dl>
+</div><h2 class="groupheader">Function Documentation</h2>
 <a id="a94abb78774aca3ce9609a59c8e3347f3" name="a94abb78774aca3ce9609a59c8e3347f3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a94abb78774aca3ce9609a59c8e3347f3">&#9670;&nbsp;</a></span>argToLine()</h2>
 
@@ -126,17 +138,17 @@ str&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.isPi5</b
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">@brief Convert a GPIO_AL pin argument to an RB Pi GPIO chip "line" or
-        "offset" numbers (2 .. 27). The argument can be an integer, in 
-        which case it is assumed that this integer represents a GPIO 
-        header pin number (1 .. 40).  The argument can also be a string,
-        in which case it is interpreted as a line number if it starts 
-        with the string 'GPIO'; otherwise it will be interpreted as 
-        representing an integer pin number.
 
-@param pinArg GPIO argument representing pin or line number
-@return line or offset number
-</pre> 
+<p>Convert a GPIO_AL pin argument to an RB Pi GPIO chip "line" or "offset" numbers (2 . </p>
+<p >. 27). The argument can be an integer, in which case it is assumed that this integer represents a GPIO header pin number (1 .. 40). The argument can also be a string, in which case it is interpreted as a line number if it starts with the string 'GPIO'; otherwise it will be interpreted as representing an integer pin number.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pinArg</td><td>GPIO argument representing pin or line number </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>line or offset number </dd></dl>
+
 </div>
 </div>
 <a id="ac8d04870c17428f0763ae4d7ed004325" name="ac8d04870c17428f0763ae4d7ed004325"></a>
@@ -154,17 +166,17 @@ str&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.isPi5</b
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">@brief Convert a GPIO_AL pin argument to an RB Pi header Pin number
-        (1 .. 40). The argument can be an integer, in which case it is 
-        assumed that this integer represents a GPIO header pin number 
-        already.  The argument can also be a string, in which case it is
-        interpreted as a line number if it starts with the string 
-        'GPIO'; otherwise it will be interpreted as representing an 
-        integer header pin number.
 
-@param pinArg GPIO argument representing pin or line number
-@return header pin number
-</pre> 
+<p>Convert a GPIO_AL pin argument to an RB Pi header Pin number (1 . </p>
+<p >. 40). The argument can be an integer, in which case it is assumed that this integer represents a GPIO header pin number already. The argument can also be a string, in which case it is interpreted as a line number if it starts with the string 'GPIO'; otherwise it will be interpreted as representing an integer header pin number.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pinArg</td><td>GPIO argument representing pin or line number </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>header pin number </dd></dl>
+
 </div>
 </div>
 <a id="af507ba242f9c172a91cbd5fe1055419c" name="af507ba242f9c172a91cbd5fe1055419c"></a>
@@ -204,7 +216,7 @@ str&#160;</td><td class="memItemRight" valign="bottom"><b>GPIO_AL.tools.isPi5</b
 </div><div class="memdoc">
 
 <p>Obtain the path to a GPIO chip that contains a given line. </p>
-<p >The function will ignore lines that are used. Note that the argument is a line or offset number NOT a GPIO header pin number! (</p><dl class="section see"><dt>See also</dt><dd><a class="el" href="tools_8py.html#a94abb78774aca3ce9609a59c8e3347f3">argToLine()</a>)</dd></dl>
+<p >The function will ignore lines that are used. Note that the argument is a line or offset number NOT a GPIO header pin number! (</p><dl class="section see"><dt>See also</dt><dd><a class="el" href="tools_8py.html#a94abb78774aca3ce9609a59c8e3347f3" title="Convert a GPIO_AL pin argument to an RB Pi GPIO chip &quot;line&quot; or &quot;offset&quot; numbers (2 .">argToLine()</a>)</dd></dl>
 <p>As long as the GPIO line names all start with GPIO and are followed by the line number, this function does not need to be changed if the architecture changes.</p>
 <p >Raspberry Pi versions before RB Pi 5 used the GPIO chip /dev/gpiochip0 to address all GPIOI lines (offsets). Early versions of RB Pi 5 used /dev/gpiochip4, which later was reversed to gpiochip0 while gpiochip4 still existed as a symbolic link to gpiochip0. To stay above all this mess, and even accomodate an architecture where GPIO lines are split across several GPIO chips, this code attempts to find the right chip for a given line programmatically. This approach has the additional advantage, that it will also work on all Linux machines (e.g. also on a Jetson Nano running gpiod v2.2 and above).</p>
 <dl class="params"><dt>Parameters</dt><dd>

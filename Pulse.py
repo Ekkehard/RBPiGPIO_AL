@@ -2,8 +2,6 @@
 ##
 # @file       Pulse.py
 #
-# @mainpage   Raspberry Pi Pulse Generator
-#
 # @version    4.0.0
 #
 # @par Purpose
@@ -180,7 +178,7 @@ class Pulse( _PulseAPI ):
     @brief Class to create arbitrary pulses on arbitrary pins.
 
     This class allows the generation of pulses of a large range of frequencies 
-    and duty cycles as well as bursts with a specified amount of impulses on any
+    and duty cycles as well as bursts with a specified number of impulses on any
     pin of the GPIO.  Some pins support hardware-generated pulses.  If this 
     class detects that the requested pin is one of those pins and that the 
     necessary kernel modules are loaded, it will use hardware to generate the 
@@ -304,7 +302,7 @@ class Pulse( _PulseAPI ):
         self.stop()
         return False
 
-    def __str__( self ):
+    def __str__( self ) -> str:
         """!
         @brief String representation of this class - returns all settable
                parameters.
@@ -327,7 +325,7 @@ class Pulse( _PulseAPI ):
         return
 
     @property
-    def dutyCycle( self ):
+    def dutyCycle( self ) -> float:
         """!
         @brief Works as read/write property to get the current duty cycle.
         @return current duty cycle
@@ -351,7 +349,7 @@ class Pulse( _PulseAPI ):
         return
 
     @property
-    def frequency( self ):
+    def frequency( self ) -> float:
         """!
         @brief Implements read property of frequency to be implemented by actor.
         @return current duty cycle
@@ -386,7 +384,7 @@ class _HWPulse( _PulseAPI ):
         @param pulsePin integer with pin number in GPIO header or string with
                         GPIO<lineNumber>
         @param frequency in Hz as float or PObject with unit Hz
-        @param duty cycle 0 <= dutyCylce <= 1
+        @param dutyCycle duty cycle 0 <= dutyCylce <= 1
         @param bursts number of burts or None for continuous operation
         """
         super().__init__( pulsePin, frequency, dutyCycle, bursts )
@@ -587,7 +585,7 @@ class _SWPulse( _PulseAPI ):
         @param pulsePin integer with pin number in GPIO header or string with
                         GPIO<lineNumber>
         @param frequency in Hz as float or PObject with unit Hz
-        @param duty cycle 0 < dutyCylce < 1
+        @param dutyCycle duty cycle 0 < dutyCylce < 1
         @param bursts number of burts or None for continuous operation
         """
         self.__swTimer = None

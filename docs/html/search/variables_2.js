@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['default_5fclock_5fpin_0',['DEFAULT_CLOCK_PIN',['../classGPIO__AL_1_1__PicoI2Cbus_1_1__PicoI2Cbus.html#ae614a194bbbeb89ad71bd265700b188f',1,'GPIO_AL::_PicoI2Cbus::_PicoI2Cbus']]],
-  ['default_5fdata_5fpin_1',['DEFAULT_DATA_PIN',['../classGPIO__AL_1_1__PicoI2Cbus_1_1__PicoI2Cbus.html#ae0a77a4427785093a7de47c143215fc9',1,'GPIO_AL::_PicoI2Cbus::_PicoI2Cbus']]],
-  ['default_5fi2c_5ffreq_2',['DEFAULT_I2C_FREQ',['../classGPIO__AL_1_1__PicoI2Cbus_1_1__PicoI2Cbus.html#a371dd6da3fdca8e5a68b4ff5a87452d9',1,'GPIO_AL._PicoI2Cbus._PicoI2Cbus.DEFAULT_I2C_FREQ()'],['../classGPIO__AL_1_1__PiI2Cbus_1_1__PiHWI2C.html#ad51cca270e6928349e6fdc21f63f927a',1,'GPIO_AL._PiI2Cbus._PiHWI2C.DEFAULT_I2C_FREQ()']]],
-  ['default_5fmode_3',['DEFAULT_MODE',['../classGPIO__AL_1_1__PicoI2Cbus_1_1__PicoI2Cbus.html#ace1956ddbff6ad5b18108f1b1b2f30b1',1,'GPIO_AL::_PicoI2Cbus::_PicoI2Cbus']]]
+  ['falling_0',['FALLING',['../classGPIO__AL_1_1PinIO_1_1PinIO_1_1Edge.html#a8d48d48efcf9fee6af4f509fb6fe7646',1,'GPIO_AL::PinIO::PinIO::Edge']]],
+  ['fatal_1',['FATAL',['../classGPIO__AL_1_1GPIOError_1_1GPIOError_1_1Severity.html#a28e833dd90ab28542d8c77baa267c340',1,'GPIO_AL::GPIOError::GPIOError::Severity']]]
 ];

@@ -2,12 +2,10 @@
 ##
 # @file       GPIOError.py
 #
-# @mainpage   Raspberry Pi GPIO Error Exception
-#
 # @version    4.0.0
 #
 # @par Purpose
-# This module providesthe exception to be thrown by modules of this package.
+# This module provides the exception to be thrown by modules of this package.
 #
 # This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
 # Pico.
@@ -61,12 +59,15 @@ class GPIOError( Exception ):
     class Severity( Enum ):
         """!
         @brief Severity Enum, consists of
-            WARNING - Warning only
-            ERROR - Regular error
+            WARNING - Warning only,
+            ERROR - Regular error,
             FATAL - Fatal error from which one cannot recover
         """
+        ## Warning only
         WARNING = 0
+        ## Regular error
         ERROR = 1
+        ## Fatal error from which one cannot recover
         FATAL = 2
 
     def __init__( self, 

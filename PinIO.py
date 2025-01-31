@@ -1,8 +1,6 @@
-# Python Implementation: GPIO_AL
+# Python Implementation: PinIO
 ##
-# @file       GPIO_AL.py
-#
-# @mainpage   Raspberry Pi GPIO Abstraction Layer
+# @file       PinIO.py
 #
 # @version    4.0.0
 #
@@ -102,9 +100,9 @@ class PinIO():
             ...
             return
     @endcode
-    to work on all Raspberry Pi architectures.  Here pin is the pin (not line or
-    offset) number, level is of type PinIO.Level, and tick is the number of the
-    event.
+    to work on all Raspberry Pi architectures.  Here pin is the board header pin
+    (not line or offset) number, level is of type PinIO.Level, and tick is the 
+    number of times the event has occurred.
 
     NOTE: It is strongly recommended to instantiate this class using a "with"
     statment.  Otherwise it cannot be guaranteed that the destructor of the 
@@ -134,11 +132,12 @@ class PinIO():
     type can be used interchangeably with ints, which of course should only
     assume the values 0 and 1.
 
-    CAUTION: Make sure you are not using voltages at any pins that exceed the
-    allowed level for your device.  Otherwise, permanent destruction of the
-    Raspberry Pi chip may result.
+    CAUTION: Make sure you are only using voltages at any pins that do not 
+    exceed the allowed level for your device.  Otherwise, permanent damage to
+    the Raspberry Pi chip may occur.
     """
 
+    ## Pin operation mode as an Enum
     class Mode( Enum ):
         ## Input mode without resistors pulling up or down
         INPUT = 0
@@ -152,6 +151,7 @@ class PinIO():
         ## support it
         OPEN_DRAIN = 4
 
+    ## Signal level as an IntEnum
     class Level( IntEnum ):
         ## Low voltage level
         LOW = 0
@@ -159,14 +159,16 @@ class PinIO():
         HIGH = 1
 
     if isPico():
+        ## Trigger edge as an Enum
         class Edge( Enum ):
             ## Trigger on falling edge
             FALLING = machine.Pin.IRQ_FALLING
             ## Trigger on rising edge
             RISING = machine.Pin.IRQ_RISING
-            ## Trigger on changing signal i.e. both edges
+            ## Trigger on both edges whenever signal changes
             BOTH = machine.Pin.IRQ_FALLING | machine.Pin.IRQ_RISING
     else:
+        ## Trigger edge Enum directly from gpiod
         Edge = gpiod.line.Edge
 
     def __init__( self, 
@@ -188,13 +190,14 @@ class PinIO():
         @param edge edge on which to trigger the callback, one of
                PinIO.Edge.FALLING, PinIO.Edge.RISING or PinIO.Edge.BOTH - 
                defaults to None
-        @param force set True to allow using reserved (for hardware) pins
+        @param force set True to allow using pins reserved for hardware
         """
         if not isinstance( mode, self.Mode ):
             raise GPIOError( 'Wrong I/O mode specified: {0}'.format( mode ) )
         self.__mode = mode
         if callback is not None and not callable( callback ):
-            raise GPIOError( 'Wrong callback funtion specified' )
+            raise GPIOError( 'Wrong callback funtion specified'
+                             '{0}'.format( callback ) )
         self.__clbk = callback
         if edge is not None and not isinstance( edge, self.Edge ):
             raise GPIOError( 'Wrong triggerEdge specified: '
@@ -273,7 +276,7 @@ class PinIO():
         return False
 
 
-    def __str__( self ):
+    def __str__( self ) -> str:
         """!
         @brief String representation of this class - returns all settable
                parameters.
@@ -288,17 +291,6 @@ class PinIO():
                         self.mode,
                         self.callback,
                         triggerEdge )
-
-
-    def __error( self, text ):
-        """!
-        @brief Private method that throws an exception.
-
-        Raising an exception alone is a statement - not an expression - in a
-        lambda function we need an expression, and this is it.
-        @param text string of text to throw GPIOError exception with
-        """
-        raise GPIOError( text )
 
 
     def __setupRP( self, pin ):
@@ -516,9 +508,9 @@ class PinIO():
         return
 
     @property
-    def pin( self ):
+    def pin( self ) -> int:
         """!
-        @brief Works as read-only property to get the GPIO pin number
+        @brief Works as read-only property to get the GPIO header pin number
         associated with this class.
         @return GPIO header pin number associated with this class
         """
@@ -526,7 +518,7 @@ class PinIO():
 
 
     @property
-    def line( self ):
+    def line( self ) -> int:
         """!
         @brief Works as read-only property to get the GPIO line number
         associated with this class.
@@ -536,7 +528,7 @@ class PinIO():
 
 
     @property
-    def mode( self ):
+    def mode( self ) -> Mode:
         """!
         @brief Works as read-only property to get I/O mode of that Pin as an
                int.
@@ -548,7 +540,7 @@ class PinIO():
 
 
     @property
-    def callback( self ):
+    def callback( self ) -> str:
         """!
         @brief Works as read-only property to get the name of callback function
                as a string.
@@ -561,17 +553,18 @@ class PinIO():
 
 
     @property
-    def triggerEdge( self ):
+    def triggerEdge( self ) -> Edge:
         """!
         @brief Works as read-only property to get the callback trigger edge
                as a PinIO.Edge type.
-        @return trigger edge as PinIO.Edge.FALLING, PinIO.Edge.RISING or None
+        @return trigger edge as PinIO.Edge.FALLING, PinIO.Edge.RISING,
+                PinIO.Edge.BOTH or None
         """
         return self.__triggerEdge
 
 
     @property
-    def level( self ):
+    def level( self ) -> Level:
         """!
         @brief Works as read/write property to get the current voltage level
                of a Pin as a PinIO.Level type.
@@ -582,7 +575,7 @@ class PinIO():
 
 
     @level.setter
-    def level( self, level ):
+    def level( self, level: Level ):
         """!
         @brief Works as the setter of a read/write property to set the Pin to a
                given voltage level.
@@ -601,6 +594,9 @@ if __name__ == "__main__":
     import sys
 
     def myCallback( pin, level, count ):
+        """!
+        @brief Dud as a callback function.
+        """
         return
 
     def main():

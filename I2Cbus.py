@@ -57,23 +57,23 @@ class I2Cbus( _I2CbusAPI ):
     """!
     @brief Class to handle I<sup>2</sup>C bus communication.
 
-    The GPIO Pins on the Raspberry Pi are GPIO 2 for I<sup>2</sup>C data and
-    GPIO 3 for I<sup>2</sup>C clock for hardware I<sup>2</sup>C and freely
+    The GPIO Pins on the Raspberry Pi are GPIO2 for I<sup>2</sup>C data and
+    GPIO3 for I<sup>2</sup>C clock for hardware I<sup>2</sup>C and freely
     selectable for software I<sup>2</sup>C (bit banging); on the Raspberry Pi
     Pico, the GPIO Pins for I<sup>2</sup>C communication are also freely
-    selectable under software I<sup>2</sup>C, they are restricted to GPIO 1 for
-    data and GPIO 2 for clock, GPIO 4 for data and GPIO 5 for clock, GPIO 6
-    for data and GPIO 7 for clock, GPIO 9 for data and GPIO 10 for clock,
-    GPIO 11 for data and GOPI 12 for clock, GPIO 14 for data and GOPI 15 for
-    clock, GPIO 16 for data and GPIO 17 for clock, GPIO 19 for data and GPIO
-    20 for clock, GPIO 21 for data and GPIO 22 for clock, GPIO 24 for data
-    and GPIO 25 for clock, GPIO 26 for data and GPIO 27 for clock, or GPIO 31
-    for data and GPIO 32 for clock.
+    selectable under software I<sup>2</sup>C, they are restricted to GPIO1 for
+    data and GPIO2 for clock, GPIO4 for data and GPIO5 for clock, GPIO6
+    for data and GPIO7 for clock, GPIO9 for data and GPIO10 for clock,
+    GPIO11 for data and GOPI12 for clock, GPIO14 for data and GOPI15 for
+    clock, GPIO16 for data and GPIO17 for clock, GPIO19 for data and GPIO20 for
+    clock, GPIO21 for data and GPIO22 for clock, GPIO24 for data and GPIO25 for
+    clock, GPIO26 for data and GPIO27 for clock, or GPIO31 for data and GPIO32
+    for clock.
 
     Since many targets can be connected on an I<sup>2</sup>C bus, one I2Cbus
     object must be able to handle them all.  Therefore, I2Cbus objects are
     created one per I<sup>2</sup>C bus, which is uniquely defined by the sda
-    and scl Pins - NOT one such object per target on that bus.  Every
+    and scl Pins - NOT one such object per target device on that bus.  Every
     I<sup>2</sup>C I/O operation therefore needs to be given the
     I<sup>2</sup>C address of the target this communication is meant for.
 
@@ -88,9 +88,10 @@ class I2Cbus( _I2CbusAPI ):
     I<sup>2</sup>C device requires elevated privileges (sudo), and the
     practice of using those when not strictly necessary is strongly discouraged.
 
-    Also, on systems Raspberry Pis other than the Raspberry Pi 5 running under 
-    an operating system the pigpiod daemon needs to run to use the software 
-    mode.  Either use
+    Also, on Raspberry Pi systems other than the Raspberry Pi 5 running under 
+    an operating system, the pigpiod daemon needs to run to use the software 
+    mode, which is strongly recommended on Raspberry Pis other than Raspberry 
+    Pi 5 (see below).  Either use
     @code
         sudo pigpiod
     @endcode
@@ -119,7 +120,7 @@ class I2Cbus( _I2CbusAPI ):
     free the CPU from the task of generating I<sup>2</sup>C signals.  This 
     software still allows the caller to select hardware mode also on the 
     Raspberry Pi 3, but the user is strongly advised to make sure that no target
-    on the I<sup>2</sup>C bus requires clock stretching in such cases.  
+    on the I<sup>2</sup>C bus requires clock stretching in such cases.
     Moreover, the user is much more likely to run into error conditions on a 
     Raspberry Pi 3 I<sup>2</sup>C bus than on any other system, and it is a very
     good idea to write "robust" code that checks error conditions continuously 
@@ -127,12 +128,12 @@ class I2Cbus( _I2CbusAPI ):
     stretching has to be used on a Raspberry Pi 3, even in software mode.
     """
     
-    # make Mode available to our callers
+    ## Operating mode either Mode.HARDWARE or Mode.SOFTWARE as Enum
     Mode = _I2CbusAPI._Mode
     
     def __init__( self, *args, **kwargs ):
         """!
-        @brief Constructor for class I<sup>2</sup>Cbus.
+        @brief Constructor for class I2Cbus.
         @param sdaPin header pin or GPIO line number for I<sup>2</sup>C data 
                (default GPIO2 on Raspberry Pi and 8 on Raspberry Pi Pico).
                Ints are interpreted as header pin numbers, strings starting with
@@ -141,16 +142,17 @@ class I2Cbus( _I2CbusAPI ):
                (default GPIO3 on Raspberry Pi and 9 on Raspberry Pi Pico).
                Ints are interpreted as header pin numbers, strings starting with
                GPIO as line numbers.
-        @param mode one of I2<Cbus.HARDWARE_MODE or I2Cbus.SOFTWARE_MODE
-               AKA bit banging (default I2Cbus.SOFTWARE for Raspberry Pi and
-               I2Cbus.HARDWARE for Raspberry Pi Pico)
+        @param mode one of I2Cbus.Mode.HARDWARE or I2Cbus.Mode.SOFTWARE
+               AKA bit banging (default I2Cbus.Mode.SOFTWARE for Raspberry Pi 
+               other than Raspberry Pi 5 and I2Cbus.Mode.HARDWARE for Raspberry 
+               Pi Pico)
         @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
                Software mode and 100 kHz for hardware mode and Raspbberry Pi 
-               Pico in all modes).  This parameter is ignored for Raspberry Pi 
+               Pico in all modes).  This parameter is ignored for Raspberry Pis 
                in hardeware mode, where the frequency is always 100 kHz.
                Also accepts PObjects of Unit Hz.
         @param attempts number of read or write attempts before throwing an
-               exception (default 1 for Pico in all modes and 5 for Pi in 
+               exception (default 1 for Pico in all modes and 5 for all Pis in 
                software mode)
         @param usePEC set True to use Packet Error Checking (default False).
                This parameter is ignored when PEC is not supported.
@@ -232,18 +234,20 @@ class I2Cbus( _I2CbusAPI ):
         
     def close( self ):
         """!
-        @brief On the Raspberry Pi other than Raspberry Pi 5, it is important to
-               call this method to properly close the pigpio object in software 
-               mode.
+        @brief On the Raspberry Pi, it is important to call this method to 
+               properly close the pigpio object in software mode.
         """
         # In case of an emergency stop, the actor may not even exist (anymore)
         if self.__actor: self.__actor.close()
         return
 
-    def readId( self, i2cAddress ):
+    def readId( self, i2cAddress: int ) -> tuple:
         """!
-        @brief Read the ID of a device.
+        @brief Read the ID tuple of a device consisting of manufacturer ID,
+               device ID, and die revision.
         @param i2cAddress address of I<sup>2</sup>C device to read ID from
+        @return tuple of (manufacturerId, deviceId, dieRev)
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -258,7 +262,7 @@ class I2Cbus( _I2CbusAPI ):
                 manufacturerId = byteList[1] >> 4 | byteList[1] >> 4
                 deviceId = (byteList[1] & 0x0F) << 5 | (byteList[2] & 0xF8) >> 3
                 dieRev = byteList[2] & 0x07
-                return manufacturerId, idBits, dieRev
+                return manufacturerId, deviceId, dieRev
             except Exception as e:
                 count += 1
                 self.__failedAttempts += 1
@@ -266,11 +270,12 @@ class I2Cbus( _I2CbusAPI ):
         raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readId ({0})'.format( lastException ) )
 
-    def readByte( self, i2cAddress ):
+    def readByte( self, i2cAddress: int ) -> int:
         """!
         @brief Read a single general byte from an I<sup>2</sup>C device.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
-        @return int with byte read
+        @return byte read as an int
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -283,12 +288,13 @@ class I2Cbus( _I2CbusAPI ):
         raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
         
-    def readByteReg( self, i2cAddress, register ):
+    def readByteReg( self, i2cAddress: int, register: int ) -> int:
         """!
         @brief Read a single byte from an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
         @param register device register to read from
-        @return int with byte read
+        @return byte read as an int
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -302,13 +308,17 @@ class I2Cbus( _I2CbusAPI ):
                          + 'in readByte ({0})'.format( lastException ) )
         
 
-    def readBlockReg( self, i2cAddress, register, length ):
+    def readBlockReg( self, 
+                      i2cAddress: int, 
+                      register: int, 
+                      length: int ) -> list:
         """!
         @brief Read a block of bytes from an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
         @param register device register to start reading
         @param length number of bytes to be read
         @return list of ints with bytes read
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -324,11 +334,12 @@ class I2Cbus( _I2CbusAPI ):
                          + 'in readByte ({0})'.format( lastException ) )
         
 
-    def writeQuick( self, i2cAddress ):
+    def writeQuick( self, i2cAddress: int ):
         """!
         @brief Issue an I<sup>2</sup>C device address with the write bit set
                and check the acknowledge signal but do not write anything else.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -342,11 +353,12 @@ class I2Cbus( _I2CbusAPI ):
         raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
 
-    def writeByte( self, i2cAddress, value ):
+    def writeByte( self, i2cAddress: int, value: int ):
         """!
         @brief Write a single byte to an I<sup>2</sup>C device.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
         @param value value of byte to be written as an int
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -360,12 +372,13 @@ class I2Cbus( _I2CbusAPI ):
         raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
 
-    def writeByteReg( self, i2cAddress, register, value ):
+    def writeByteReg( self, i2cAddress: int, register: int, value: int ):
         """!
         @brief Write a single byte to an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
         @param register device register to write to
         @param value value of byte to be written as an int
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -381,13 +394,14 @@ class I2Cbus( _I2CbusAPI ):
         self.__actor.writeBlockReg( i2cAddress, register, block )
         return
         
-    def writeBlockReg( self, i2cAddress, register, block ):
+    def writeBlockReg( self, i2cAddress: int, register: int, block: list ):
         """!
         @brief Write a block of bytes to an I<sup>2</sup>C device starting at
                register.
         @param i2cAddress address of I<sup>2</sup>C device to be written to
         @param register device register to start writing
         @param block list of ints with bytes to be written
+        @throws GPIOError in case of an error
         """
         count = 0
         while count < self.__actor.attempts:
@@ -402,21 +416,21 @@ class I2Cbus( _I2CbusAPI ):
                          + 'in readByte ({0})'.format( lastException ) )
 
     @property
-    def sda( self ):
+    def sda( self ) -> int:
         """!
-        @brief Works as read-only property to get the sda Pin number.
+        @brief Works as read-only property to get the sda line number.
         """
         return self.__actor.sda
 
     @property
-    def scl( self ):
+    def scl( self ) -> int:
         """!
-        @brief Works as read-only property to get the scl Pin number.
+        @brief Works as read-only property to get the scl line number.
         """
         return self.__actor.scl
 
     @property
-    def mode( self ):
+    def mode( self ) -> Mode:
         """!
         @brief Works as read-only property to get the I<sup>2</sup>C bus mode
                (I2Cbus.Mode.SOFTWARE or I2Cbus.Mode.HARDWARE).
@@ -424,7 +438,7 @@ class I2Cbus( _I2CbusAPI ):
         return self.__actor.mode
 
     @property
-    def frequency( self ):
+    def frequency( self ) -> float:
         """!
         @brief Works as read-only property to get the frequency the
                I<sup>2</sup>C bus is operating at.
@@ -432,14 +446,14 @@ class I2Cbus( _I2CbusAPI ):
         return self.__actor.frequency
 
     @property
-    def attempts( self ):
+    def attempts( self ) -> int:
         """!
         @brief Obtain the user-supplied number of communication attempts.
         """
         return self.__actor.attempts
 
     @property
-    def usePEC( self ):
+    def usePEC( self ) -> bool:
         """!
         @brief Return current status of Packet Error Checking.
         """
@@ -453,7 +467,7 @@ class I2Cbus( _I2CbusAPI ):
         return
 
     @property
-    def failedAttempts( self ):
+    def failedAttempts( self ) -> int:
         """!
         @brief Works as read-only property to obtain the number of internally
                recorded failed attempts.

@@ -1,0 +1,54 @@
+#
+# .gitignore Implementation
+#
+# Version   : 1.2.0
+#
+# Purpose   : Define all files to be ignored by git
+#
+# Comments  :
+#
+# Known Bugs: none
+#
+# Author    : W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
+#
+# Copyright :
+# Copyright (C) 2013-2025 W. Ekkehard Blanz
+# See NOTICE.md and LICENSE.md files that come with this distribution.
+#
+# File history:
+#
+#     Date          | Author            | Modification
+#   ----------------+-------------------+---------------------------------------
+#   Sun Dec 26 2013 | W. Ekkehard Blanz | created
+#   Mon Dec 27 2013 | W. Ekkehard Blanz | added Doxyfile
+#   Thu Jan 30 2025 | W. Ekkehard Blanz | added customize.mak
+#                   |                   |
+#
+
+.gitattributes
+core
+.directory
+.*.swp
+__pycache__
+.kdev4
+*.kdev4
+.idea/
+.DS_Store
+*.iml
+*.xcodeproj
+.vs
+*.sln
+*.pyproj
+*.vcxproj
+*.vcxproj.*
+.vscode
+*.code-workspace
+*~
+Makefile
+customize.mak
+debug
+BCM2835Bug
+experiments
+LinuxHeaders
+tools
+docs/Doxyfile

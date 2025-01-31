@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gpioerror_0',['GPIOError',['../classGPIO__AL_1_1GPIOError_1_1GPIOError.html',1,'GPIO_AL::GPIOError']]]
+  ['i2cbus_0',['I2Cbus',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html',1,'GPIO_AL::I2Cbus']]]
 ];

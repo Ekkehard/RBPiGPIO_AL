@@ -1,4 +1,4 @@
 <map id="GPIO_AL.PinIO.PinIO.Level" name="GPIO_AL.PinIO.PinIO.Level">
-<area shape="rect" id="node1" title=" " alt="" coords="5,80,197,107"/>
+<area shape="rect" id="node1" title="Signal level as an IntEnum." alt="" coords="5,80,197,107"/>
 <area shape="rect" id="node2" title=" " alt="" coords="63,5,139,32"/>
 </map>
