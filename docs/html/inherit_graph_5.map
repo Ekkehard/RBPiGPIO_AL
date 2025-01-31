@@ -1,8 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,31,95,57"/>
-<area shape="rect" id="node2" href="$classGPIO__AL_1_1Pulse_1_1__PulseAPI.html" title="Abstract base class provides API for pulse classes." alt="" coords="143,56,325,83"/>
-<area shape="rect" id="node3" href="$classGPIO__AL_1_1Pulse_1_1Pulse.html" title="Class to create arbitrary pulses on arbitrary pins." alt="" coords="389,5,543,32"/>
-<area shape="rect" id="node4" href="$classGPIO__AL_1_1Pulse_1_1__HWPulse.html" title="Internal child class to implement hardware PWM pulses." alt="" coords="373,56,559,83"/>
-<area shape="rect" id="node5" href="$classGPIO__AL_1_1Pulse_1_1__SWPulse.html" title="Internal child class to implement software PWM pulses." alt="" coords="375,107,557,133"/>
-<area shape="rect" id="node6" title=" " alt="" coords="9,81,91,108"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,5,81,32"/>
+<area shape="rect" id="node2" href="$classGPIO__AL_1_1PinIO_1_1PinIO_1_1Level.html" title="Signal level as an IntEnum." alt="" coords="129,5,321,32"/>
 </map>

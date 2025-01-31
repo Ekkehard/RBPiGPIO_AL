@@ -7,8 +7,6 @@
 # @par Purpose
 # This module provides common tools used throughout this package.
 #
-# @par Comments
-#
 # @par Known Bugs
 # None
 #

@@ -15,16 +15,6 @@
 # This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
 # Pico.
 #
-# @par Comments
-# This is Python 3 code!  PEP 8 guidelines are decidedly NOT followed in some
-# instances, and guidelines provided by "Coding Style Guidelines" a "Process
-# Guidelines" document from WEB Design are used instead where the two differ,
-# as the latter span several programming languages and are therefore applicable
-# also for projects that require more than one programming language; it also
-# provides consistency across hundreds of thousands of lines of legacy code.
-# Doing so, ironically, is following PEP 8 which speaks highly of the wisdom of
-# the authors of PEP 8.
-#
 # @par Known Bugs
 # None
 #
