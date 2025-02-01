@@ -70,9 +70,55 @@ isPi5 = lambda: platform().find( 'Pi 5' ) != -1
 
 # determine platform and import appropriate module for GPIO access
 if isPico():
+    # Currently, this is the proper mapping of GP header pins to Pico lines
+    _convList = [-1, 0, 1, -1, 2, 3, 4, 5, -1, 6, 7, 8, 9, -1, 10, 11, 12,
+                 13, -1, 14, 15, 16, 17, -1, 18, 19, 20, 21, -1, 22, -2, 26, 
+                 27, -1, 28, -3, -4, -5, -6, -1, -7, -8]
+    
+    # minima and maxima of GPIO pin and line numbers
+    _GPIO_LINE_MIN = 0
+    _GPIO_LINE_MAX = 28
+    _GPIO_PIN_MIN = 1
+    _GPIO_PIN_MAX = 40
+
     def argToLine( pinArg: Union[int, str] ) -> int:
-        # TODO
-        return pinArg
+        if isinstance( pinArg, int ):
+            try:
+                retval = _convList[pinArg]
+                if retval <= 0:
+                    raise IndexError
+            except IndexError:
+                raise ValueError( '\n\nwrong GP pin argument specified: {0}\n'
+                                'If the argument is given as an integer, it '
+                                'needs to be in the range {1} to {2} and\n'
+                                'correspond to a GP Line number from {3} to '
+                                '{4}.\n'
+                                'Please run pinout to see which pins correspond'
+                                ' to which GP lines.'
+                                .format( pinArg, _GPIO_PIN_MIN, _GPIO_PIN_MAX,
+                                        _GPIO_LINE_MIN, _GPIO_LINE_MAX ) )
+        elif isinstance( pinArg, str ):
+            try:
+                if pinArg.startswith( 'GP' ):
+                    retval = int( pinArg[2:] )
+                    if retval < 2 or retval > 28: raise ValueError
+                else:
+                    raise ValueError
+            except (ValueError, IndexError):
+                raise ValueError( '\n\nwrong GPIO pin argument specified: {0}\n'
+                                'If the argument is given as a string, it needs'
+                                ' to be of the form \'GPIO<m>\' or\n\'<n>\', '
+                                'where m ranges from {1} to {2} and represents '
+                                'a GPIO line number, and n\nranges from {3} to '
+                                '{4} and represents a GPIO header pin number.\n'
+                                'Please run pinout to see which pins correspond'
+                                ' to which GPIO lines.'
+                                .format( pinArg, _GPIO_LINE_MIN, _GPIO_LINE_MAX,
+                                        _GPIO_PIN_MIN, _GPIO_PIN_MAX ) )
+        else:
+            raise ValueError( '\n\nwrong pin argument given: {0}'
+                                .format( pinArg ) )
+        return retval
 else:
     # the following data and functions are not needed for the Raspberry Pi Pico
 
@@ -80,9 +126,9 @@ else:
     # This secion encapsulates the mapping of GPIO header pins to GPIO lines.  
     # Change only this section whenever that changes.
     # Currently, this is the proper mapping of GPIO header pins to GPIO lines
-    _convList = [0, 0, 0, 2, 0, 3, 0, 4, 14, 0, 15, 17, 18, 27, 0, 22, 23,
-                 0, 24, 10, 0, 9, 25, 11, 8, 0, 7, 0, 0, 5, 0, 6, 12, 13,
-                 0, 19, 16, 26, 20, 0, 21]
+    _convList = [-1, -2, -3, 2, -3, 3, -1, 4, 14, -1, 15, 17, 18, 27, -1, 22, 
+                 23, -4, 24, 10, -1, 9, 25, 11, 8, -1, 7, -5, 6, 5, -1, 6, 12, 
+                 13, -1, 19, 16, 26, 20, -1, 21]
     # --------------------------------------------------------------------------
 
     # minima and maxima of GPIO pin and line numbers
@@ -108,7 +154,7 @@ else:
         if isinstance( pinArg, int ):
             try:
                 retval = _convList[pinArg]
-                if not retval:
+                if retval <= 0:
                     raise IndexError
             except IndexError:
                 raise ValueError( '\n\nwrong GPIO pin argument specified: {0}\n'
@@ -126,7 +172,7 @@ else:
                     retval = int( pinArg[4:] )
                     if retval < 2 or retval > 27: raise ValueError
                 else:
-                    retval = _convList[int( pinArg )]
+                    raise ValueError
             except (ValueError, IndexError):
                 raise ValueError( '\n\nwrong GPIO pin argument specified: {0}\n'
                                 'If the argument is given as a string, it needs'
@@ -144,25 +190,25 @@ else:
         return retval
 
 
-    def argToPin( pinArg: Union[int, str] ) -> int:
-        """!
-        @brief Convert a GPIO_AL pin argument to an RB Pi header Pin number
-                (1 .. 40). The argument can be an integer, in which case it is 
-                assumed that this integer represents a GPIO header pin number 
-                already.  The argument can also be a string, in which case it is
-                interpreted as a line number if it starts with the string 
-                'GPIO'; otherwise it will be interpreted as representing an 
-                integer header pin number.
+def argToPin( pinArg: Union[int, str] ) -> int:
+    """!
+    @brief Convert a GPIO_AL pin argument to an RB Pi header Pin number
+            (1 .. 40). The argument can be an integer, in which case it is 
+            assumed that this integer represents a GPIO header pin number 
+            already.  The argument can also be a string, in which case it is
+            interpreted as a line number if it starts with the string 
+            'GPIO'; otherwise it will be interpreted as representing an 
+            integer header pin number.
 
-        @param pinArg GPIO argument representing pin or line number
-        @return header pin number
-        """
-        line = argToLine( pinArg )
-        for retval in range( _GPIO_PIN_MAX ):
-            if _convList[retval] == line:
-                return retval
-        raise ValueError( '\n\nwrong pin argument given: {0}'
-                          .format( pinArg ) )
+    @param pinArg GPIO argument representing pin or line number
+    @return header pin number
+    """
+    line = argToLine( pinArg )
+    for retval in range( _GPIO_PIN_MAX ):
+        if _convList[retval] == line:
+            return retval
+    raise ValueError( '\n\nwrong pin argument given: {0}'
+                        .format( pinArg ) )
 
 def cpuInfo() -> dict:
     """!
@@ -278,8 +324,11 @@ def _hwPulseChip() -> int:
 def hwPWMlines() -> list:
     """!
     @brief Obtain a list of lines that support hardware PWM.
+    This function is aware of whether or not the correct pwm overlay was loaded.
     @return list of GPIO lines that support hardware PWM
     """
+    if isPico():
+        return list( range( 0, 23 ) ) + list( range( 26, 29 ) )
     configPath = '/boot/firmware/config.txt'
     if os.path.getmtime( configPath ) > psutil.boot_time():
         raise GPIOError( 'config.txt was modified since last reboot\n'
@@ -306,9 +355,8 @@ def isHWpulsePin( pin: Union[int, str] ) -> bool:
                in GPIO header, GPIO{n} is line number)
     @return True if given pin is capable of HW pulses, False otherwise
     """
-    if isPico(): return True
-    if not os.path.isdir( '/sys/class/pwm/{0}'
-                          .format( _hwPulseChip() ) ):
+    if not isPico()) and not os.path.isdir( '/sys/class/pwm/{0}'
+                                            .format( _hwPulseChip() ) ):
         # pwm-2chan module not loaded - no pin can produce HW pulses
         return False
         
@@ -318,7 +366,7 @@ def isHWpulsePin( pin: Union[int, str] ) -> bool:
 def hwI2CLinePairs() -> Union[list, None]:
     """!
     @brief Obtain a list of line pairs that support hardware I2C.
-    @return list of GPIO line pairs that support hardware PWM
+    @return list of GPIO line pairs that support hardware PWM or None for any
     """
     if not isPico():
         linePairList = [[2, 3]]
@@ -335,7 +383,7 @@ def isHWI2CPinPair( sdaPin: Union[int, str], sclPin: Union[int,str] ) -> bool:
            number in GPIO header, GPIO{n} is line number) of scl
     @return True if given pin is capable of HW pulses, False otherwise
     """
-        
+    if isPico(): return True
     return [argToLine( sdaPin ), argToLine( sclPin )] in hwI2CLinePairs()
 
 
