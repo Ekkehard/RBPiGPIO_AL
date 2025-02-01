@@ -85,7 +85,7 @@ class _PulseAPI( metaclass=ABCMeta ):
         pass
         
     @abstractmethod
-    def __str__( self ):
+    def __str__( self ) -> str:
         """!
         @brief String representation of this class - returns all settable
                parameters.  To be implemented by child.

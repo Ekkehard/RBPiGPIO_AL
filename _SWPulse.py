@@ -28,7 +28,6 @@
 #                   |                |
 
  
-from typing import Union, Optional   
 import threading
 import time
 from GPIO_AL.PinIO import PinIO
@@ -41,10 +40,10 @@ class _SWPulse( _PulseAPI ):
     @brief Internal child class to implement software PWM pulses.
     """
     def __init__( self,
-                  pulsePin: Union[int, str, PinIO],
-                  frequency: Union[float,object],
-                  dutyCycle: float,
-                  bursts: Union[int, None] ):
+                  pulsePin,
+                  frequency,
+                  dutyCycle,
+                  bursts ):
         """!
         @brief Constructor - sets up parameters.
         @param pulsePin integer with pin number in GPIO header or string with
@@ -170,7 +169,7 @@ class _SWPulse( _PulseAPI ):
         return self._dutyCycle
 
     @dutyCycle.setter
-    def dutyCycle( self, value: float ):
+    def dutyCycle( self, value ):
         """!
         @brief Works as the setter of a read/write property to set the duty
                cycle
@@ -178,10 +177,16 @@ class _SWPulse( _PulseAPI ):
         """
         if self.__burstTime:
             raise GPIOError( 'Cannot set duty cycle during a burst in SW mode' )
-        self._dutyCycle = value
-        if value == 0: 
+        if value > 1 and value <= 100:
+            self._dutyCycle = value / 100.
+        else:
+            self._dutyCycle = value
+        if self._dutyCycle < 0 or self._dutyCycle > 1:
+            raise GPIOError( 'Wrong duty cycle specified: {0}'
+                             .format( dutyCycle ) )
+        if self._dutyCycle == 0: 
             self.__pin.level = PinIO.Level.LOW
-        elif value == 1:
+        elif self._dutyCycle == 1:
             self.__pin.level = PinIO.Level.HIGH
         else:
             self.__high = 1. / self._frequency * self._dutyCycle
@@ -189,7 +194,7 @@ class _SWPulse( _PulseAPI ):
         return
 
     @property
-    def frequency( self ) -> float:
+    def frequency( self ):
         """!
         @brief read property to get frequency.
         @return current duty cycle
@@ -197,7 +202,7 @@ class _SWPulse( _PulseAPI ):
         return self._frequency
   
     @frequency.setter
-    def frequency( self, value: float ):
+    def frequency( self, value ):
         """!
         @brief setter of a freqyency property.
         @param value new duty cycle to use 0 <= value <= 1

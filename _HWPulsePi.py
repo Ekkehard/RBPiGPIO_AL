@@ -30,7 +30,6 @@
 #   Fri Jan 31 2025 | Ekkehard Blanz | extracted from Pulse.py
 #                   |                |
 
-from typing import Union, Optional
 import os
 import time
 from GPIO_AL.tools import isPi5, argToLine, _hwPulseChip
@@ -46,10 +45,10 @@ class _HWPulsePi( _PulseAPI ):
     to be touched.  Be mindful to keep the API determined by PulseAPI as is. 
     """
     def __init__( self,
-                  pulsePin: Union[int, str],
-                  frequency: Union[float,object],
-                  dutyCycle: float,
-                  bursts: Union[int, None] ):
+                  pulsePin,
+                  frequency,
+                  dutyCycle,
+                  bursts ):
         """!
         @brief Constructor - sets up parameters.
         @param pulsePin integer with pin number in GPIO header or string with
@@ -128,7 +127,7 @@ class _HWPulsePi( _PulseAPI ):
                         self._dutyCycle,
                         self._bursts )
 
-    def __writeDevice( self, device: str, param: int ):
+    def __writeDevice( self, device, param ):
         """!
         @brief write a given parameter to a given PWM device.
         @param device one of 'period', 'duty_cycle, or 'enable'
@@ -138,7 +137,7 @@ class _HWPulsePi( _PulseAPI ):
             f.write( '{0}\n'.format( round( param ) ) )
         return
 
-    def __lineToPWMChannel( self, line: int ) -> int:
+    def __lineToPWMChannel( self, line ):
         """!
         @brief Determine the PWM channel on a chip for a given GPIO line.
         @param line GPIO line
@@ -202,7 +201,7 @@ class _HWPulsePi( _PulseAPI ):
         return self._dutyCycle
 
     @dutyCycle.setter
-    def dutyCycle( self, value: float ):
+    def dutyCycle( self, value ):
         """!
         @brief Works as the setter of a read/write property to set the duty
                cycle.
@@ -214,7 +213,7 @@ class _HWPulsePi( _PulseAPI ):
         return
 
     @property
-    def frequency( self ) -> float:
+    def frequency( self ):
         """!
         @brief read property to get frequency.
         @return current duty cycle
@@ -222,7 +221,7 @@ class _HWPulsePi( _PulseAPI ):
         return self._frequency
   
     @frequency.setter
-    def frequency( self, value: float ):
+    def frequency( self, value ):
         """!
         @brief setter of a freqyency property.
         @param value new frequency to use
