@@ -306,6 +306,7 @@ def isHWpulsePin( pin: Union[int, str] ) -> bool:
                in GPIO header, GPIO{n} is line number)
     @return True if given pin is capable of HW pulses, False otherwise
     """
+    if isPico(): return True
     if not os.path.isdir( '/sys/class/pwm/{0}'
                           .format( _hwPulseChip() ) ):
         # pwm-2chan module not loaded - no pin can produce HW pulses
