@@ -199,7 +199,7 @@ class _SWPulse( _PulseAPI ):
         @brief read property to get frequency.
         @return current duty cycle
         """
-        return self._frequency
+        return self._orgFreq
   
     @frequency.setter
     def frequency( self, value ):
@@ -207,11 +207,18 @@ class _SWPulse( _PulseAPI ):
         @brief setter of a freqyency property.
         @param value new duty cycle to use 0 <= value <= 1
         """
-        if self._frequency > 2000:
+        try:
+            if str( value.unit ) != 'Hz':
+                raise GPIOError( 'Wrong frequency object specified: {0}'
+                                 .format( value ) )
+        except AttributeError:
+            pass
+        if float( value ) > 2000:
             raise GPIOError( 'frequency {0} exceeds max frequency for '
-                             'software mode'.format( self._orgFreq ) )
-        self._frequency = value
-        self._period = 1. / value
+                             'software mode'.format( value ) )
+        self._frequency = float( value )
+        self._orgFreq = value
+        self._period = 1. / self._frequency
         self.__high = self._period * self._dutyCycle
         self.__low = self._period * (1. - self._dutyCycle)
         return

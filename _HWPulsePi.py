@@ -207,7 +207,13 @@ class _HWPulsePi( _PulseAPI ):
                cycle.
         @param value new duty cycle to use 0 <= value <= 1
         """
-        self._dutyCycle = value
+        if value > 1 and value <= 100:
+            self._dutyCycle = value / 100.
+        else:
+            self._dutyCycle = value
+        if self._dutyCycle < 0 or self._dutyCycle > 1:
+            raise GPIOError( 'Wrong duty cycle specified: {0}'
+                             .format( dutyCycle ) )
         self.__writeDevice( 'duty_cycle',
                             self.__periodNs * self._dutyCycle )
         return
@@ -218,7 +224,7 @@ class _HWPulsePi( _PulseAPI ):
         @brief read property to get frequency.
         @return current duty cycle
         """
-        return self._frequency
+        return self._orgFreq
   
     @frequency.setter
     def frequency( self, value ):
@@ -226,13 +232,20 @@ class _HWPulsePi( _PulseAPI ):
         @brief setter of a freqyency property.
         @param value new frequency to use
         """
-        self._frequency = value
-        if self._frequency > 5000000:
+        try:
+            if str( value.unit ) != 'Hz':
+                raise GPIOError( 'Wrong frequency object specified: {0}'
+                                 .format( value ) )
+        except AttributeError:
+            pass
+        if float( value ) > 5000000:
             raise GPIOError( 'frequency {0} exceeds max frequency for hardware '
-                             'pulse mode'.format( self._orgFreq ) )
-        elif self._frequency < 0.1:
+                             'pulse mode'.format( value ) )
+        elif float( value ) < 0.1:
             raise GPIOError( 'frequency {0} below min frequency for hardware '
-                             'pulse mode'.format( self._orgFreq ) )
+                             'pulse mode'.format( value ) )
+        self._frequency = float( value )
+        self._orgFreq = value
         self._period = 1 / self._frequency
         self.__periodNs = self._period * 1000000000
         self.__writeDevice( 'duty_cycle', 0 )

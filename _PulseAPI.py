@@ -132,15 +132,15 @@ class _PulseAPI( metaclass=ABCMeta ):
     def frequency( self ) -> float:
         """!
         @brief read property to get frequency to be implemented by child.
-        @return current duty cycle
+        @return current frequency as originally provided
         """
         pass
   
     @frequency.setter
     @abstractmethod
-    def frequency( self, value: float ):
+    def frequency( self, value: Union[float, object] ):
         """!
         @brief setter of a frequency property to be implemented by child.
-        @param value new frequency (note that actors only accept floats)
+        @param value pulse frequency in Hz or a PObject with unit Hz
         """
         pass

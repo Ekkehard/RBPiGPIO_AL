@@ -6,7 +6,7 @@
 #
 # @par Purpose
 # Provide hardware generated pulses for the Pulse class of the GPIO_AL module 
-# for Raspberry Pico.
+# for Raspberry Pi Pico.
 #
 # This code has been tested on a Raspberry Pi Pico.
 #
@@ -32,7 +32,7 @@
 
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
-from machine import PWM
+from machine import PWM, Pin
 
 class _HWPulsePico( _PulseAPI ):
     """!
@@ -58,7 +58,6 @@ class _HWPulsePico( _PulseAPI ):
                                 .format( shortestBurstTime ) )
             self.__burstTime -= shortestBurstTime
         return
-    
 
     def __del__( self ):
         """!
@@ -90,7 +89,7 @@ class _HWPulsePico( _PulseAPI ):
                                                  self.stop )
         self.__pwmObj = PWM( Pin( self._pulsePin ), 
                              freq=self._frequency, 
-                             duty_u16=round( 2**16 * self._dutyCycle ) )
+                             duty_u16=round( 65535 * self._dutyCycle ) )
         if self.__burstTimer:
             self.__burstTimer.start()
         return
@@ -124,8 +123,8 @@ class _HWPulsePico( _PulseAPI ):
             self._dutyCycle = value
         if self._dutyCycle < 0 or self._dutyCycle > 1:
             raise GPIOError( 'Wrong duty cycle specified: {0}'
-                             .format( dutyCycle ) )
-        self.__pwmObj.duty( round( 2**16 * self._dutyCycle ) )
+                             .format( value ) )
+        self.__pwmObj.duty_u16( round( 65535 * self._dutyCycle ) )
         return
 
     @property
@@ -134,19 +133,24 @@ class _HWPulsePico( _PulseAPI ):
         @brief read property to get frequency.
         @return current duty cycle
         """
-        return self._frequency
+        return self._orgFreq
   
     @frequency.setter
     def frequency( self, value ):
         """!
-        @brief setter of a freqyency property.
+        @brief setter of the freqyency property.
         @param value new frequency to use
         """
+        try:
+            if str( value.unit ) != 'Hz':
+                raise GPIOError( 'Wrong frequency object specified: {0}'
+                                 .format( value ) )
+        except AttributeError:
+            pass
+        self._orgFreq = value
         self._frequency = float( value )
         try:
-            self.__pwmObj.init( Pin( self._pulsePin ), 
-                                freq=self._frequency, 
-                                duty_u16=round( 2**16 * self._dutyCycle ) )
+            self.__pwmObj.freq( self._frequency )
         except:
             raise GPIOError( 'Wrong frequency specified: {0}'.format( value ) )
         return

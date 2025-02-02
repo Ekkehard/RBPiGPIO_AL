@@ -28,10 +28,9 @@
 # standard Linux library.
 #
 # This package consists of three major parts, general Bit-I/O, pulse generation,
-# and serial bus communication.  The first part is further subdivided into 
-# single bit and parallel I/O.  The third part provides software to handle 
-# standard serial busses, but currently, only the I<sup>2</sup>C bus is 
-# supported.  More busses will be implemented as the need arises.
+# and serial bus communication.  Currently, only the I<sup>2</sup>C bus is 
+# supported in the third part, but more busses will be implemented as the need 
+# arises.
 #
 # This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
 # Pico.

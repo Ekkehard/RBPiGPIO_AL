@@ -52,17 +52,18 @@ class Pulse( _PulseAPI ):
 
     This class allows the generation of pulses of a large range of frequencies 
     and duty cycles as well as bursts with a specified number of impulses on any
-    pin of the GPIO.  Some pins support hardware-generated pulses.  If this 
-    class detects that the requested pin is one of those pins and that the 
-    necessary kernel modules are loaded, it will use hardware to generate the 
-    pulses; otherwise, the pulses will be generated via software.  The software 
-    to generate the pulses will run in the background with minimal overhead.  It
-    is noted, however, that the Raspbian (Debian) operating system is not a 
-    real-time operating system, and pulse parameters for software-generated 
-    pulses are therefore not guaranteed to be stable and not meant for precise 
-    measurements.  In particular, if the pulses are used to control servo
-    motors, software-generated pulses can cause the motors to move erratically,
-    especially under heavy CPU load on a Raspberry Pi.
+    pin of the GPIO.  Some pins support hardware-generated pulses (on a 
+    Raspberry Pi Pico, all pins do).  If this class detects that the requested 
+    pin is one of those pins and that the necessary kernel modules are loaded,
+    it will use hardware to generate the pulses; otherwise, the pulses will be 
+    generated via software.  The software to generate the pulses will run in 
+    the background with minimal overhead.  It is noted, however, that the 
+    Raspbian (Debian) operating system is not a real-time operating system, and
+    pulse parameters for software-generated pulses are therefore not guaranteed 
+    to be stable and not meant for precise measurements.  In particular, if the 
+    pulses are used to control servo motors, software-generated pulses can cause
+    the motors to move erratically, especially under heavy CPU load on a 
+    Raspberry Pi.
     
     This module can provide a list of pins that support hardware-generated 
     pulses, if they exist and the needed modules are loaded.  Minimal and 
@@ -102,6 +103,19 @@ class Pulse( _PulseAPI ):
     
     This class can be initiated with a frequency in Hz given as a float or
     with a PObject (-derived object) with unit 'Hz'. 
+
+    Both frequency and duty cycle can be read and set via properties of the 
+    Pulse object, i.e. if myPulse is the Pulse object then
+    @code
+        value = myPulse.dutyCycle
+    @endcode
+    gets the current value of the duty cycle of the pulse and stores it in the
+    variable value and
+    @code
+        myPulse.frequency = value
+    @endcode
+    sets the frequency of the pulse to whatever the variable value contains, 
+    which is assumed to be be in Hz.
     
     When operating in burst mode, there are a few additional restrictions.  The 
     time the bursts can last is a minimum of 0.75 ms in hardware mode; in 
@@ -229,19 +243,19 @@ class Pulse( _PulseAPI ):
     @property
     def frequency( self ) -> float:
         """!
-        @brief Implements read property of frequency to be implemented by actor.
-        @return current duty cycle
+        @brief Implements read property of frequency.
+        @return current frequncy in Hz as a float (or PObject if that was 
+                provided)
         """
-        return self._frequency
+        return self.__actor.frequency
   
     @frequency.setter
     def frequency( self, value: Union[float,object] ):
         """!
-        @brief setter of a frequency property to be implemented by actor.
-        @param value new duty cycle to use 0 <= value <= 1
+        @brief setter of the frequency read/write property.
+        @param value pulse frequency in Hz or a PObject with unit Hz
         """
-        self._orgFreq = value
-        self.__actor.frequency = float( frequency )
+        self.__actor.frequency = frequency
         return
 
 

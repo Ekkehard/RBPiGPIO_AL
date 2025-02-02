@@ -127,21 +127,24 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> (self)</td></
 <tr class="memdesc:a153704ea0c1eae5ca5cd3f707cb3e436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Works as the setter of a read/write property to set the duty cycle.  <a href="classGPIO__AL_1_1Pulse_1_1Pulse.html#a153704ea0c1eae5ca5cd3f707cb3e436">More...</a><br /></td></tr>
 <tr class="separator:a153704ea0c1eae5ca5cd3f707cb3e436"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8375ad2a0dfd01e517af5424825735ac"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGPIO__AL_1_1Pulse_1_1Pulse.html#a8375ad2a0dfd01e517af5424825735ac">frequency</a> (self)</td></tr>
-<tr class="memdesc:a8375ad2a0dfd01e517af5424825735ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements read property of frequency to be implemented by actor.  <a href="classGPIO__AL_1_1Pulse_1_1Pulse.html#a8375ad2a0dfd01e517af5424825735ac">More...</a><br /></td></tr>
+<tr class="memdesc:a8375ad2a0dfd01e517af5424825735ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements read property of frequency.  <a href="classGPIO__AL_1_1Pulse_1_1Pulse.html#a8375ad2a0dfd01e517af5424825735ac">More...</a><br /></td></tr>
 <tr class="separator:a8375ad2a0dfd01e517af5424825735ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cd754af2b5071460486342712c6735e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGPIO__AL_1_1Pulse_1_1Pulse.html#a5cd754af2b5071460486342712c6735e">frequency</a> (self, Union[float, object] value)</td></tr>
-<tr class="memdesc:a5cd754af2b5071460486342712c6735e"><td class="mdescLeft">&#160;</td><td class="mdescRight">setter of a frequency property to be implemented by actor.  <a href="classGPIO__AL_1_1Pulse_1_1Pulse.html#a5cd754af2b5071460486342712c6735e">More...</a><br /></td></tr>
+<tr class="memdesc:a5cd754af2b5071460486342712c6735e"><td class="mdescLeft">&#160;</td><td class="mdescRight">setter of the frequency read/write property.  <a href="classGPIO__AL_1_1Pulse_1_1Pulse.html#a5cd754af2b5071460486342712c6735e">More...</a><br /></td></tr>
 <tr class="separator:a5cd754af2b5071460486342712c6735e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class to create arbitrary pulses on arbitrary pins. </p>
-<p >This class allows the generation of pulses of a large range of frequencies and duty cycles as well as bursts with a specified number of impulses on any pin of the GPIO. Some pins support hardware-generated pulses. If this class detects that the requested pin is one of those pins and that the necessary kernel modules are loaded, it will use hardware to generate the pulses; otherwise, the pulses will be generated via software. The software to generate the pulses will run in the background with minimal overhead. It is noted, however, that the Raspbian (Debian) operating system is not a real-time operating system, and pulse parameters for software-generated pulses are therefore not guaranteed to be stable and not meant for precise measurements. In particular, if the pulses are used to control servo motors, software-generated pulses can cause the motors to move erratically, especially under heavy CPU load on a Raspberry Pi.</p>
+<p >This class allows the generation of pulses of a large range of frequencies and duty cycles as well as bursts with a specified number of impulses on any pin of the GPIO. Some pins support hardware-generated pulses (on a Raspberry Pi Pico, all pins do). If this class detects that the requested pin is one of those pins and that the necessary kernel modules are loaded, it will use hardware to generate the pulses; otherwise, the pulses will be generated via software. The software to generate the pulses will run in the background with minimal overhead. It is noted, however, that the Raspbian (Debian) operating system is not a real-time operating system, and pulse parameters for software-generated pulses are therefore not guaranteed to be stable and not meant for precise measurements. In particular, if the pulses are used to control servo motors, software-generated pulses can cause the motors to move erratically, especially under heavy CPU load on a Raspberry Pi.</p>
 <p >This module can provide a list of pins that support hardware-generated pulses, if they exist and the needed modules are loaded. Minimal and maximal frequencies are vastly different for hardware and software generated pulses and this class won't accept out-of-reach frequencies as parameters. In particular, hardware-generated pulses can oscillate from 0.1 Hz up to about 5 MHz, while software-generated pulses can oscillate from arbitrarily low frequencies up to about 2 kHz. For hardware-generated pulses to work, the module pwm-2chan needs to be loaded by putting the line </p><div class="fragment"><div class="line">dtoverlay=pwm-2chan</div>
 </div><!-- fragment --><p> or </p><div class="fragment"><div class="line">dtoverlay=pwm-2chan,pin=18,func=2,pin2=19,func2=2</div>
 </div><!-- fragment --><p> in the file config.txt in /boot/firmware. If that module is not loaded, this class will only use software-generated pulses. Usually, GPIO18 (pin 12) and GPIO19 (pin 35) are used for hardware pulses, but if the line </p><div class="fragment"><div class="line">dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4</div>
 </div><!-- fragment --><p> is placed in config.txt instead of one of the previously mentioned lines, the pins GPIO12 (pin 32) and GPIO13 (pin 33) are used for hardware pulses instead. This class is aware of the content of the file config.txt and checks if the system has been booted with that exact config.txt in place and that config.txt has not changed since then.</p>
 <p >The class is initiated with a pulsePin parameter that is either an int, a string, or a PinIO object. If it is given as an int, it is assumed that this represents the Pin number on the GPIO header of the Raspberry Pi, not the GPIO line number. If it is given as a string, it must be of the form GPIO&lt;line&gt; where line is the GPIO line number. Lastly, the parameter can be given as a PinIO object. In this case, this object is used to generate software-timed pulses, even if it is a PinIO object for Pins that are capable of generating hardware pulses.</p>
 <p >This class can be initiated with a frequency in Hz given as a float or with a PObject (-derived object) with unit 'Hz'.</p>
+<p >Both frequency and duty cycle can be read and set via properties of the <a class="el" href="classGPIO__AL_1_1Pulse_1_1Pulse.html" title="Class to create arbitrary pulses on arbitrary pins.">Pulse</a> object, i.e. if myPulse is the <a class="el" href="classGPIO__AL_1_1Pulse_1_1Pulse.html" title="Class to create arbitrary pulses on arbitrary pins.">Pulse</a> object then </p><div class="fragment"><div class="line">value = myPulse.dutyCycle</div>
+</div><!-- fragment --><p> gets the current value of the duty cycle of the pulse and stores it in the variable value and </p><div class="fragment"><div class="line">myPulse.frequency = value</div>
+</div><!-- fragment --><p> sets the frequency of the pulse to whatever the variable value contains, which is assumed to be be in Hz.</p>
 <p >When operating in burst mode, there are a few additional restrictions. The time the bursts can last is a minimum of 0.75 ms in hardware mode; in software mode there is no restriction. Additionally, the maximal frequency in burst mode is limited to 10 kHz in hardware mode; in software mode, all frequency that this mode can operate with are also available in burst mode. Please note that in hardware mode the burst mechanism is controlled via software timing and all restrictions with respect to software timing on non-real-time operating systems apply for hardware bursts too. The class will properly dispose of all objects that are created internally. However, if an external PinIO object was provided, it will not be destroyed by this class upon termination. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="acd62682157b87bcd5bb2ab8d679633a2" name="acd62682157b87bcd5bb2ab8d679633a2"></a>
@@ -368,8 +371,8 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> (self)</td></
       </table>
 </div><div class="memdoc">
 
-<p>Implements read property of frequency to be implemented by actor. </p>
-<dl class="section return"><dt>Returns</dt><dd>current duty cycle </dd></dl>
+<p>Implements read property of frequency. </p>
+<dl class="section return"><dt>Returns</dt><dd>current frequncy in Hz as a float (or PObject if that was provided) </dd></dl>
 
 </div>
 </div>
@@ -399,10 +402,10 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> (self)</td></
       </table>
 </div><div class="memdoc">
 
-<p>setter of a frequency property to be implemented by actor. </p>
+<p>setter of the frequency read/write property. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">value</td><td>new duty cycle to use 0 &lt;= value &lt;= 1 </td></tr>
+    <tr><td class="paramname">value</td><td>pulse frequency in Hz or a PObject with unit Hz </td></tr>
   </table>
   </dd>
 </dl>
