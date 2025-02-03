@@ -65,7 +65,7 @@ else:
 
 
 
-class PinIO():
+class PinIO( _PinIOAPI ):
     """!
     @brief Class to encapsulate single Pin I/O.
 
@@ -127,39 +127,15 @@ class PinIO():
     the Raspberry Pi chip may occur.
     """
 
-    ## Pin operation mode as an Enum
-    class Mode( Enum ):
-        ## Input mode without resistors pulling up or down
-        INPUT = 0
-        ## Input mode with pullup resistor
-        INPUT_PULLUP = 1
-        ## Input mode with pulldown resistor
-        INPUT_PULLDOWN = 2
-        ## Regular output mode
-        OUTPUT = 3
-        ## Open drain mode - implemented in software on hardware that does not
-        ## support it
-        OPEN_DRAIN = 4
+    ## Mode Enum - one of INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, and 
+    ## OPEN_DRAIN
+    Mode = _PinIOAPI._Mode
 
-    ## Signal level as an IntEnum
-    class Level( IntEnum ):
-        ## Low voltage level
-        LOW = 0
-        ## High voltage level
-        HIGH = 1
+    ## Level Enum - one of LOW or HIGH
+    Level = _PinIOAPI._Level
 
-    if isPico():
-        ## Trigger edge as an Enum
-        class Edge( Enum ):
-            ## Trigger on falling edge
-            FALLING = machine.Pin.IRQ_FALLING
-            ## Trigger on rising edge
-            RISING = machine.Pin.IRQ_RISING
-            ## Trigger on both edges whenever signal changes
-            BOTH = machine.Pin.IRQ_FALLING | machine.Pin.IRQ_RISING
-    else:
-        ## Trigger edge Enum directly from gpiod
-        Edge = gpiod.line.Edge
+    ## Edge Enum, trigger edge one of FALLING, RAISING, or BOTH
+    Edge = _PinIOAPI._Edge
 
     def __init__( self, 
                   pin: Union[int, str], 
@@ -173,7 +149,7 @@ class PinIO():
         @param pin I/O header pin or GPIO line number to associate with object
                Can be an integer pin number or a string of the form GPIO<m>
                where m represents the GPIO line number
-        @param mode I/O mode - one of MOde.INPUT, PinIO.Mode.INPUT_PULLUP,
+        @param mode I/O mode - one of Mode.INPUT, PinIO.Mode.INPUT_PULLUP,
                PinIO.Mode.INPUT_PULLDOWN, PinIO.Mode.OUTPUT, or 
                PinIO.Mode.OPEN_DRAIN
         @param callback function for this Pin or None (default)
@@ -181,52 +157,23 @@ class PinIO():
                PinIO.Edge.FALLING, PinIO.Edge.RISING or PinIO.Edge.BOTH - 
                defaults to None
         @param force set True to allow using pins reserved for hardware
+               defaults to False
         """
-        if not isinstance( mode, self.Mode ):
-            raise GPIOError( 'Wrong I/O mode specified: {0}'.format( mode ) )
-        self.__mode = mode
-        if callback is not None and not callable( callback ):
-            raise GPIOError( 'Wrong callback funtion specified'
-                             '{0}'.format( callback ) )
-        self.__clbk = callback
-        if edge is not None and not isinstance( edge, self.Edge ):
-            raise GPIOError( 'Wrong triggerEdge specified: '
-                             '{0}'.format( edge ) )
-        if (callback is not None and edge is None) or \
-           (callback is None and edge is not None):
-            raise GPIOError( 'Either both callback and edge must be specified '
-                             'or none of them' )
-        self.__triggerEdge = edge
 
-        # set to False in case the setup methods throw an exception
         self.__open = False
-
-        self.__pinObj = None    # will be set by setup methods
-        if isHWpulsePin( pin ) and not force:
-            raise GPIOError( 'Hardware PWM pin {0} not allowed without force'
-                             .format( pin ))
-
-        if self.__mode != self.Mode.OUTPUT and \
-           self.__mode != self.Mode.OPEN_DRAIN:
-            self.__set = (lambda _level: self.__error( 'Cannot set level on '
-                                                       'input Pins' ) )
-        elif self.__mode == self.Mode.OUTPUT:
-            # consider returning self.__actLevel
-            self.__level = (lambda : self.__error( 'Cannot read level from '
-                                                   'output Pins' ) )
-
-        # initialize host-specific libraries and hardware
+        # instantiate actor
         if isPico():
-            self.__setupRPPico( pin )
+            self.__actor = _PinIOPico( pin, mode, callback, edge, force )
         else:
-            self.__setupRP( pin )
+            self.__actor = _PinIOPi( pin, mode, callback, edge, force )
 
-        # after everything went well, we declare the GPIO pin open
+        # for output modes drive "meaningful" levels and set self.__actLevel
+        if self._mode == self.Mode.OUTPUT:
+            self.level = self.Level.LOW
+        elif self._mode == self.Mode.OPEN_DRAIN:
+            self.level = self.Level.HIGH
+
         self.__open = True
-
-        if self.__mode == self.Mode.OUTPUT or \
-           self.__mode == self.Mode.OPEN_DRAIN:
-            self.__set( self.Level.HIGH )
 
         return
 
@@ -271,198 +218,7 @@ class PinIO():
         @brief String representation of this class - returns all settable
                parameters.
         """
-        if self.triggerEdge is not None:
-            triggerEdge = self.triggerEdge
-        else:
-            triggerEdge = 'None'
-        return 'pin: {0}, line: GPIO{1}, mode: {2}, callback: {3}, edge: {4}' \
-               .format( self.pin,
-                        self.line,
-                        self.mode,
-                        self.callback,
-                        triggerEdge )
-
-
-    def __setupRP( self, pin ):
-        """!
-        @brief Private method to set up hardware of the Raspberry Pi as well as
-        lambda functions to read from and write to single I/O Pins.
-        """
-        from gpiod.line import Direction, Drive, Value, Bias, Edge
-
-        self.__line = argToLine( pin )
-        self.__pin = argToPin( pin )
-
-        if self.__mode.value < self.Mode.OUTPUT.value:
-            if self.__mode == self.Mode.INPUT_PULLUP:
-                config={self.__line: 
-                            gpiod.LineSettings( direction=Direction.INPUT,
-                                                active_low=False,
-                                                bias=Bias.PULL_UP )}
-            elif self.__mode == self.Mode.INPUT_PULLDOWN:
-                config={self.__line: 
-                            gpiod.LineSettings( direction=Direction.INPUT,
-                                                active_low=False,
-                                                bias=Bias.PULL_DOWN )}
-            else:
-                # normal input operation
-                config={self.__line:
-                            gpiod.LineSettings( direction=Direction.INPUT,
-                                                active_low=False,
-                                                bias=Bias.AS_IS )}
-            self.__level = (lambda: 
-                self.Level.LOW 
-                    if self.__pinObj.get_value( self.__line ) == Value.INACTIVE
-                    else self.Level.HIGH)
-        else:
-            self.__makeLevel = (lambda level: Value.INACTIVE if level == 0
-                                                             else Value.ACTIVE)
-            if self.__mode == self.Mode.OUTPUT:
-                self.__set = (lambda level: self.__setRBP( level ) )
-                config = {self.__line:
-                             gpiod.LineSettings( direction=Direction.OUTPUT,
-                                                 active_low=False,
-                                                 drive=Drive.PUSH_PULL )}
-            else: # do we still need the software simulation?
-                self.__set = (lambda level: self.__setRBP( level ) )
-                
-                self.__level = (lambda: 
-                           self.Level.LOW 
-                           if 
-                               self.__pinObj.get_value( self.__line ) == 
-                               Value.INACTIVE
-                            else self.Level.HIGH)
-                config = {self.__line:
-                             gpiod.LineSettings( direction=Direction.OUTPUT,
-                                                 active_low=False,
-                                                 drive=Drive.OPEN_DRAIN )}
-
-        if self.__clbk is not None:
-            config[self.__line].edge_detection = self.__triggerEdge
-
-        # in gpiod we use a LineRequest object as the pinObject
-        self.__pinObj = gpiod.request_lines( gpioChipPath( self.__line ),
-                                             consumer='GPIO_AL',
-                                             config=config )
-        self.__close = self.__closeRP
-
-        if self.__clbk is not None:
-            import threading
-            self.__terminateFd = os.eventfd( 0 )
-            self.__eventThread = threading.Thread( target=self.__waitEventLoop )
-            self.__eventThread.start()
-        else:
-            self.__terminateFd = None
-            self.__eventThread = None
-        return
-
-    def __closeRP( self ):
-        """!
-        @brief Close a pin on Raspberry Pi, close event loop thread if running, 
-               and set pin to input.
-        """
-        if self.__clbk is not None:
-            if self.__eventThread.is_alive():
-                os.eventfd_write( self.__terminateFd, 1 )
-                self.__eventThread.join()
-            os.close( self.__terminateFd )
-        # switch to INPUT no pullup or pulldown
-        self.__pinObj.reconfigure_lines( config={self.__line:
-                       gpiod.LineSettings( direction=gpiod.line.Direction.INPUT,
-                                           active_low=False,
-                                           bias=gpiod.line.Bias.AS_IS )} )
-        self.__pinObj.release()
-        return
-
-
-    def __waitEventLoop( self ):
-        """!
-        @brief Main GPIO-event loop to be run in a separate thread.
-
-        Uses poll to wait for events on GPIO pins and calls caller-supplied 
-        functions or methods when those events occur.  Also waits for an event
-        on the doneFd file descriptor, which will terminate the event loop.
-        """
-        import select
-        eventToLevel = {gpiod.EdgeEvent.Type.FALLING_EDGE: self.Level.LOW,
-                        gpiod.EdgeEvent.Type.RISING_EDGE: self.Level.HIGH}
-        poll = select.poll()
-        poll.register( self.__pinObj.fd, select.POLLIN )
-        poll.register( self.__terminateFd, select.POLLIN )
-        done = False
-        while not done:
-            for fd, _ in poll.poll():
-                if fd == self.__terminateFd:
-                    # handle done event
-                    done = True
-                    break
-                else:
-                    # handle any edge events
-                    for event in self.__pinObj.read_edge_events():
-                        self.__clbk( self.pin, 
-                                     eventToLevel[event.event_type], 
-                                     event.line_seqno )
-        return
-
-
-    def __setupRPPico( self, pin ):
-        """!
-        @brief Private method to set up hardware of the Raspberry Pi Pico as
-        well as lambda functions to read from and write to single I/O Pins.
-        """
-        self.__pin = pin
-        pull = None
-        if self.__mode == self.INPUT:
-            mode = machine.Pin.IN
-        elif self.__mode == self.INPUT_PULLUP:
-            mode = machine.Pin.IN
-            pull = machine.Pin.PULL_UP
-        elif self.__mode == self.INPUT_PULLDOWN:
-            mode = machine.Pin.IN
-            pull = machine.Pin.PULL_DOWN
-        elif self.__mode == self.OUTPUT:
-            mode = machine.Pin.OUT
-        elif self.__mode == self.OPEN_DRAIN:
-            mode = machine.Pin.OPEN_DRAIN
-            pull = machine.Pin.PULL_UP
-        else:
-            raise GPIOError( 'Internal error' )
-        self.__pinObj = machine.Pin( pin, mode, pull )
-
-        self.__close = (lambda:
-                        self.__pinObj.init( pin, machine.Pin.IN ))
-
-        if self.__mode == self.Mode.OUTPUT or \
-           self.__mode == self.Mode.OPEN_DRAIN:
-            self.__set = (lambda level: self.__setRBPPico( level ) )
-
-        if self.__mode != self.Mode.OUTPUT:
-            self.__level = (lambda: self.__pinObj.value())
-
-        if self.__clbk is not None:
-            self.__pinObj.irq( self.__clbk, triggerEdge )
-
-        return
-
-
-    def __softwareOpenDrainSet( self, level ):
-        """!
-        @brief Private method to simulate an open drain circuit on a Raspberry
-               Pi that doesn't offer hardware support for it.
-        @param level level to set Pin to - one of PinIO.Level.HIGH or 
-                     PinIO.Level.LOW
-        """
-        if level == self.HIGH:
-            # output is never driven high - just pulled up in input mode
-            self.__pinObj.set_mode( self.__pin, pigpio.INPUT )
-            self.__pinObj.set_pull_up_down( self.__pin, pigpio.PUD_UP )
-        else:
-            # output is actively driven low
-            self.__pinObj.set_mode( self.__pin, pigpio.OUTPUT )
-            self.__pinObj.write( self.__pin, level )
-
-        return
-
+        return self.__actor.__str__()
 
     def close( self ):
         """!
@@ -470,31 +226,15 @@ class PinIO():
                up or down.  Terminates event loop thread if running.
         """
         if self.__open:
-            self.__close()
+            self.__actor.close()
             self.__open = False
         return
-
-
-    def __setRBP( self, level ):
-        """!
-        @brief set the pin level.
-        """
-        self.__pinObj.set_value( self.__line, self.__makeLevel( level ) )
-        self.__actLevel = level
-        return
-        
-        
-    def __setRBPPico( self, level ):
-        self.__pinObj.value( level )
-        self.__actLevel = level
-        return
-        
         
     def toggle( self ):
         """!
         @brief toggle the pin level.
         """
-        self.__set( 1 - self.__actLevel )
+        self.__actor.toggle()
         return
 
     @property
@@ -504,7 +244,7 @@ class PinIO():
         associated with this class.
         @return GPIO header pin number associated with this class
         """
-        return self.__pin
+        return self.__actor.pin
 
 
     @property
@@ -514,7 +254,7 @@ class PinIO():
         associated with this class.
         @return GPIO line number associated with this class
         """
-        return self.__line
+        return self.__actor.line
 
 
     @property
@@ -526,7 +266,7 @@ class PinIO():
                      PinIO.Mode.INPUT_PULLDOWN, PinIO.Mode.OUTPUT or 
                      PinIO.Mode.OPEN_DRAIN
         """
-        return self.__mode
+        return self.__actor.mode
 
 
     @property
@@ -536,10 +276,7 @@ class PinIO():
                as a string.
         @return callback function name or emtpy string
         """
-        if self.__clbk is not None:
-            return self.__clbk.__name__
-        else:
-            return 'None'
+        return self.__actor.callback
 
 
     @property
@@ -550,7 +287,7 @@ class PinIO():
         @return trigger edge as PinIO.Edge.FALLING, PinIO.Edge.RISING,
                 PinIO.Edge.BOTH or None
         """
-        return self.__triggerEdge
+        return self.__actor.triggerEdge
 
 
     @property
@@ -561,7 +298,7 @@ class PinIO():
         @return PinIO.Level.HIGH or PinIO.Level.LOW
         """
         # The dud self.__level() will be overridden by setup methods.
-        return self.__level()
+        return self.__actor.level
 
 
     @level.setter
@@ -572,8 +309,7 @@ class PinIO():
         @param level level to set Pin to - one of PinIO.Level.HIGH and 
                PinIO.Level.LOW (1 and 0 can be used instead)
         """
-        # The dud self.__set() will be overridden by setup methods.
-        self.__set( level )
+        self.__actor.level = level
         return
 
 

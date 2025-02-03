@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['falling_0',['FALLING',['../classGPIO__AL_1_1PinIO_1_1PinIO_1_1Edge.html#a8d48d48efcf9fee6af4f509fb6fe7646',1,'GPIO_AL::PinIO::PinIO::Edge']]],
-  ['fatal_1',['FATAL',['../classGPIO__AL_1_1GPIOError_1_1GPIOError_1_1Severity.html#a28e833dd90ab28542d8c77baa267c340',1,'GPIO_AL::GPIOError::GPIOError::Severity']]]
+  ['ispi5_0',['isPi5',['../tools_8py.html#adfe45e1c75217c47697ab5c36d7327bd',1,'GPIO_AL::tools']]],
+  ['ispico_1',['isPico',['../tools_8py.html#a41d106a12f2fe79e26aff286e9920688',1,'GPIO_AL::tools']]]
 ];

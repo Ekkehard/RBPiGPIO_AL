@@ -7,8 +7,7 @@
 # @par Purpose
 # Provide hardware generated pulses for the Pulse class of the GPIO_AL module.
 #
-# This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
-# Pico.
+# This code has been tested on a Raspberry Pi 0, 3, 4 and 5.
 #
 # This class is the only class that needs to be modified should the RB Pi 
 # hardware PWM mechanism ever change.

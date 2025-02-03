@@ -10,6 +10,10 @@
 # This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
 # Pico.
 #
+# @Comments
+# This API should never be changed.  The most that is allowed is to add
+# functionality, never to take existing functionality away!
+#
 # @par Known Bugs
 # None
 #
@@ -132,7 +136,7 @@ class _PulseAPI( metaclass=ABCMeta ):
     def frequency( self ) -> float:
         """!
         @brief read property to get frequency to be implemented by child.
-        @return current frequency as originally provided
+        @return current frequency as originally
         """
         pass
   

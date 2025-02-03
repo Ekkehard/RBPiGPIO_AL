@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['low_0',['LOW',['../classGPIO__AL_1_1PinIO_1_1PinIO_1_1Level.html#af0437ad059c83d81570785441f624ed8',1,'GPIO_AL::PinIO::PinIO::Level']]]
+  ['warning_0',['WARNING',['../classGPIO__AL_1_1GPIOError_1_1GPIOError_1_1Severity.html#a77af9f64cf5145c2d4efefc40f575d71',1,'GPIO_AL::GPIOError::GPIOError::Severity']]]
 ];

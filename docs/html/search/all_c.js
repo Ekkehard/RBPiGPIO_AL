@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['open_5fdrain_0',['OPEN_DRAIN',['../classGPIO__AL_1_1PinIO_1_1PinIO_1_1Mode.html#a13373e892adfc8891a38c5467255f793',1,'GPIO_AL::PinIO::PinIO::Mode']]],
-  ['output_1',['OUTPUT',['../classGPIO__AL_1_1PinIO_1_1PinIO_1_1Mode.html#acec428f8d6e9aaf466fa8d4b9b6baf96',1,'GPIO_AL::PinIO::PinIO::Mode']]]
+  ['raspberry_20pi_20gpio_20abstraction_20layer_0',['Raspberry Pi GPIO Abstraction Layer',['../index.html',1,'']]],
+  ['readblockreg_1',['readBlockReg',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#aff5a3f8edbb2330c5c9970be2fb1cea1',1,'GPIO_AL::I2Cbus::I2Cbus']]],
+  ['readbyte_2',['readByte',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#aa92b469e40d3d57f68872e5c2dafcc25',1,'GPIO_AL::I2Cbus::I2Cbus']]],
+  ['readbytereg_3',['readByteReg',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a1979fc832d95cf2f731b5c3f2d003543',1,'GPIO_AL::I2Cbus::I2Cbus']]],
+  ['readid_4',['readId',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#abb4995ade10a38032f7066170ac41669',1,'GPIO_AL::I2Cbus::I2Cbus']]]
 ];

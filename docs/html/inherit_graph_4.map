@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classGPIO__AL_1_1PinIO_1_1PinIO.html" title="Class to encapsulate single Pin I/O." alt="" coords="5,5,159,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,5,92,32"/>
+<area shape="rect" id="node2" href="$classGPIO__AL_1_1GPIOError_1_1GPIOError.html" title="Exception class to be thrown by the GPIO_AL module, or modules that use it." alt="" coords="140,5,351,32"/>
 </map>

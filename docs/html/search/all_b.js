@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['main_0',['main',['../I2Cbus_8py.html#a67de73b0af5ee5cf8aee4baea5be8f8c',1,'GPIO_AL.I2Cbus.main()'],['../PinIO_8py.html#a062e1601f852d8f0c03b9a1c1889fe7e',1,'GPIO_AL.PinIO.main()'],['../Pulse_8py.html#ab9566882ea34cc9cfdcc537c0a38d5d0',1,'GPIO_AL.Pulse.main()'],['../tools_8py.html#a0a4c68a5461544f231dd44a086a4266d',1,'GPIO_AL.tools.main()']]],
-  ['mode_1',['Mode',['../classGPIO__AL_1_1PinIO_1_1PinIO_1_1Mode.html',1,'GPIO_AL::PinIO::PinIO']]],
-  ['mode_2',['mode',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a6f617dcd3b2e108a769a0b350a5e068b',1,'GPIO_AL.I2Cbus.I2Cbus.mode()'],['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a0a2703520c9021c6f2bf4c1a674bf80b',1,'GPIO_AL.PinIO.PinIO.mode()']]],
-  ['mode_3',['Mode',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a3e26484cd425edbf16b99248d5bb42c1',1,'GPIO_AL::I2Cbus::I2Cbus']]],
-  ['mycallback_4',['myCallback',['../PinIO_8py.html#a58af3c3753a74b943f7d1eda410a7077',1,'GPIO_AL::PinIO']]]
+  ['pin_0',['pin',['../classGPIO__AL_1_1PinIO_1_1PinIO.html#af1f67b0eb07d574d807ed7e89837f76f',1,'GPIO_AL::PinIO::PinIO']]],
+  ['pinio_1',['PinIO',['../classGPIO__AL_1_1PinIO_1_1PinIO.html',1,'GPIO_AL::PinIO']]],
+  ['pinio_2epy_2',['PinIO.py',['../PinIO_8py.html',1,'']]],
+  ['platform_3',['platform',['../tools_8py.html#a7d4c7b35d7f88cdfae19336fe5bf1491',1,'GPIO_AL::tools']]],
+  ['pulse_4',['Pulse',['../classGPIO__AL_1_1Pulse_1_1Pulse.html',1,'GPIO_AL::Pulse']]],
+  ['pulse_2epy_5',['Pulse.py',['../Pulse_8py.html',1,'']]]
 ];

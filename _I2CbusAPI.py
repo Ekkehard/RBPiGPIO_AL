@@ -11,15 +11,9 @@
 # This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
 # Pico.
 #
-# @par Comments
-# This is Python 3 code!  PEP 8 guidelines are decidedly NOT followed in some
-# instances, and guidelines provided by "Coding Style Guidelines" a "Process
-# Guidelines" document from WEB Design are used instead where the two differ,
-# as the latter span several programming languages and are therefore applicable
-# also for projects that require more than one programming language; it also
-# provides consistency across hundreds of thousands of lines of legacy code.
-# Doing so, ironically, is following PEP 8 which speaks highly of the wisdom of
-# the authors of PEP 8.
+# @Comments
+# This API should never be changed.  The most that is allowed is to add
+# functionality, never to take existing functionality away!
 #
 # @par Known Bugs
 # None
@@ -50,6 +44,9 @@ class _I2CbusAPI( metaclass=ABCMeta ):
     """!
     @brief Abstract base class provides API for I<sup>2</sup>C classes.
     """
+
+    # Enums are provided in the API so children have them.
+    # They are copied to the main class so clients have easy access to them.
 
     class _Mode( Enum ):
         ## Operate I<sup>2</sup>C bus in hardware mode
