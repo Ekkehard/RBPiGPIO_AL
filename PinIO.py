@@ -45,10 +45,10 @@
 
 from typing import Union, Optional
 from enum import Enum, IntEnum
-import time
-import threading
-import os
 
+from GPIO_AL._PinIOAPI import _PinIOAPI
+from GPIO_AL._PinIOPi import _PinIOPi
+from GPIO_AL._PinIOPico import _PinIOPico
 from GPIO_AL.tools import argToLine, argToPin, isHWpulsePin, isPico, \
                           gpioChipPath
 
@@ -86,13 +86,12 @@ class PinIO( _PinIOAPI ):
     functionality is provided for the selected Pin.  Callback functions must be 
     provided by the user in the form
     @code
-        def myCallback( pin, level=None, tick=None ):
+        def myCallback( pinObj ):
             ...
             return
     @endcode
-    to work on all Raspberry Pi architectures.  Here pin is the board header pin
-    (not line or offset) number, level is of type PinIO.Level, and tick is the 
-    number of times the event has occurred.
+    which works on all Raspberry Pi architectures.  Here pinObj is the PinIO 
+    object associated with the line on which this event occurred.
 
     NOTE: It is strongly recommended to instantiate this class using a "with"
     statment.  Otherwise it cannot be guaranteed that the destructor of the 
@@ -122,6 +121,18 @@ class PinIO( _PinIOAPI ):
     type can be used interchangeably with ints, which of course should only
     assume the values 0 and 1.
 
+    The class also provides an Open Drain mode.  In this mode, pins are only
+    driven low by any device on a bus line and rely on an external resistor to
+    pull the line up when no device on the bus is driving it low.  An internal 
+    Raspberry Pi resistor is not enough to pull the bus line high - an external
+    resistor is therefore mandatory.  Pleas assure that only one resistor is
+    pulling that line high, as some devices may provide such a pullup resistor.
+    Too many such pullup resistors on a single line may result in permanent
+    damage to any device connected to that line, including the Raspberry Pi.
+    The same holds true if the pullup resistor is chosen too small.  If you 
+    don't completely understand this or don't know how to chose a proper pullup
+    resistor, please don't use this mode without help from an expert.
+
     CAUTION: Make sure you are only using voltages at any pins that do not 
     exceed the allowed level for your device.  Otherwise, permanent damage to
     the Raspberry Pi chip may occur.
@@ -134,7 +145,7 @@ class PinIO( _PinIOAPI ):
     ## Level Enum - one of LOW or HIGH
     Level = _PinIOAPI._Level
 
-    ## Edge Enum, trigger edge one of FALLING, RAISING, or BOTH
+    ## Edge Enum, trigger edge one of FALLING, RISING, or BOTH
     Edge = _PinIOAPI._Edge
 
     def __init__( self, 
@@ -146,9 +157,10 @@ class PinIO( _PinIOAPI ):
         """!
         @brief Constructor - sets Pin properties, including callback
                capabilities.
-        @param pin I/O header pin or GPIO line number to associate with object
-               Can be an integer pin number or a string of the form GPIO<m>
-               where m represents the GPIO line number
+        @param pin I/O header pin or GPIO line number to associate with object.
+               Can be an integer header pin number or a string of the form 
+               GPIO<m> on the Raspberry Pi or GP<m> on the Pico where m 
+               represents the line number
         @param mode I/O mode - one of Mode.INPUT, PinIO.Mode.INPUT_PULLUP,
                PinIO.Mode.INPUT_PULLDOWN, PinIO.Mode.OUTPUT, or 
                PinIO.Mode.OPEN_DRAIN
@@ -156,10 +168,9 @@ class PinIO( _PinIOAPI ):
         @param edge edge on which to trigger the callback, one of
                PinIO.Edge.FALLING, PinIO.Edge.RISING or PinIO.Edge.BOTH - 
                defaults to None
-        @param force set True to allow using pins reserved for hardware
+        @param force set True to allow using pins reserved for hardware -
                defaults to False
         """
-
         self.__open = False
         # instantiate actor
         if isPico():
@@ -168,13 +179,11 @@ class PinIO( _PinIOAPI ):
             self.__actor = _PinIOPi( pin, mode, callback, edge, force )
 
         # for output modes drive "meaningful" levels and set self.__actLevel
-        if self._mode == self.Mode.OUTPUT:
+        if self.mode == self.Mode.OUTPUT:
             self.level = self.Level.LOW
-        elif self._mode == self.Mode.OPEN_DRAIN:
+        elif self.mode == self.Mode.OPEN_DRAIN:
             self.level = self.Level.HIGH
-
         self.__open = True
-
         return
 
 
@@ -188,6 +197,7 @@ class PinIO( _PinIOAPI ):
         Closes the pin and terminates the event loop thread if running.
         """
         self.close()
+        self.__actor = None
         return
 
 
@@ -227,7 +237,7 @@ class PinIO( _PinIOAPI ):
         """
         if self.__open:
             self.__actor.close()
-            self.__open = False
+        self.__open = False
         return
         
     def toggle( self ):
@@ -319,7 +329,7 @@ if __name__ == "__main__":
 
     import sys
 
-    def myCallback( pin, level, count ):
+    def myCallback( line, level, count ):
         """!
         @brief Dud as a callback function.
         """
@@ -332,7 +342,8 @@ if __name__ == "__main__":
         """
         with PinIO( 'GPIO5', PinIO.Mode.INPUT, myCallback, PinIO.Edge.RISING ) \
              as pin:
-            print( 'pin: {0}'.format( pin ) )
+            print( pin )
+        print( '\nSUCCESS: No Python syntax errors detected\n' )
         print( 'Please use included GPIO_ALUnitTest.py for complete Unit Test' )
         return 0
 

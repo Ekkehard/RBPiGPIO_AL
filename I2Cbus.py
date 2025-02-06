@@ -37,6 +37,7 @@
 #
 
 from enum import Enum
+from typing import Union
 from GPIO_AL.tools import isPico, isPi5, isHWI2CPinPair
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._I2CbusAPI import _I2CbusAPI
@@ -126,12 +127,14 @@ class I2Cbus( _I2CbusAPI ):
         @brief Constructor for class I2Cbus.
         @param sdaPin header pin or GPIO line number for I<sup>2</sup>C data 
                (default GPIO2 on Raspberry Pi and 8 on Raspberry Pi Pico).
-               Ints are interpreted as header pin numbers, strings starting with
-               GPIO as line numbers.
+               Ints are interpreted as header header pin numbers, strings 
+               starting with GPIO on the Raspberry Pi and GP on the Pico as line
+               numbers.
         @param sclPin header pin or GPIO line number for I<sup>2</sup>C clock 
                (default GPIO3 on Raspberry Pi and 9 on Raspberry Pi Pico).
-               Ints are interpreted as header pin numbers, strings starting with
-               GPIO as line numbers.
+               Ints are interpreted as header header pin numbers, strings 
+               starting with GPIO on the Raspberry Pi and GP on the Pico as line
+               numbers.
         @param mode one of I2Cbus.Mode.HARDWARE or I2Cbus.Mode.SOFTWARE
                AKA bit banging (default I2Cbus.Mode.SOFTWARE for Raspberry Pi 
                other than Raspberry Pi 5 and I2Cbus.Mode.HARDWARE for Raspberry 
@@ -242,17 +245,7 @@ class I2Cbus( _I2CbusAPI ):
         count = 0
         while count < self.__actor.attempts:
             try:
-                self.__actor.writeQuick( 0x7C )
-            except Exception as e:
-                # no acknowledge bit causes exception but we don't care
-                pass
-            try:
-                byteList = self.__actor.readBlockReg( i2cAddress, 0x7C, 3 )
-
-                manufacturerId = byteList[1] >> 4 | byteList[1] >> 4
-                deviceId = (byteList[1] & 0x0F) << 5 | (byteList[2] & 0xF8) >> 3
-                dieRev = byteList[2] & 0x07
-                return manufacturerId, deviceId, dieRev
+                self.__actor.readId( i2cAddress )
             except Exception as e:
                 count += 1
                 self.__failedAttempts += 1
@@ -428,7 +421,7 @@ class I2Cbus( _I2CbusAPI ):
         return self.__actor.mode
 
     @property
-    def frequency( self ) -> float:
+    def frequency( self ) -> Union[float, object]:
         """!
         @brief Works as read-only property to get the frequency the
                I<sup>2</sup>C bus is operating at.
@@ -468,7 +461,7 @@ class I2Cbus( _I2CbusAPI ):
 if "__main__" == __name__:
     import sys
     
-    def main():
+    def main() -> int:
         """!
         @brief No unit test - coarse Python syntax test only.
         """

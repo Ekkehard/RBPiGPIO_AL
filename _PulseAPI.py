@@ -33,8 +33,10 @@
 
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Union, Optional
+from enum import Enum
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL.GPIOError import GPIOError
+from GPIO_AL.tools import lineToStr
 
 
     
@@ -42,6 +44,10 @@ class _PulseAPI( metaclass=ABCMeta ):
     """!
     @brief Abstract base class provides API for pulse classes.
     """
+
+    class _Mode( Enum ):
+        HARDWARE = 0
+        SOFTWARE = 1
 
     def __init__( self,
                   pulsePin: Union[int,str,PinIO],
@@ -57,7 +63,7 @@ class _PulseAPI( metaclass=ABCMeta ):
         @param bursts number of impulses to generate or None for continuous
                       (default: None)
         """
-
+        self._mode = None # to be overwritte by child
         self._bursts = bursts
         self._pulsePin = pulsePin
         try:
@@ -88,13 +94,19 @@ class _PulseAPI( metaclass=ABCMeta ):
         """
         pass
         
-    @abstractmethod
-    def __str__( self ) -> str:
+    def __str__( self ):
         """!
         @brief String representation of this class - returns all settable
-               parameters.  To be implemented by child.
+               parameters.
         """
-        pass
+        return 'pin: {0}, line: {2}, frequency: {2}, duty cycle: {3}, ' \
+               'bursts: {4}, mode: {5}' \
+               .format( self._pulsePin,
+                        lineToStr( self._line ),
+                        self._orgFreq,
+                        self._dutyCycle,
+                        self._bursts,
+                        str( self._mode ).replace( '_', '' ) )
             
     @abstractmethod
     def start( self ):
@@ -114,31 +126,30 @@ class _PulseAPI( metaclass=ABCMeta ):
         pass
 
     @property
-    @abstractmethod
     def dutyCycle( self ) -> float:
         """!
-        @brief read property to get duty cycle to be implemented by child.
+        @brief read property to get duty cycle - can be overwritten by child.
         @return current duty cycle
         """
-        pass
+        return self._dutyCycle
   
     @dutyCycle.setter
     @abstractmethod
     def dutyCycle( self, value: float ):
         """!
-        @brief setter of a dutyCycle property to be implemented by child.
+        @brief Works as the setter of a read/write property to set the duty
+               cycle
         @param value new duty cycle to use 0 <= value <= 1
         """
         pass
 
     @property
-    @abstractmethod
     def frequency( self ) -> float:
         """!
         @brief read property to get frequency to be implemented by child.
         @return current frequency as originally
         """
-        pass
+        return self._orgFreq
   
     @frequency.setter
     @abstractmethod

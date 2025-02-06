@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['i2cbus_0',['I2Cbus',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html',1,'GPIO_AL::I2Cbus']]]
+  ['pinio_0',['PinIO',['../classGPIO__AL_1_1PinIO_1_1PinIO.html',1,'GPIO_AL::PinIO']]],
+  ['pulse_1',['Pulse',['../classGPIO__AL_1_1Pulse_1_1Pulse.html',1,'GPIO_AL::Pulse']]]
 ];

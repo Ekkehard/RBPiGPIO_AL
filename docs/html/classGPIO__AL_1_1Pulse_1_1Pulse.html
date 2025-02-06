@@ -194,7 +194,7 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> (self)</td></
 <p>Constructor - sets up parameters and determines mode (hard- or software) This class merely provides a common API to both hardware and software generated pulses and selects the proper one of the two. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pulsePin</td><td>integer with pin number in GPIO header or string of the form 'GPIO&lt;lineNumber&gt;' </td></tr>
+    <tr><td class="paramname">pulsePin</td><td>I/O header pin or GPIO line number to generate pulses on. Can be an integer header pin number or a string of the form GPIO&lt;m&gt; on the Raspberry Pi or GP&lt;m&gt; on the Pico where m represents the line number </td></tr>
     <tr><td class="paramname">frequency</td><td>pulse frequency in Hz as float or PObject with unit Hz </td></tr>
     <tr><td class="paramname">dutyCycle</td><td>0 &lt;= dutyCycle &lt;= 1 duty cycle of pulse (default: 0.5) </td></tr>
     <tr><td class="paramname">bursts</td><td>number of impulses to generate or None for continuous operation (default: None) </td></tr>

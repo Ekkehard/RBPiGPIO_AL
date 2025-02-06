@@ -149,10 +149,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>scl</b> (self)</td></t
 <a class="el" href="classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a3e26484cd425edbf16b99248d5bb42c1">Mode</a>&#160;</td><td class="memItemRight" valign="bottom"><b>mode</b> (self)</td></tr>
 <tr class="memdesc:a6f617dcd3b2e108a769a0b350a5e068b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Works as read-only property to get the I<sup>2</sup>C bus mode (I2Cbus.Mode.SOFTWARE or I2Cbus.Mode.HARDWARE). <br /></td></tr>
 <tr class="separator:a6f617dcd3b2e108a769a0b350a5e068b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e30895b6ba706430813300b4efc1e46"><td class="memItemLeft" align="right" valign="top"><a id="a8e30895b6ba706430813300b4efc1e46" name="a8e30895b6ba706430813300b4efc1e46"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>frequency</b> (self)</td></tr>
-<tr class="memdesc:a8e30895b6ba706430813300b4efc1e46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Works as read-only property to get the frequency the I<sup>2</sup>C bus is operating at. <br /></td></tr>
-<tr class="separator:a8e30895b6ba706430813300b4efc1e46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a177ea7d077e8fc1f506f947889c8e644"><td class="memItemLeft" align="right" valign="top"><a id="a177ea7d077e8fc1f506f947889c8e644" name="a177ea7d077e8fc1f506f947889c8e644"></a>
+Union[float, object]&#160;</td><td class="memItemRight" valign="bottom"><b>frequency</b> (self)</td></tr>
+<tr class="memdesc:a177ea7d077e8fc1f506f947889c8e644"><td class="mdescLeft">&#160;</td><td class="mdescRight">Works as read-only property to get the frequency the I<sup>2</sup>C bus is operating at. <br /></td></tr>
+<tr class="separator:a177ea7d077e8fc1f506f947889c8e644"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ced2e5ae4ac3f4dc144960d94a7aef7"><td class="memItemLeft" align="right" valign="top"><a id="a2ced2e5ae4ac3f4dc144960d94a7aef7" name="a2ced2e5ae4ac3f4dc144960d94a7aef7"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>attempts</b> (self)</td></tr>
 <tr class="memdesc:a2ced2e5ae4ac3f4dc144960d94a7aef7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtain the user-supplied number of communication attempts. <br /></td></tr>
@@ -223,8 +223,8 @@ Static Public Attributes</h2></td></tr>
 <p>Constructor for class <a class="el" href="classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html" title="Class to handle I2C bus communication.">I2Cbus</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">sdaPin</td><td>header pin or GPIO line number for I<sup>2</sup>C data (default GPIO2 on Raspberry Pi and 8 on Raspberry Pi Pico). Ints are interpreted as header pin numbers, strings starting with GPIO as line numbers. </td></tr>
-    <tr><td class="paramname">sclPin</td><td>header pin or GPIO line number for I<sup>2</sup>C clock (default GPIO3 on Raspberry Pi and 9 on Raspberry Pi Pico). Ints are interpreted as header pin numbers, strings starting with GPIO as line numbers. </td></tr>
+    <tr><td class="paramname">sdaPin</td><td>header pin or GPIO line number for I<sup>2</sup>C data (default GPIO2 on Raspberry Pi and 8 on Raspberry Pi Pico). Ints are interpreted as header header pin numbers, strings starting with GPIO on the Raspberry Pi and GP on the Pico as line numbers. </td></tr>
+    <tr><td class="paramname">sclPin</td><td>header pin or GPIO line number for I<sup>2</sup>C clock (default GPIO3 on Raspberry Pi and 9 on Raspberry Pi Pico). Ints are interpreted as header header pin numbers, strings starting with GPIO on the Raspberry Pi and GP on the Pico as line numbers. </td></tr>
     <tr><td class="paramname">mode</td><td>one of I2Cbus.Mode.HARDWARE or I2Cbus.Mode.SOFTWARE AKA bit banging (default I2Cbus.Mode.SOFTWARE for Raspberry Pi other than Raspberry Pi 5 and I2Cbus.Mode.HARDWARE for Raspberry Pi Pico) </td></tr>
     <tr><td class="paramname">frequency</td><td>I<sup>2</sup>C frequency in Hz (default 75 kHz for Software mode and 100 kHz for hardware mode and Raspbberry Pi Pico in all modes). This parameter is ignored for Raspberry Pis in hardeware mode, where the frequency is always 100 kHz. Also accepts PObjects of Unit Hz. </td></tr>
     <tr><td class="paramname">attempts</td><td>number of read or write attempts before throwing an exception (default 1 for Pico in all modes and 5 for all Pis in software mode) </td></tr>

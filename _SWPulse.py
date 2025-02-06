@@ -30,6 +30,7 @@
  
 import threading
 import time
+from typing import Union
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
@@ -56,6 +57,7 @@ class _SWPulse( _PulseAPI ):
         self.__pin = None
         self.__burstCount = 0
         super().__init__( pulsePin, frequency, dutyCycle, bursts )
+        self._mode = self._Mode.SOFTWARE
         if self._bursts is None:
             self._bursts = -1
         if isinstance( pulsePin, PinIO ):
@@ -161,12 +163,9 @@ class _SWPulse( _PulseAPI ):
         return
 
     @property
-    def dutyCycle( self ):
-        """!
-        @brief Works as read/write property to get the current duty cycle.
-        @return current duty cycle
-        """
-        return self._dutyCycle
+    def dutyCycle( self ) -> float:
+        # Python bu? Doesn't recognize implementation in parent class
+        return super().dutyCycle
 
     @dutyCycle.setter
     def dutyCycle( self, value ):
@@ -194,12 +193,9 @@ class _SWPulse( _PulseAPI ):
         return
 
     @property
-    def frequency( self ):
-        """!
-        @brief read property to get frequency.
-        @return current duty cycle
-        """
-        return self._orgFreq
+    def frequency( self ) -> Union[float, object]:
+        # Python bu? Doesn't recognize implementation in parent class
+        return super().frequency
   
     @frequency.setter
     def frequency( self, value ):

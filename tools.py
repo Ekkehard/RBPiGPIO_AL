@@ -59,19 +59,17 @@ def platform() -> str:
 # instead
 _CPU_INFO = None        # Struct with cpu info
 
-# Convenience function to see whether we run on Pico
-## isPico() returns True if the hos is a Raspberry Pi Pico
+## isPico() returns True if the host is a Raspberry Pi Pico
 isPico = lambda: platform().find( 'Pico' ) != -1
 
-# Convenience function to see whether we run on RB Pi 5
-## isPi5() returns True if the hos is a Raspberry Pi Pi 5
+## isPi5() returns True if the host is a Raspberry Pi 5
 isPi5 = lambda: platform().find( 'Pi 5' ) != -1
 
 
 # determine platform and import appropriate module for GPIO access
 if isPico():
     # Currently, this is the proper mapping of GP header pins to Pico lines
-    _convList = [-1, 0, 1, -1, 2, 3, 4, 5, -1, 6, 7, 8, 9, -1, 10, 11, 12,
+    _convList = [-9, 0, 1, -1, 2, 3, 4, 5, -1, 6, 7, 8, 9, -1, 10, 11, 12,
                  13, -1, 14, 15, 16, 17, -1, 18, 19, 20, 21, -1, 22, -2, 26, 
                  27, -1, 28, -3, -4, -5, -6, -1, -7, -8]
     
@@ -126,7 +124,7 @@ else:
     # This secion encapsulates the mapping of GPIO header pins to GPIO lines.  
     # Change only this section whenever that changes.
     # Currently, this is the proper mapping of GPIO header pins to GPIO lines
-    _convList = [-1, -2, -3, 2, -3, 3, -1, 4, 14, -1, 15, 17, 18, 27, -1, 22, 
+    _convList = [-9, -2, -3, 2, -3, 3, -1, 4, 14, -1, 15, 17, 18, 27, -1, 22, 
                  23, -4, 24, 10, -1, 9, 25, 11, 8, -1, 7, -5, 6, 5, -1, 6, 12, 
                  13, -1, 19, 16, 26, 20, -1, 21]
     # --------------------------------------------------------------------------
@@ -150,6 +148,14 @@ else:
         @param pinArg GPIO argument representing pin or line number
         @return line or offset number
         """
+
+        # if the argument just came from a user interface, it might be a string
+        # representing only a number, in which case we simply convert it to an 
+        # int
+        try:
+            pinArg = int( pinArg )
+        except ValueError:
+            pass
         
         if isinstance( pinArg, int ):
             try:
@@ -159,9 +165,9 @@ else:
             except IndexError:
                 raise ValueError( '\n\nwrong GPIO pin argument specified: {0}\n'
                                 'If the argument is given as an integer, it '
-                                'needs to be in the range {1} to {2} and\n'
+                                'needs to be in the range {1} to {2}\nand '
                                 'correspond to a GPIO Line number from {3} to '
-                                '{4}.\n'
+                                '{4} and not be a power or\nground pin.\n'
                                 'Please run pinout to see which pins correspond'
                                 ' to which GPIO lines.'
                                 .format( pinArg, _GPIO_PIN_MIN, _GPIO_PIN_MAX,
@@ -291,6 +297,7 @@ def gpioChipPath( line: int ) -> str:
         @return path to GPIO chip containing that (unused) line as a string
         """
         if isPico():
+            # Pico has no OS and no device files
             return ""
 
         import glob, os.path, gpiod
@@ -328,6 +335,7 @@ def hwPWMlines() -> list:
     @return list of GPIO lines that support hardware PWM
     """
     if isPico():
+        # every line can be a HW PWM line
         return list( range( 0, 23 ) ) + list( range( 26, 29 ) )
     configPath = '/boot/firmware/config.txt'
     if os.path.getmtime( configPath ) > psutil.boot_time():
@@ -355,7 +363,7 @@ def isHWpulsePin( pin: Union[int, str] ) -> bool:
                in GPIO header, GPIO{n} is line number)
     @return True if given pin is capable of HW pulses, False otherwise
     """
-    if not isPico()) and not os.path.isdir( '/sys/class/pwm/{0}'
+    if not isPico() and not os.path.isdir( '/sys/class/pwm/{0}'
                                             .format( _hwPulseChip() ) ):
         # pwm-2chan module not loaded - no pin can produce HW pulses
         return False
@@ -363,16 +371,24 @@ def isHWpulsePin( pin: Union[int, str] ) -> bool:
     return argToLine( pin ) in hwPWMlines()
 
 
-def hwI2CLinePairs() -> Union[list, None]:
+def hwI2CLinePairs() -> list:
     """!
     @brief Obtain a list of line pairs that support hardware I2C.
-    @return list of GPIO line pairs that support hardware PWM or None for any
+    @return list of GPIO line pairs that support hardware PWM
     """
     if not isPico():
         linePairList = [[2, 3]]
         return linePairList
     else:
-        return None
+        # every line can be sda and scl
+        lines = list( range( 0, 23 ) ) + list( range( 26, 29 ) )
+        result = []
+        for i in range( len( lines ) ):
+            for j in range( len( lines ) ):
+                if lines[j] != lines[i]:
+                    result.append( [lines[i], lines[j]] )
+        return result
+
 
 def isHWI2CPinPair( sdaPin: Union[int, str], sclPin: Union[int,str] ) -> bool:
     """!
@@ -381,10 +397,23 @@ def isHWI2CPinPair( sdaPin: Union[int, str], sclPin: Union[int,str] ) -> bool:
            number in GPIO header, GPIO{n} is line number) os sda
     @param sclPin GPIO argument representing pin or line number (int is pin 
            number in GPIO header, GPIO{n} is line number) of scl
-    @return True if given pin is capable of HW pulses, False otherwise
+    @return True if given pin is capable of HW I2C, False otherwise
     """
-    if isPico(): return True
     return [argToLine( sdaPin ), argToLine( sclPin )] in hwI2CLinePairs()
+
+
+def lineToStr( line: int ) -> str:
+    """!
+    @brief Convert a line number into a platform-specific string, i.e. into the
+           string 'GPIO<number>' for Raspberry Pi and 'GP<number>' for Raspberry
+           Pi Pico.
+    @param line GPIO or GP line number as an int
+    @return platform specific string representation of line number
+    """
+    if isPico():
+        return 'GP{0}'.format( line )
+    else:
+        return 'GPIO{0}'.format( line )
 
 
 
@@ -396,7 +425,7 @@ if __name__ == "__main__":
 
     import sys
 
-    def main():
+    def main() -> int:
         """!
         @brief Main program - to save some resources, we do not include the
                Unit Test here.

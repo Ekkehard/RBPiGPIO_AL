@@ -31,6 +31,7 @@
 
 import os
 import time
+from typing import Union
 from GPIO_AL.tools import isPi5, argToLine, _hwPulseChip
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
@@ -57,6 +58,7 @@ class _HWPulsePi( _PulseAPI ):
         @param bursts number of burts or None for continuous operation
         """
         super().__init__( pulsePin, frequency, dutyCycle, bursts )
+        self._mode = self._Mode.HARDWARE
         self.__burstTime = None
         self.__burstTimer = None
         if bursts and self._frequency > 10000:
@@ -114,17 +116,7 @@ class _HWPulsePi( _PulseAPI ):
             f.write( str( self.__channel ) )
         return
 
-    def __str__( self ):
-        """!
-        @brief String representation of this class - returns all settable
-               parameters.
-        """
-        return 'pin: {0}, frequency: {1}, duty cycle: {2}, bursts: {3}, ' \
-               'mode: HARDWARE' \
-               .format( self._pulsePin,
-                        self._orgFreq,
-                        self._dutyCycle,
-                        self._bursts )
+    
 
     def __writeDevice( self, device, param ):
         """!
@@ -192,12 +184,9 @@ class _HWPulsePi( _PulseAPI ):
         return
 
     @property
-    def dutyCycle( self ):
-        """!
-        @brief Works as read/write property to get the current duty cycle.
-        @return current duty cycle
-        """
-        return self._dutyCycle
+    def dutyCycle( self ) -> float:
+        # Python bu? Doesn't recognize implementation in parent class
+        return super().dutyCycle
 
     @dutyCycle.setter
     def dutyCycle( self, value ):
@@ -218,12 +207,9 @@ class _HWPulsePi( _PulseAPI ):
         return
 
     @property
-    def frequency( self ):
-        """!
-        @brief read property to get frequency.
-        @return current duty cycle
-        """
-        return self._orgFreq
+    def frequency( self ) -> Union[float, object]:
+        # Python bu? Doesn't recognize implementation in parent class
+        return super().frequency
   
     @frequency.setter
     def frequency( self, value ):

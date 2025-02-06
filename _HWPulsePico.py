@@ -30,9 +30,10 @@
 #   Fri Jan 31 2025 | Ekkehard Blanz | extracted from Pulse.py
 #                   |                |
 
+from typing import Union
+from machine import PWM, Pin
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
-from machine import PWM, Pin
 
 class _HWPulsePico( _PulseAPI ):
     """!
@@ -49,6 +50,7 @@ class _HWPulsePico( _PulseAPI ):
                   bursts ):
 
         super().__init__( pulsePin, frequency, dutyCycle, bursts )
+        self._mode = self._Mode.HARDWARE
         self.__pwmObj = None
         shortestBurstTime = 0.000750
         if self._bursts:
@@ -103,12 +105,9 @@ class _HWPulsePico( _PulseAPI ):
         return
 
     @property
-    def dutyCycle( self ):
-        """!
-        @brief Works as read/write property to get the current duty cycle.
-        @return current duty cycle
-        """
-        return self._dutyCycle
+    def dutyCycle( self ) -> float:
+        # Python bu? Doesn't recognize implementation in parent class
+        return super().dutyCycle
 
     @dutyCycle.setter
     def dutyCycle( self, value ):
@@ -128,12 +127,9 @@ class _HWPulsePico( _PulseAPI ):
         return
 
     @property
-    def frequency( self ):
-        """!
-        @brief read property to get frequency.
-        @return current duty cycle
-        """
-        return self._orgFreq
+    def frequency( self ) -> Union[float, object]:
+        # Python bu? Doesn't recognize implementation in parent class
+        return super().frequency
   
     @frequency.setter
     def frequency( self, value ):

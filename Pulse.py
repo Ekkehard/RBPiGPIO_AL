@@ -140,8 +140,10 @@ class Pulse( _PulseAPI ):
                software)
         This class merely provides a common API to both hardware and software
         generated pulses and selects the proper one of the two.
-        @param pulsePin integer with pin number in GPIO header or string of the
-                        form 'GPIO<lineNumber>'
+        @param pulsePin I/O header pin or GPIO line number to generate pulses 
+               on.  Can be an integer header pin number or a string of the form
+               GPIO<m> on the Raspberry Pi or GP<m> on the Pico where m 
+               represents the line number
         @param frequency pulse frequency in Hz as float or PObject with unit Hz
         @param dutyCycle 0 <= dutyCycle <= 1 duty cycle of pulse (default: 0.5)
         @param bursts number of impulses to generate or None for continuous
@@ -231,13 +233,7 @@ class Pulse( _PulseAPI ):
                cycle
         @param value new duty cycle to use 0 <= value <= 1
         """
-        # silently handle percent values between 1 and 100
-        if value > 1 and value <= 100: val = value / 100.
-        else: val = value
-        if val < 0 or val > 1:
-            raise GPIOError( 'Wrong duty cycle specified: {0}'
-                             .format( value ) )
-        self.__actor.dutyCycle = val
+        self.__actor.dutyCycle = value
         return
 
     @property
@@ -263,7 +259,7 @@ class Pulse( _PulseAPI ):
 if "__main__" == __name__:
     import sys
     
-    def main():
+    def main() -> int:
         """!
         @brief Unit test - coarse Python syntax test only.
         """

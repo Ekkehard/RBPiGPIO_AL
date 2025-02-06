@@ -120,21 +120,21 @@ class _I2CbusAPI( metaclass=ABCMeta ):
                         self.usePEC )
     
     @property
-    def sda( self ):
+    def sda( self ) -> int:
         """!
         @brief Works as read-only property to get the sda line number.
         """
         return self._sdaLine
 
     @property
-    def scl( self ):
+    def scl( self ) -> int:
         """!
         @brief Works as read-only property to get the scl line number.
         """
         return self._sclLine
 
     @property
-    def mode( self ):
+    def mode( self ) -> _Mode:
         """!
         @brief Works as read-only property to get the I<sup>2</sup>C bus mode
                (I2Cbus.Mode.HARDWARE or I2Cbus.Mode.SOFTWARE).
@@ -142,7 +142,7 @@ class _I2CbusAPI( metaclass=ABCMeta ):
         return self._mode
 
     @property
-    def frequency( self ):
+    def frequency( self ) -> Union[float, object]:
         """!
         @brief Works as read-only property to get the frequency the
                I<sup>2</sup>C bus is operating at.
@@ -150,14 +150,14 @@ class _I2CbusAPI( metaclass=ABCMeta ):
         return self._orgFrequency
 
     @property
-    def attempts( self ):
+    def attempts( self ) -> int:
         """!
         @brief Obtain the user-supplied number of communication attempts.
         """
         return self._attempts
 
     @property
-    def usePEC( self ):
+    def usePEC( self ) -> bool:
         """!
         @brief Return current status of Packet Error Checking.
         """
@@ -170,6 +170,25 @@ class _I2CbusAPI( metaclass=ABCMeta ):
                method to properly close the pigpio object in software mode.
         """
         pass
+
+    def readId( self, i2cAddress ) -> tuple:
+        """!
+        @brief Read the ID tuple of a device consisting of manufacturer ID,
+               device ID, and die revision.
+        @param i2cAddress address of I<sup>2</sup>C device to read ID from
+        @return tuple of (manufacturerId, deviceId, dieRev)
+        @throws GPIOError in case of an error
+        """
+        try:
+            self.writeQuick( 0x7C )
+        except Exception as e:
+            # no acknowledge bit causes exception but we don't care
+            pass
+        byteList = self.readBlockReg( i2cAddress, 0x7C, 3 )
+        manufacturerId = byteList[1] >> 4 | byteList[1] >> 4
+        deviceId = (byteList[1] & 0x0F) << 5 | (byteList[2] & 0xF8) >> 3
+        dieRev = byteList[2] & 0x07
+        return manufacturerId, deviceId, dieRev
 
     @abstractmethod
     def readByte( self, i2cAddress: int ) -> int:
@@ -194,7 +213,7 @@ class _I2CbusAPI( metaclass=ABCMeta ):
     def readBlockReg( self,
                       i2cAddress: int,
                       register: int,
-                      length: int ) -> int:
+                      length: int ) -> list:
         """!
         @brief Read a block of bytes from an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
