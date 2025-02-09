@@ -22,8 +22,8 @@
 # longer worked.  Therefore, this code is restricted to standard Linux device 
 # file interfaces in the hope, that they prove to be more stable than register-
 # based operations and generally does not rely on other packages to do so.  This 
-# package, however, does rely on the packages pgiod for direct bit-I/O and 
-# SMBus2 for the I<sup>2</sup>C bus interface since thses packages follow the 
+# package, however, does rely on the packages gpiod for direct bit-I/O and 
+# SMBus2 for the I<sup>2</sup>C bus interface since these packages follow the 
 # same philosophy, gpiod, in fact is the Python binding of libgpiod, which is a 
 # standard Linux library.
 #

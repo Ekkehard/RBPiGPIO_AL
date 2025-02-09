@@ -105,7 +105,7 @@ class _PinIOAPI( metaclass=ABCMeta ):
             raise GPIOError( 'Wrong I/O mode specified: {0}'.format( mode ) )
         self._mode = mode
         if callback is not None and not callable( callback ):
-            raise GPIOError( 'Wrong callback funtion specified'
+            raise GPIOError( 'Wrong callback function specified'
                              '{0}'.format( callback ) )
         self._clbk = callback
         if edge is not None and not isinstance( edge, self._Edge ):

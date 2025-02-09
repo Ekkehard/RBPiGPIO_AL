@@ -6,7 +6,7 @@
 #
 # @par Purpose
 # This module provides an abstraction layer for the Raspberry Pi General Purpose
-# I/O (GPIO) single Opin I/O functionality for all models of the regular 
+# I/O (GPIO) single pin I/O functionality for all models of the regular 
 # Raspberry Pi 0 and up Raspberry Pi 5, as well as the Raspberry Pi Pico
 #
 # This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
@@ -95,7 +95,7 @@ class PinIO( _PinIOAPI ):
 
     NOTE: It is strongly recommended to instantiate this class using a "with"
     statment.  Otherwise it cannot be guaranteed that the destructor of the 
-    class will be called as the Python interpreter will not call the destructur
+    class will be called as the Python interpreter will not call the destructor
     when one thinks it should---not even when del is used or the variable 
     holding the object is re-assigned.  The "with" statement, at the other hand,
     is safe and is guaranteed to shut down the object properly.  This is 
@@ -216,7 +216,7 @@ class PinIO( _PinIOAPI ):
         Closes the pin and terminates the event loop thread if running.
         @param excType type of exception ending the context
         @param excValue value of the exception ending the context
-        @param excTraceback traceback of excweption ending the context
+        @param excTraceback traceback of exception ending the context
         @return False (will re-raise the exception)
         """
         self.close()
@@ -284,7 +284,7 @@ class PinIO( _PinIOAPI ):
         """!
         @brief Works as read-only property to get the name of callback function
                as a string.
-        @return callback function name or emtpy string
+        @return callback function name or empty string
         """
         return self.__actor.callback
 
