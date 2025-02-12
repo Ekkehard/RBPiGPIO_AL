@@ -29,6 +29,7 @@
 #   Sun Feb 02 2025 | Ekkehard Blanz | extracted from PinIO.py
 #                   |                |
 
+import machine
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PinIOAPI import _PinIOAPI
 

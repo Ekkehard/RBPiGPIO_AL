@@ -1,6 +1,6 @@
-# Python Implementation: _HWPulsePico
+# Python Implementation: _PulsePicoHW
 ##
-# @file       _HWPulsePico.py
+# @file       _PulsePicoHW.py
 #
 # @version    2.0.0
 #
@@ -30,14 +30,13 @@
 #   Fri Jan 31 2025 | Ekkehard Blanz | extracted from Pulse.py
 #                   |                |
 
-from typing import Union
 from machine import PWM, Pin
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
 
-class _HWPulsePico( _PulseAPI ):
+class _PulsePicoHW( _PulseAPI ):
     """!
-    @brief Internal child class to implement hardware PWM pulses on a Raspbery 
+    @brief Internal child class to implement hardware PWM pulses on a Raspberry 
            Pi Pico.
     
     If the RB Pi hardware PWM support changes, this is the only class that needs
@@ -134,7 +133,7 @@ class _HWPulsePico( _PulseAPI ):
     @frequency.setter
     def frequency( self, value ):
         """!
-        @brief setter of the freqyency property.
+        @brief setter of the frequency property.
         @param value new frequency to use
         """
         try:

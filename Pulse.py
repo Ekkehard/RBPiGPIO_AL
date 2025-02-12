@@ -36,14 +36,19 @@
 #   Sat Dec 14 2024 | Ekkehard Blanz | extracted from GPIO_AL.py
 #                   |                |
 
-from typing import Union, Optional
-from enum import Enum, IntEnum
 from GPIO_AL.tools import isPi5, isPico, argToLine, isHWpulsePin, _hwPulseChip
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
-from GPIO_AL._HWPulsePi import _HWPulsePi
-from GPIO_AL._SWPulse import _SWPulse
+
+if isPico():
+    # MicroPython silently ignores type hints without the need to import typing
+    from GPIO_AL._PulsePiHW import _PulsePicoHW
+else:
+    from typing import Union, Optional
+    from enum import Enum, IntEnum
+    from GPIO_AL._PulsePiHW import _PulsePiHW
+    from GPIO_AL._PulseSW import _PulseSW
 
 
 class Pulse( _PulseAPI ):
@@ -151,14 +156,14 @@ class Pulse( _PulseAPI ):
         """
         self.__actor = None
         if isinstance( pulsePin, PinIO ) or not isHWpulsePin( pulsePin ):
-            self.__actor = _SWPulse( pulsePin, frequency, dutyCycle, bursts )
+            self.__actor = _PulseSW( pulsePin, frequency, dutyCycle, bursts )
         elif isPico():
-            self.__actor = _HWPulsePico( pulsePin, 
+            self.__actor = _PulsePicoHW( pulsePin, 
                                          frequency, 
                                          dutyCycle, 
                                          bursts )
         else:
-            self.__actor = _HWPulsePi( pulsePin, frequency, dutyCycle, bursts )
+            self.__actor = _PulsePiHW( pulsePin, frequency, dutyCycle, bursts )
         return
 
     def __del__( self ):
@@ -240,7 +245,7 @@ class Pulse( _PulseAPI ):
     def frequency( self ) -> float:
         """!
         @brief Implements read property of frequency.
-        @return current frequncy in Hz as a float (or PObject if that was 
+        @return current frequency in Hz as a float (or PObject if that was 
                 provided)
         """
         return self.__actor.frequency
@@ -251,7 +256,7 @@ class Pulse( _PulseAPI ):
         @brief setter of the frequency read/write property.
         @param value pulse frequency in Hz or a PObject with unit Hz
         """
-        self.__actor.frequency = frequency
+        self.__actor.frequency = value
         return
 
 

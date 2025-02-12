@@ -1,12 +1,13 @@
-# Python Implementation: _PicoI2Cbus
+# Python Implementation: _I2CbusPico
 # -*- coding: utf-8 -*-
 ##
-# @file       _PicoI2Cbus.py
+# @file       _I2CbusPico.py
 #
 # @version    4.0.0
 #
 # @par Purpose
-# Provides I2Cbus code for Raspberry Pico - hardware and software.
+# Provides I2Cbus code for Raspberry Pi Pico - hardware only, software not 
+# needed.
 #
 # This code has been tested on a Raspberry Pi Pico.
 #
@@ -44,7 +45,7 @@ from GPIO_AL.tools import isPico
 
 import machine
 
-class _PicoI2Cbus( _I2CbusAPI ):
+class _I2CbusPico( _I2CbusAPI ):
     """!
     @brief Class dedicated to I2C hardware and software operations on the
            Raspberry Pi Pico.
@@ -71,9 +72,9 @@ class _PicoI2Cbus( _I2CbusAPI ):
                   attempts=ATTEMPTS,
                   usePEC=False ):
         """!
-        @brief Constructor for class I<sup>2</sup>Cbus.
+        @brief Constructor for class PicoI2Cbus.
         @param sdaPin GPIO Pin number for I<sup>2</sup>C data
-        @param sclPin GPIO Pin number for I<sup>2</sup>C cloc
+        @param sclPin GPIO Pin number for I<sup>2</sup>C clock
         @param mode operational mode
         @param frequency I<sup>2</sup>C frequency in Hz
         @param attempts number of read or write attempts before throwing an

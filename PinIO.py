@@ -2,7 +2,7 @@
 ##
 # @file       PinIO.py
 #
-# @version    4.0.0
+# @version    2.0.0
 #
 # @par Purpose
 # This module provides an abstraction layer for the Raspberry Pi General Purpose
@@ -43,25 +43,24 @@
 #                   |                |
 #
 
-from typing import Union, Optional
-from enum import Enum, IntEnum
 
 from GPIO_AL._PinIOAPI import _PinIOAPI
-from GPIO_AL._PinIOPi import _PinIOPi
-from GPIO_AL._PinIOPico import _PinIOPico
 from GPIO_AL.tools import argToLine, argToPin, isHWpulsePin, isPico, \
                           gpioChipPath
 
 # determine platform and import appropriate module for GPIO access
 if isPico():
-    import machine
+    # MicroPython silently ignores type hints without the need to import typing
+    from GPIO_AL._PinIOPico import _PinIOPico
 else:
+    from typing import Union, Optional
     # the following data and functions are not needed for the Raspberry Pi Pico
     import gpiod
     if int( gpiod.__version__.split( '.' )[0] ) < 2 or \
        (int( gpiod.__version__.split( '.' )[0] ) > 1 and \
         int( gpiod.__version__.split( '.' )[1] ) < 2):
         raise ValueError( 'GPIO_AL requires gpiod version 2.2 or higher' )
+    from GPIO_AL._PinIOPi import _PinIOPi
 
 
 
@@ -94,7 +93,7 @@ class PinIO( _PinIOAPI ):
     object associated with the line on which this event occurred.
 
     NOTE: It is strongly recommended to instantiate this class using a "with"
-    statment.  Otherwise it cannot be guaranteed that the destructor of the 
+    statement.  Otherwise it cannot be guaranteed that the destructor of the 
     class will be called as the Python interpreter will not call the destructor
     when one thinks it should---not even when del is used or the variable 
     holding the object is re-assigned.  The "with" statement, at the other hand,

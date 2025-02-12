@@ -32,11 +32,15 @@
 #                   |                |
 
 from abc import ABC, ABCMeta, abstractmethod
-from enum import Enum, IntEnum
-from typing import Union, Optional
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPico, argToPin, argToLine, lineToStr, isHWpulsePin
 
+if not isPico():
+    Enum = object
+    IntEnum = object
+else:
+    from enum import Enum, IntEnum
+    from typing import Union, Optional
 
     
 class _PinIOAPI( metaclass=ABCMeta ):
@@ -198,7 +202,7 @@ class _PinIOAPI( metaclass=ABCMeta ):
         """!
         @brief Works as read-only property to get the name of callback function
                as a string.
-        @return callback function name or emtpy string
+        @return callback function name or empty string
         """
         if self._clbk is not None:
             return self._clbk.__name__

@@ -32,12 +32,16 @@
 #   Mon Jan 27 2025 | Ekkehard Blanz | extracted from I2Cbus.py
 #                   |                |
 #
-
-from enum import Enum
-from typing import Union, Optional
 from abc import ABC, ABCMeta, abstractmethod
 from GPIO_AL.tools import argToLine
 from GPIO_AL.GPIOError import GPIOError
+from GPIO_AL.tools import isPico
+
+if not isPico():
+    Enum = object
+else:
+    from typing import Union
+    from enum import Enum
 
 
 class _I2CbusAPI( metaclass=ABCMeta ):
@@ -73,9 +77,9 @@ class _I2CbusAPI( metaclass=ABCMeta ):
                GPIO as line numbers.
         @param mode one of I2Cbus.Mode.HARDWARE or I2Cbus.Mode.SOFTWARE
         @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
-               Software mode and 100 kHz for hardware mode and Raspbberry Pi 
+               Software mode and 100 kHz for hardware mode and Raspberry Pi 
                Pico in all modes).  This parameter is ignored for Raspberry Pi 
-               in hardeware mode, where the frequency is always 100 kHz.
+               in hardware mode, where the frequency is always 100 kHz.
                Also accepts PObjects of Unit Hz.
         @param attempts number of read or write attempts before throwing an
                exception

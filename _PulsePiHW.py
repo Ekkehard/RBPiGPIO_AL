@@ -1,6 +1,6 @@
-# Python Implementation: _HWPulsePi
+# Python Implementation: _PulsePiHW
 ##
-# @file       _HWPulsePi.py
+# @file       _PulsePiHW.py
 #
 # @version    2.0.0
 #
@@ -36,7 +36,7 @@ from GPIO_AL.tools import isPi5, argToLine, _hwPulseChip
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
 
-class _HWPulsePi( _PulseAPI ):
+class _PulsePiHW( _PulseAPI ):
     """!
     @brief Internal child class to implement hardware PWM pulses on a Raspbery 
            Pi.

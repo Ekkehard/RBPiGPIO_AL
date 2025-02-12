@@ -1,7 +1,7 @@
-# Python Implementation: _PiI2Cbus
+# Python Implementation: _I2CbusPi
 # -*- coding: utf-8 -*-
 ##
-# @file       _PiI2Cbus.py
+# @file       _I2CbusPi.py
 #
 # @version    4.0.0
 #
@@ -43,7 +43,7 @@ from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPi5
 from GPIO_AL._I2CbusAPI import _I2CbusAPI
 
-class _PiHWI2C( _I2CbusAPI ):
+class _I2CPiHW( _I2CbusAPI ):
     """!
     @brief Class dedicated to I2C hardware operations on the Raspberry Pi.
     """
@@ -209,7 +209,7 @@ class _PiHWI2C( _I2CbusAPI ):
         return
               
               
-class _PiSWI2C( _I2CbusAPI ):
+class _I2CPiSW( _I2CbusAPI ):
     """!
     @brief Class dedicated to I2C software operations on the Raspberry Pi.
     """

@@ -32,12 +32,15 @@
 #                   |                |
 
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Union, Optional
-from enum import Enum
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL.GPIOError import GPIOError
-from GPIO_AL.tools import lineToStr
+from GPIO_AL.tools import lineToStr, isPico
 
+if not isPico():
+    Enum = object
+else:
+    from typing import Union, Optional
+    from enum import Enum
 
     
 class _PulseAPI( metaclass=ABCMeta ):
@@ -63,7 +66,7 @@ class _PulseAPI( metaclass=ABCMeta ):
         @param bursts number of impulses to generate or None for continuous
                       (default: None)
         """
-        self._mode = None # to be overwritte by child
+        self._mode = None # to be overwritten by child
         self._bursts = bursts
         self._pulsePin = pulsePin
         try:

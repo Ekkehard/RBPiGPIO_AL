@@ -1,6 +1,6 @@
-# Python Implementation: _SWPulse
+# Python Implementation: _PulseSW
 ##
-# @file       _SWPulse.py
+# @file       _Pulse.py
 #
 # @version    2.0.0
 #
@@ -36,7 +36,7 @@ from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
 
 
-class _SWPulse( _PulseAPI ):
+class _PulseSW( _PulseAPI ):
     """!
     @brief Internal child class to implement software PWM pulses.
     """

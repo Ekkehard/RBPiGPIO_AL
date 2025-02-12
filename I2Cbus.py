@@ -3,7 +3,7 @@
 ##
 # @file       I2Cbus.py
 #
-# @version    4.0.0
+# @version    2.0.0
 #
 # @par Purpose
 # This module provides an I2C bus abstraction layer for the Raspberry Pi General 
@@ -36,8 +36,8 @@
 #                   |                |
 #
 
-from enum import Enum
-from typing import Union
+if not isPico():
+    from typing import Union
 from GPIO_AL.tools import isPico, isPi5, isHWI2CPinPair
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._I2CbusAPI import _I2CbusAPI
@@ -55,7 +55,7 @@ class I2Cbus( _I2CbusAPI ):
     selectable under software I<sup>2</sup>C, they are restricted to GPIO1 for
     data and GPIO2 for clock, GPIO4 for data and GPIO5 for clock, GPIO6
     for data and GPIO7 for clock, GPIO9 for data and GPIO10 for clock,
-    GPIO11 for data and GOPI12 for clock, GPIO14 for data and GOPI15 for
+    GPIO11 for data and GPIO12 for clock, GPIO14 for data and GPIO15 for
     clock, GPIO16 for data and GPIO17 for clock, GPIO19 for data and GPIO20 for
     clock, GPIO21 for data and GPIO22 for clock, GPIO24 for data and GPIO25 for
     clock, GPIO26 for data and GPIO27 for clock, or GPIO31 for data and GPIO32
@@ -95,7 +95,7 @@ class I2Cbus( _I2CbusAPI ):
     currently not available there.
 
     It is worth noting that the defaults for the operating mode are different
-    between different systems.  This is because either the Broadcomm BCM2835 
+    between different systems.  This is because either the Broadcom BCM2835 
     chip, which the Raspberry Pi 3 uses for hardware I<sup>2</sup>C, or the 
     standard Raspberry Pi driver smbus2 is broken and does not (reliably) 
     support clock stretching when requested by a target.  This was found through
@@ -140,9 +140,9 @@ class I2Cbus( _I2CbusAPI ):
                other than Raspberry Pi 5 and I2Cbus.Mode.HARDWARE for Raspberry 
                Pi Pico)
         @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
-               Software mode and 100 kHz for hardware mode and Raspbberry Pi 
+               Software mode and 100 kHz for hardware mode and Raspberry Pi 
                Pico in all modes).  This parameter is ignored for Raspberry Pis 
-               in hardeware mode, where the frequency is always 100 kHz.
+               in hardware mode, where the frequency is always 100 kHz.
                Also accepts PObjects of Unit Hz.
         @param attempts number of read or write attempts before throwing an
                exception (default 1 for Pico in all modes and 5 for all Pis in 
@@ -155,8 +155,8 @@ class I2Cbus( _I2CbusAPI ):
         self.__actor = None
         
         if isPico():
-            from GPIO_AL._PicoI2Cbus import _PicoI2Cbus
-            self.__actor = _PicoI2Cbus( *args, **kwargs )
+            from GPIO_AL._I2CbusPico import _I2CbusPico
+            self.__actor = _I2CbusPico( *args, **kwargs )
         else:
             # for RB Pis we must get or infer mode as we'll call specific actors
             if len( args ) > 2:
@@ -188,11 +188,11 @@ class I2Cbus( _I2CbusAPI ):
             if not isinstance( mode, self.Mode ):
                 raise GPIOError( 'Wrong mode specified: {0}'.format( mode ) )
             if mode == self.Mode.SOFTWARE:
-                from GPIO_AL._PiI2Cbus import _PiSWI2C
-                self.__actor = _PiSWI2C( *args, **kwargs )
+                from GPIO_AL._I2CbusPi import _I2CPiSW
+                self.__actor = _I2CPiSW( *args, **kwargs )
             else:
-                from GPIO_AL._PiI2Cbus import _PiHWI2C
-                self.__actor = _PiHWI2C( *args, **kwargs )
+                from GPIO_AL._I2CbusPi import _I2CPiHW
+                self.__actor = _I2CPiHW( *args, **kwargs )
         self.__failedAttempts = 0
         return
 
