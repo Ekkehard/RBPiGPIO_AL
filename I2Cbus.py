@@ -36,11 +36,11 @@
 #                   |                |
 #
 
-if not isPico():
-    from typing import Union
 from GPIO_AL.tools import isPico, isPi5, isHWI2CPinPair
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._I2CbusAPI import _I2CbusAPI
+if not isPico():
+    from typing import Union
 
 
 

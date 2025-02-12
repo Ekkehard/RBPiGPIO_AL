@@ -34,9 +34,9 @@
 from abc import ABC, ABCMeta, abstractmethod
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL.GPIOError import GPIOError
-from GPIO_AL.tools import lineToStr, isPico
+from GPIO_AL.tools import lineToStr, isPico, argToLine
 
-if not isPico():
+if isPico():
     Enum = object
 else:
     from typing import Union, Optional
@@ -69,6 +69,7 @@ class _PulseAPI( metaclass=ABCMeta ):
         self._mode = None # to be overwritten by child
         self._bursts = bursts
         self._pulsePin = pulsePin
+        self._line = argToLine( pulsePin )
         try:
             if str( frequency.unit ) != 'Hz':
                 raise GPIOError( 'Wrong frequency object specified: {0}'

@@ -37,7 +37,7 @@ from GPIO_AL.tools import argToLine
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPico
 
-if not isPico():
+if isPico():
     Enum = object
 else:
     from typing import Union

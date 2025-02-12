@@ -31,6 +31,7 @@
 
 import os
 import time
+import threading
 from typing import Union
 from GPIO_AL.tools import isPi5, argToLine, _hwPulseChip
 from GPIO_AL.GPIOError import GPIOError

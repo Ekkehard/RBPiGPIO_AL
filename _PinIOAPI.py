@@ -35,7 +35,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPico, argToPin, argToLine, lineToStr, isHWpulsePin
 
-if not isPico():
+if isPico():
     Enum = object
     IntEnum = object
 else:

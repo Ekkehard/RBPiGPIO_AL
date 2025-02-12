@@ -45,8 +45,7 @@
 
 
 from GPIO_AL._PinIOAPI import _PinIOAPI
-from GPIO_AL.tools import argToLine, argToPin, isHWpulsePin, isPico, \
-                          gpioChipPath
+from GPIO_AL.tools import isPico, gpioChipPath
 
 # determine platform and import appropriate module for GPIO access
 if isPico():
