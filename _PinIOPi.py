@@ -207,7 +207,7 @@ class _PinIOPi( _PinIOAPI ):
                of a Pin as a PinIO.Level type.
         @return PinIO.Level.HIGH or PinIO.Level.LOW
         """
-        if self._mode.value == self._Mode.OUTPUT:
+        if self._mode == self._Mode.OUTPUT:
             raise GPIOError( 'cannot read from output pins' )
         if self.__pinObj.get_value( self._line ) == Value.INACTIVE:
             return self._Level.LOW

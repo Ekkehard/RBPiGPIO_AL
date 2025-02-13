@@ -50,7 +50,7 @@ from GPIO_AL.tools import isPico, gpioChipPath
 # determine platform and import appropriate module for GPIO access
 if isPico():
     # MicroPython silently ignores type hints without the need to import typing
-    from GPIO_AL._PinIOPico import _PinIOPico
+    from _PinIOPico import _PinIOPico
 else:
     from typing import Union, Optional
     # the following data and functions are not needed for the Raspberry Pi Pico
@@ -305,7 +305,6 @@ class PinIO( _PinIOAPI ):
                of a Pin as a PinIO.Level type.
         @return PinIO.Level.HIGH or PinIO.Level.LOW
         """
-        # The dud self.__level() will be overridden by setup methods.
         return self.__actor.level
 
 

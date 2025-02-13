@@ -31,19 +31,24 @@
 #   Sat Feb 01 2025 | Ekkehard Blanz | extracted from Pulse.py
 #                   |                |
 
-from abc import ABC, ABCMeta, abstractmethod
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPico, argToPin, argToLine, lineToStr, isHWpulsePin
 
 if isPico():
+    import machine
     Enum = object
     IntEnum = object
+    class ABCMeta:
+        pass
+    def abstractmethod(f):
+        return f
 else:
+    from abc import ABCMeta, abstractmethod
     from enum import Enum, IntEnum
     from typing import Union, Optional
 
     
-class _PinIOAPI( metaclass=ABCMeta ):
+class _PinIOAPI( ABCMeta ):
     """!
     @brief Abstract base class provides API for pin I/O classes.
     """
@@ -105,14 +110,15 @@ class _PinIOAPI( metaclass=ABCMeta ):
 
         self._open = False
 
-        if not isinstance( mode, self._Mode ):
+        if not isPico() and not isinstance( mode, self._Mode ):
             raise GPIOError( 'Wrong I/O mode specified: {0}'.format( mode ) )
         self._mode = mode
         if callback is not None and not callable( callback ):
             raise GPIOError( 'Wrong callback function specified'
                              '{0}'.format( callback ) )
         self._clbk = callback
-        if edge is not None and not isinstance( edge, self._Edge ):
+        if edge is not None and \
+           not isPico() and not isinstance( edge, self._Edge ):
             raise GPIOError( 'Wrong triggerEdge specified: '
                              '{0}'.format( edge ) )
         if (callback is not None and edge is None) or \

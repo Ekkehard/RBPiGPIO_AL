@@ -39,7 +39,7 @@ from GPIO_AL._PulseAPI import _PulseAPI
 
 class _PulsePiHW( _PulseAPI ):
     """!
-    @brief Internal child class to implement hardware PWM pulses on a Raspbery 
+    @brief Internal child class to implement hardware PWM pulses on a Raspberry 
            Pi.
     
     If the RB Pi hardware PWM support changes, this is the only class that needs
@@ -202,7 +202,7 @@ class _PulsePiHW( _PulseAPI ):
             self._dutyCycle = value
         if self._dutyCycle < 0 or self._dutyCycle > 1:
             raise GPIOError( 'Wrong duty cycle specified: {0}'
-                             .format( dutyCycle ) )
+                             .format( value ) )
         self.__writeDevice( 'duty_cycle',
                             self.__periodNs * self._dutyCycle )
         return
@@ -215,7 +215,7 @@ class _PulsePiHW( _PulseAPI ):
     @frequency.setter
     def frequency( self, value ):
         """!
-        @brief setter of a freqyency property.
+        @brief setter of a frequency property.
         @param value new frequency to use
         """
         try:

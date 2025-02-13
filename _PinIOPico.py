@@ -57,7 +57,7 @@ class _PinIOPico( _PinIOAPI ):
         pull = None
         if self._mode == self._Mode.INPUT:
             mode = machine.Pin.IN
-        elif self.__mode == self._Mode.INPUT_PULLUP:
+        elif self._mode == self._Mode.INPUT_PULLUP:
             mode = machine.Pin.IN
             pull = machine.Pin.PULL_UP
         elif self._mode == self._Mode.INPUT_PULLDOWN:
@@ -70,7 +70,7 @@ class _PinIOPico( _PinIOAPI ):
             pull = machine.Pin.PULL_UP
         else:
             raise GPIOError( 'Internal error' )
-        self.__pinObj = machine.Pin( pin, mode, pull )
+        self.__pinObj = machine.Pin( self._line, mode, pull )
 
         if self._triggerEdge == self._Edge.BOTH:
             # TODO figure out a way to do that
@@ -110,9 +110,9 @@ class _PinIOPico( _PinIOAPI ):
                of a Pin as a PinIO.Level type.
         @return PinIO.Level.HIGH or PinIO.Level.LOW
         """
-        if self._mode.value == self._Mode.OUTPUT:
+        if self._mode == self._Mode.OUTPUT:
             raise GPIOError( 'cannot read from output pins' )
-        return self.__pinObj.value
+        return self.__pinObj.value()
 
     @level.setter
     def level( self, level ):
@@ -122,7 +122,7 @@ class _PinIOPico( _PinIOAPI ):
         @param level level to set Pin to - one of PinIO.Level.HIGH and 
                PinIO.Level.LOW (1 and 0 can be used instead)
         """
-        if self._mode.value < self._Mode.OUTPUT.value:
+        if self._mode < self._Mode.OUTPUT:
             raise GPIOError( 'cannot write to input pins' )
         self.__pinObj.value( level )
         self.__actLevel = level

@@ -28,11 +28,12 @@
 #                   |                |
 #
 
-from typing import Union, Optional
-from enum import Enum, IntEnum
-import time
-import threading
-import os
+from GPIO_AL.tools import isPico
+if isPico():
+    Enum = object
+else:
+    from typing import Optional
+    from enum import Enum
 
 # first define our exception class
 # (ValueError will be thrown if this import did not complete)

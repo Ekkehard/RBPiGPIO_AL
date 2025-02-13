@@ -25,11 +25,6 @@
 #                   |                |
 #
 
-
-from typing import Union, Optional
-import os
-import psutil
-
 # Micro Python does not know function attributes, use global variables instead
 _PLATFORM = None
         
@@ -66,6 +61,9 @@ isPico = lambda: platform().find( 'Pico' ) != -1
 isPi5 = lambda: platform().find( 'Pi 5' ) != -1
 
 
+if not isPico():
+    from typing import Union
+
 # determine platform and import appropriate module for GPIO access
 if isPico():
     # Currently, this is the proper mapping of GP header pins to Pico lines
@@ -83,7 +81,7 @@ if isPico():
         if isinstance( pinArg, int ):
             try:
                 retval = _convList[pinArg]
-                if retval <= 0:
+                if retval < 0:
                     raise IndexError
             except IndexError:
                 raise ValueError( '\n\nwrong GP pin argument specified: {0}\n'
@@ -284,10 +282,10 @@ def gpioChipPath( line: int ) -> str:
         architecture changes.
 
         Raspberry Pi versions before RB Pi 5 used the GPIO chip /dev/gpiochip0 
-        to address all GPIOI lines (offsets).  Early versions of RB Pi 5 used
+        to address all GPIO lines (offsets).  Early versions of RB Pi 5 used
         /dev/gpiochip4, which later was reversed to gpiochip0 while gpiochip4
         still existed as a symbolic link to gpiochip0.  To stay above all this
-        mess, and even accomodate an architecture where GPIO lines are split
+        mess, and even accommodate an architecture where GPIO lines are split
         across several GPIO chips, this code attempts to find the right chip for
         a given line programmatically.  This approach has the additional
         advantage, that it will also work on all Linux machines (e.g. also on a
@@ -333,26 +331,29 @@ def hwPWMlines() -> list:
     @brief Obtain a list of lines that support hardware PWM.
     This function is aware of whether or not the correct pwm overlay was loaded.
     @return list of GPIO lines that support hardware PWM
+    @throws ValueError if config.txt was not used during startup
     """
     if isPico():
         # every line can be a HW PWM line
-        return list( range( 0, 23 ) ) + list( range( 26, 29 ) )
-    configPath = '/boot/firmware/config.txt'
-    if os.path.getmtime( configPath ) > psutil.boot_time():
-        raise GPIOError( 'config.txt was modified since last reboot\n'
-                         'please reboot your system and try again' )
-                         
-    configModified = False
-    with open( configPath, 'r' ) as f:
-        for line in f:
-            if line.strip() == \
-               'dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4':
-                configModified = True
-                break
-    if configModified:
-        lineList = [12, 13]
+        lineList = list( range( 0, 23 ) ) + list( range( 26, 29 ) )
     else:
-        lineList = [18, 19]
+        import psutil
+        configPath = '/boot/firmware/config.txt'
+        if os.path.getmtime( configPath ) > psutil.boot_time():
+            raise GPIOError( 'config.txt was modified since last reboot\n'
+                              'please reboot your system and try again' )
+                            
+        configModified = False
+        with open( configPath, 'r' ) as f:
+            for line in f:
+                if line.strip() == \
+                'dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4':
+                    configModified = True
+                    break
+        if configModified:
+            lineList = [12, 13]
+        else:
+            lineList = [18, 19]
     return lineList
 
 
@@ -377,8 +378,7 @@ def hwI2CLinePairs() -> list:
     @return list of GPIO line pairs that support hardware PWM
     """
     if not isPico():
-        linePairList = [[2, 3]]
-        return linePairList
+        result = [[2, 3]]
     else:
         # every line can be sda and scl
         lines = list( range( 0, 23 ) ) + list( range( 26, 29 ) )
@@ -387,7 +387,7 @@ def hwI2CLinePairs() -> list:
             for j in range( len( lines ) ):
                 if lines[j] != lines[i]:
                     result.append( [lines[i], lines[j]] )
-        return result
+    return result
 
 
 def isHWI2CPinPair( sdaPin: Union[int, str], sclPin: Union[int,str] ) -> bool:
