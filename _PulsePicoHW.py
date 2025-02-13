@@ -28,9 +28,10 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Fri Jan 31 2025 | Ekkehard Blanz | extracted from Pulse.py
+#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico again
 #                   |                |
 
-from machine import PWM, Pin
+from machine import PWM, Pin, Timer
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
 
@@ -51,12 +52,15 @@ class _PulsePicoHW( _PulseAPI ):
         super().__init__( pulsePin, frequency, dutyCycle, bursts )
         self._mode = self._Mode.HARDWARE
         self.__pwmObj = None
-        shortestBurstTime = 0.000750
+        self.__burstTimer = None
+        shortestBurstTime = 100000 # TODO figure that out
         if self._bursts:
-            self.__burstTime = self._bursts * self._period - self._lowTime / 2
+            # this time must be in ms
+            self.__burstTime = \
+                int( self._bursts * self._period - self._lowTime / 2000 )
             if self.__burstTime < shortestBurstTime:
                 raise GPIOError( 'Time bursts must last longer than {0} s'
-                                .format( shortestBurstTime ) )
+                                 .format( shortestBurstTime ) )
             self.__burstTime -= shortestBurstTime
         return
 
@@ -69,30 +73,18 @@ class _PulsePicoHW( _PulseAPI ):
         self.__pwmObj = None
         return
 
-    def __str__( self ):
-        """!
-        @brief String representation of this class - returns all settable
-               parameters.
-        """
-        return 'pin: {0}, frequency: {1}, duty cycle: {2}, bursts: {3}, ' \
-               'mode: HARDWARE' \
-               .format( self._pulsePin,
-                        self._orgFreq,
-                        self._dutyCycle,
-                        self._bursts )
-
     def start( self ):
         """!
         @brief Method to start a HW pulse.
         """
-        if self.__burstTime:
-            self.__burstTimer = threading.Timer( self.__burstTime,
-                                                 self.stop )
-        self.__pwmObj = PWM( Pin( self._pulsePin ), 
+        
+        self.__pwmObj = PWM( Pin( self._line ), 
                              freq=self._frequency, 
                              duty_u16=round( 65535 * self._dutyCycle ) )
-        if self.__burstTimer:
-            self.__burstTimer.start()
+        if self.__burstTime:
+            self.__burstTimer = Timer.init( Timer.ONE_SHOT,
+                                            period=self.__burstTime,
+                                            callback=self.__stop )
         return
 
     def stop( self ):
@@ -100,12 +92,22 @@ class _PulsePicoHW( _PulseAPI ):
         @brief Method to stop the HW pulse; destroys the burst timer object if
                present.
         """
+        if self.__burstTimer:
+            self.__burstTimer.deinit()
         self.__pwmObj.deinit()
+        return
+    
+    def __stop( self, timerObj ):
+        """!
+        @brief Method to serve as a callback for the burst timer.
+        @param needs timer object as a parameter
+        """
+        self.stop()
         return
 
     @property
     def dutyCycle( self ) -> float:
-        # Python bu? Doesn't recognize implementation in parent class
+        # Python bug? Doesn't recognize implementation in parent class
         return super().dutyCycle
 
     @dutyCycle.setter
@@ -126,8 +128,8 @@ class _PulsePicoHW( _PulseAPI ):
         return
 
     @property
-    def frequency( self ) -> Union[float, object]:
-        # Python bu? Doesn't recognize implementation in parent class
+    def frequency( self ):
+        # Python bug? Doesn't recognize implementation in parent class
         return super().frequency
   
     @frequency.setter

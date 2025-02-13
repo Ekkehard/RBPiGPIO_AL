@@ -338,6 +338,7 @@ def hwPWMlines() -> list:
         lineList = list( range( 0, 23 ) ) + list( range( 26, 29 ) )
     else:
         import psutil
+        import os
         configPath = '/boot/firmware/config.txt'
         if os.path.getmtime( configPath ) > psutil.boot_time():
             raise GPIOError( 'config.txt was modified since last reboot\n'

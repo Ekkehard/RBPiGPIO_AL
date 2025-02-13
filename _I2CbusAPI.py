@@ -32,21 +32,30 @@
 #   Mon Jan 27 2025 | Ekkehard Blanz | extracted from I2Cbus.py
 #                   |                |
 #
-from abc import ABC, ABCMeta, abstractmethod
+
 from GPIO_AL.tools import argToLine
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPico
 
 if isPico():
+    class ABCMeta:
+        pass
+    def abstractmethod(f):
+        return f
+    # MicroPython silently ignores type hints without the need to import typing
     Enum = object
 else:
+    from abc import ABCMeta, abstractmethod
     from typing import Union
     from enum import Enum
 
 
-class _I2CbusAPI( metaclass=ABCMeta ):
+class _I2CbusAPI( ABCMeta ):
     """!
     @brief Abstract base class provides API for I<sup>2</sup>C classes.
+
+    NOTE: metaclass=ABCMeta has been replaced by just ABCMeta inheritance to make
+    also work under MicroPython.
     """
 
     # Enums are provided in the API so children have them.

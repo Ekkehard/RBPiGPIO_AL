@@ -19,7 +19,7 @@
 # W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
 #
 # @copyright
-# Copyright (C) 2021 - 2024 W. Ekkehard Blanz\n
+# Copyright (C) 2021 - 2025 W. Ekkehard Blanz\n
 # See NOTICE.md and LICENSE.md files that come with this distribution.
 
 # File history:
@@ -40,12 +40,13 @@
 #   Thu Nov 07 2024 | Ekkehard Blanz | switched to gpiod v 2.2 on RB Pi
 #   Sat Dec 14 2024 | Ekkehard Blanz | removed GPIOError, Pulse, and I2Cbus and
 #                   |                | placed in separate files
+#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico again
 #                   |                |
 #
 
 
 from GPIO_AL._PinIOAPI import _PinIOAPI
-from GPIO_AL.tools import isPico, gpioChipPath
+from GPIO_AL.tools import isPico
 
 # determine platform and import appropriate module for GPIO access
 if isPico():

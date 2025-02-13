@@ -26,7 +26,7 @@
 # W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
 #
 # @copyright
-# Copyright (C) 2021 - 2024 W. Ekkehard Blanz\n
+# Copyright (C) 2021 - 2025 W. Ekkehard Blanz\n
 # See NOTICE.md and LICENSE.md files that come with this distribution.
 
 # File history:
@@ -34,19 +34,18 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Sat Dec 14 2024 | Ekkehard Blanz | extracted from GPIO_AL.py
+#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico again
 #                   |                |
 
-from GPIO_AL.tools import isPi5, isPico, argToLine, isHWpulsePin, _hwPulseChip
+from GPIO_AL.tools import isPico, isHWpulsePin
 from GPIO_AL.PinIO import PinIO
-from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
 
 if isPico():
     # MicroPython silently ignores type hints without the need to import typing
-    from GPIO_AL._PulsePiHW import _PulsePicoHW
+    from GPIO_AL._PulsePicoHW import _PulsePicoHW
 else:
     from typing import Union, Optional
-    from enum import Enum, IntEnum
     from GPIO_AL._PulsePiHW import _PulsePiHW
     from GPIO_AL._PulseSW import _PulseSW
 

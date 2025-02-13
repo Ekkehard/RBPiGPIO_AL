@@ -29,6 +29,7 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Sat Feb 01 2025 | Ekkehard Blanz | extracted from Pulse.py
+#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico again
 #                   |                |
 
 from GPIO_AL.GPIOError import GPIOError
@@ -42,6 +43,7 @@ if isPico():
         pass
     def abstractmethod(f):
         return f
+    # MicroPython silently ignores type hints without the need to import typing
 else:
     from abc import ABCMeta, abstractmethod
     from enum import Enum, IntEnum
@@ -51,6 +53,9 @@ else:
 class _PinIOAPI( ABCMeta ):
     """!
     @brief Abstract base class provides API for pin I/O classes.
+
+    NOTE: metaclass=ABCMeta has been replaced by just ABCMeta inheritance to make
+    also work under MicroPython.
     """
 
     # Enums are provided in the API so children have them.

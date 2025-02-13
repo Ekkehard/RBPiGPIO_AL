@@ -27,6 +27,7 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Sun Feb 02 2025 | Ekkehard Blanz | extracted from PinIO.py
+#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico again
 #                   |                |
 
 import machine

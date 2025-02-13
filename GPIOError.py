@@ -30,6 +30,7 @@
 
 from GPIO_AL.tools import isPico
 if isPico():
+    # MicroPython silently ignores type hints without the need to import typing
     Enum = object
 else:
     from typing import Optional

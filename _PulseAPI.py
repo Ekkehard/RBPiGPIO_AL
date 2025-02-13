@@ -29,23 +29,32 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Fri Jan 31 2025 | Ekkehard Blanz | extracted from Pulse.py
+#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico again
 #                   |                |
 
-from abc import ABC, ABCMeta, abstractmethod
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import lineToStr, isPico, argToLine
 
 if isPico():
+    class ABCMeta:
+        pass
+    def abstractmethod(f):
+        return f
+    # MicroPython silently ignores type hints without the need to import typing
     Enum = object
 else:
+    from abc import ABCMeta, abstractmethod
     from typing import Union, Optional
     from enum import Enum
 
     
-class _PulseAPI( metaclass=ABCMeta ):
+class _PulseAPI( ABCMeta ):
     """!
     @brief Abstract base class provides API for pulse classes.
+
+    NOTE: metaclass=ABCMeta has been replaced by just ABCMeta inheritance to make
+    also work under MicroPython.
     """
 
     class _Mode( Enum ):
