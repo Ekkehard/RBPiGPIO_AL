@@ -28,7 +28,7 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Fri Jan 31 2025 | Ekkehard Blanz | extracted from Pulse.py
-#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico again
+#   Thu Feb 13 2025 | Ekkehard Blanz | made work on Pico
 #                   |                |
 
 from machine import PWM, Pin, Timer
@@ -53,7 +53,7 @@ class _PulsePicoHW( _PulseAPI ):
         @param pulsePin integer with pin number in GPIO header or string with
                         GPIO<lineNumber>
         @param frequency in Hz as float or PObject with unit Hz
-        @param dutyCycle duty cycle 0 <= dutyCylce <= 1
+        @param dutyCycle duty cycle 0 <= dutyCycle <= 1
         @param bursts number of bursts or None for continuous operation
         """
 

@@ -39,22 +39,20 @@ if isPico():
     import machine
     Enum = object
     IntEnum = object
-    class ABCMeta:
+    class ABC:
         pass
     def abstractmethod( f ):
         return f
     # MicroPython silently ignores type hints without the need to import typing
 else:
-    from abc import ABCMeta, abstractmethod # type: ignore
+    from abc import ABC, abstractmethod # type: ignore
     from enum import Enum, IntEnum
     from typing import Union, Optional
 
     
-class _PinIOAPI( metaclass=ABCMeta ):
+class _PinIOAPI( ABC ):
     """!
     @brief Abstract base class provides API for pin I/O classes.
-
-    #TODO Need to find way to not break this metaclass in microPython.
     """
 
     # Enums are provided in the API so children have them.
@@ -82,15 +80,16 @@ class _PinIOAPI( metaclass=ABCMeta ):
         HIGH = 1
 
     if isPico():
-        import machine
+        import machine # type: ignore
         ## Trigger edge as an Enum
-        class _Edge( IntEnum ):
+        class _Edge( IntEnum ): # type: ignore
             ## Trigger on falling edge
-            FALLING = machine.Pin.IRQ_FALLING
+            FALLING = machine.Pin.IRQ_FALLING # type: ignore
             ## Trigger on rising edge
-            RISING = machine.Pin.IRQ_RISING
+            RISING = machine.Pin.IRQ_RISING # type: ignore
             ## Trigger on both edges whenever signal changes
-            BOTH = machine.Pin.IRQ_FALLING | machine.Pin.IRQ_RISING
+            BOTH = machine.Pin.IRQ_FALLING | # type: ignore \
+                   machine.Pin.IRQ_RISING # type: ignore
     else:
         import gpiod
         ## Get trigger edge Enum directly from gpiod

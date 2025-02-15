@@ -37,24 +37,23 @@ from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import lineToStr, isPico, argToLine
 
 if isPico():
-    class ABCMeta:
+    class ABC:
         pass
     def abstractmethod( f ):
         return f
     # MicroPython silently ignores type hints without the need to import typing
     Enum = object
 else:
-    from abc import ABCMeta, abstractmethod # type: ignore
+    from abc import ABC, abstractmethod # type: ignore
     from typing import Union, Optional
     from enum import Enum
 
     
-class _PulseAPI( metaclass=ABCMeta ):
+class _PulseAPI( ABC ):
     """!
     @brief Abstract base class provides API for pulse classes.
 
-    NOTE: metaclass=ABCMeta has been replaced by just ABCMeta inheritance to make
-    also work under MicroPython.
+    #TODO Need to find way to not break this metaclass in microPython.
     """
 
     class _Mode( Enum ): # type: ignore

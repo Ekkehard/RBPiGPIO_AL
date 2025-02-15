@@ -2,7 +2,7 @@
 ##
 # @file       GPIOError.py
 #
-# @version    4.0.0
+# @version    2.0.0
 #
 # @par Purpose
 # This module provides the exception to be thrown by modules of this package.
@@ -48,7 +48,7 @@ class GPIOError( Exception ):
     returns the severity with which it was instantiated.
     """
 
-    class Severity( Enum ):
+    class Severity( Enum ): # type: ignore
         """!
         @brief Severity Enum, consists of
             WARNING - Warning only,
@@ -64,7 +64,7 @@ class GPIOError( Exception ):
 
     def __init__( self, 
                   value: str, 
-                  severity: Optional[Severity]=Severity.ERROR ):
+                  severity: Optional[Severity]=Severity.ERROR ): # type: ignore
         """!
         @brief Constructor - accepts and internally stores error message as well
                as a severity of the error.

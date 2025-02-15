@@ -38,19 +38,19 @@ from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPico
 
 if isPico():
-    class ABCMeta:
+    class ABC:
         pass
-    def abstractmethod(f):
+    def abstractmethod( f ):
         return f
     # MicroPython silently ignores type hints without the need to import typing
     Enum = object
 else:
-    from abc import ABCMeta, abstractmethod
+    from abc import ABC, abstractmethod # type: ignore
     from typing import Union
     from enum import Enum
 
 
-class _I2CbusAPI( ABCMeta ):
+class _I2CbusAPI( ABC ):
     """!
     @brief Abstract base class provides API for I<sup>2</sup>C classes.
 
@@ -61,7 +61,7 @@ class _I2CbusAPI( ABCMeta ):
     # Enums are provided in the API so children have them.
     # They are copied to the main class so clients have easy access to them.
 
-    class _Mode( Enum ):
+    class _Mode( Enum ): # type: ignore
         ## Operate I<sup>2</sup>C bus in hardware mode
         HARDWARE = 0
         ## Operate I<sup>2</sup>C bus in software (bit banging) mode
@@ -107,7 +107,7 @@ class _I2CbusAPI( ABCMeta ):
         except AttributeError:
             pass
         self._orgFrequency = frequency
-        self._frequency = float( frequency )
+        self._frequency = float( frequency ) # type: ignore
         self._attempts = attempts
         return
             
@@ -128,7 +128,7 @@ class _I2CbusAPI( ABCMeta ):
                .format( self.sda,
                         self.scl,
                         str( self.mode ).replace( '_', '' ),
-                        float( self.frequency ) / 1000.,
+                        float( self.frequency ) / 1000., # type: ignore
                         self.attempts,
                         self.usePEC )
     
@@ -204,7 +204,7 @@ class _I2CbusAPI( ABCMeta ):
         return manufacturerId, deviceId, dieRev
 
     @abstractmethod
-    def readByte( self, i2cAddress: int ) -> int:
+    def readByte( self, i2cAddress: int ) -> int: # type: ignore
         """!
         @brief Read a single general byte from an I<sup>2</sup>C device.
         @param i2cAddress int address of I<sup>2</sup>C device to be read from
@@ -213,7 +213,9 @@ class _I2CbusAPI( ABCMeta ):
         pass
 
     @abstractmethod
-    def readByteReg( self, i2cAddress: int, register: int ) -> int:
+    def readByteReg( self, 
+                     i2cAddress: int, 
+                     register: int ) -> int: # type: ignore
         """!
         @brief Read a single byte from an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
@@ -226,7 +228,7 @@ class _I2CbusAPI( ABCMeta ):
     def readBlockReg( self,
                       i2cAddress: int,
                       register: int,
-                      length: int ) -> list:
+                      length: int ) -> list: # type: ignore
         """!
         @brief Read a block of bytes from an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be read from

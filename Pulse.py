@@ -44,11 +44,17 @@ from GPIO_AL.GPIOError import GPIOError
 
 if isPico():
     # MicroPython silently ignores type hints without the need to import typing
-    from _PulsePicoHW import _PulsePicoHW
+    from _PulsePicoHW import _PulsePicoHW # type: ignore
+    class _PulseSW:
+        pass
+    class _PulsePiHW:
+        pass
 else:
     from typing import Union, Optional
-    from GPIO_AL._PulsePiHW import _PulsePiHW
-    from GPIO_AL._PulseSW import _PulseSW
+    from GPIO_AL._PulsePiHW import _PulsePiHW # type: ignore
+    from GPIO_AL._PulseSW import _PulseSW # type: ignore
+    class _PulsePicoHW:
+        pass
 
 
 class Pulse( _PulseAPI ):
@@ -168,14 +174,20 @@ class Pulse( _PulseAPI ):
             raise GPIOError( 'Pulse does not accept PinIO objects on Pico' )
         self.__actor = None
         if isinstance( pulsePin, PinIO ) or not isHWpulsePin( pulsePin ):
-            self.__actor = _PulseSW( pulsePin, frequency, dutyCycle, bursts )
+            self.__actor = _PulseSW( pulsePin,  # type: ignore
+                                     frequency, 
+                                     dutyCycle,
+                                     bursts )
         elif isPico():
-            self.__actor = _PulsePicoHW( pulsePin, 
+            self.__actor = _PulsePicoHW( pulsePin,  # type: ignore
                                          frequency, 
                                          dutyCycle, 
                                          bursts )
         else:
-            self.__actor = _PulsePiHW( pulsePin, frequency, dutyCycle, bursts )
+            self.__actor = _PulsePiHW( pulsePin,  # type: ignore
+                                       frequency, 
+                                       dutyCycle, 
+                                       bursts )
         return
 
     def __del__( self ):
@@ -234,7 +246,7 @@ class Pulse( _PulseAPI ):
         @brief Method to stop any pulse.
         """
         # In case of an emergency stop, the actor may not even exist (anymore)
-        if self.__actor: self.__actor.stop()
+        if self.__actor: self.__actor.stop() # type: ignore
         return
 
     @property
