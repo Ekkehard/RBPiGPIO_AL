@@ -30,14 +30,12 @@
 #                   |                |
 
 import os
-import threading
-import time
 import gpiod
 if int( gpiod.__version__.split( '.' )[0] ) < 2 or \
     (int( gpiod.__version__.split( '.' )[0] ) > 1 and \
     int( gpiod.__version__.split( '.' )[1] ) < 2):
     raise ValueError( 'GPIO_AL requires gpiod version 2.2 or higher' )
-from gpiod.line import Direction, Drive, Value, Bias, Edge
+from gpiod.line import Direction, Drive, Value, Bias
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PinIOAPI import _PinIOAPI
 from GPIO_AL.tools import gpioChipPath
@@ -109,7 +107,7 @@ class _PinIOPi( _PinIOAPI ):
             self.__eventThread = threading.Thread( target=self.__waitEventLoop )
             self.__eventThread.start()
 
-        if self._mode.value >= self._Mode.OPEN_DRAIN.value:
+        if self._mode.value >= self._Mode.OPEN_DRAIN.value: # type: ignore
             self.level = self._Level.HIGH
         self._open = True
 
@@ -127,8 +125,8 @@ class _PinIOPi( _PinIOAPI ):
         eventToLevel = {gpiod.EdgeEvent.Type.FALLING_EDGE: self._Level.LOW,
                         gpiod.EdgeEvent.Type.RISING_EDGE: self._Level.HIGH}
         poll = select.poll()
-        poll.register( self.__pinObj.fd, select.POLLIN )
-        poll.register( self.__terminateFd, select.POLLIN )
+        poll.register( self.__pinObj.fd, select.POLLIN ) # type: ignore
+        poll.register( self.__terminateFd, select.POLLIN ) # type: ignore
         done = False
         while not done:
             for fd, _ in poll.poll():
@@ -139,27 +137,8 @@ class _PinIOPi( _PinIOAPI ):
                     break
                 else:
                     # handle all edge events that caused an interrupt
-                    for event in self.__pinObj.read_edge_events():
-                        self._clbk( self )
-        return
-
-    def __softwareOpenDrainSet( self, level ):
-        """!
-        @brief Private method to simulate an open drain circuit on a Raspberry
-               Pi that doesn't offer hardware support for it.
-        @param level level to set Pin to - one of PinIO.Level.HIGH or 
-                     PinIO.Level.LOW
-        """
-        # TODO see whether this is still needed on RB Pi 3 and/or 4
-        if level == self.HIGH:
-            # output is never driven high - just pulled up in input mode
-            self.__pinObj.set_mode( self.__pin, pigpio.INPUT )
-            self.__pinObj.set_pull_up_down( self.__pin, pigpio.PUD_UP )
-        else:
-            # output is actively driven low
-            self.__pinObj.set_mode( self.__pin, pigpio.OUTPUT )
-            self.__pinObj.write( self.__pin, level )
-
+                    for event in self.__pinObj.read_edge_events(): # type: ignore
+                        self._clbk( self ) # type: ignore
         return
 
     def __del__( self ):
@@ -177,19 +156,19 @@ class _PinIOPi( _PinIOAPI ):
         if self._open:
             if self._clbk is not None and self.__eventThread is not None:
                 if self.__eventThread.is_alive():
-                    os.eventfd_write( self.__terminateFd, 1 )
+                    os.eventfd_write( self.__terminateFd, 1 ) # type: ignore
                     self.__eventThread.join()
-                os.close( self.__terminateFd )
+                os.close( self.__terminateFd ) # type: ignore
             # switch to INPUT no pullup or pulldown
-            self.__pinObj.reconfigure_lines( config={self._line:
+            self.__pinObj.reconfigure_lines( config={self._line: # type: ignore
                         gpiod.LineSettings( direction=gpiod.line.Direction.INPUT,
                                             active_low=False,
                                             bias=gpiod.line.Bias.PULL_DOWN )} )
-            self.__pinObj.reconfigure_lines( config={self._line:
+            self.__pinObj.reconfigure_lines( config={self._line: # type: ignore
                         gpiod.LineSettings( direction=gpiod.line.Direction.INPUT,
                                             active_low=False,
                                             bias=gpiod.line.Bias.AS_IS )} )
-            self.__pinObj.release()
+            self.__pinObj.release() # type: ignore
         self._open = False
         return
         
@@ -201,7 +180,7 @@ class _PinIOPi( _PinIOAPI ):
         return
 
     @property
-    def level( self ):
+    def level( self ): # type: ignore
         """!
         @brief Works as read/write property to get the current voltage level
                of a Pin as a PinIO.Level type.
@@ -209,7 +188,7 @@ class _PinIOPi( _PinIOAPI ):
         """
         if self._mode == self._Mode.OUTPUT:
             raise GPIOError( 'cannot read from output pins' )
-        if self.__pinObj.get_value( self._line ) == Value.INACTIVE:
+        if self.__pinObj.get_value( self._line ) == Value.INACTIVE: # type: ignore
             return self._Level.LOW
         else:
             return self._Level.HIGH
@@ -222,12 +201,12 @@ class _PinIOPi( _PinIOAPI ):
         @param level level to set Pin to - one of PinIO.Level.HIGH and 
                PinIO.Level.LOW (1 and 0 can be used instead)
         """
-        if self._mode.value < self._Mode.OUTPUT.value:
+        if self._mode.value < self._Mode.OUTPUT.value: # type: ignore
             raise GPIOError( 'cannot write to input pins' )
         if level == self._Level.LOW:
             value = Value.INACTIVE
         else:
             value = Value.ACTIVE
-        self.__pinObj.set_value( self._line, value )
+        self.__pinObj.set_value( self._line, value ) # type: ignore
         self.__actLevel = level
         return

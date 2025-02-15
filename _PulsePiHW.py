@@ -56,7 +56,7 @@ class _PulsePiHW( _PulseAPI ):
                         GPIO<lineNumber>
         @param frequency in Hz as float or PObject with unit Hz
         @param dutyCycle duty cycle 0 <= dutyCylce <= 1
-        @param bursts number of burts or None for continuous operation
+        @param bursts number of bursts or None for continuous operation
         """
         super().__init__( pulsePin, frequency, dutyCycle, bursts )
         self._mode = self._Mode.HARDWARE
@@ -64,7 +64,7 @@ class _PulsePiHW( _PulseAPI ):
         self.__burstTimer = None
         if bursts and self._frequency > 10000:
             raise GPIOError( 'Maximal frequency for hardware bursts is 10 kHz' )
-        line = argToLine( pulsePin )
+        line = argToLine( pulsePin ) # type: ignore
         self.__channel = self.__lineToPWMChannel( line )
         self.__deviceDir = os.path.join( '/sys/class/pwm',
                                          _hwPulseChip(),
@@ -112,8 +112,8 @@ class _PulsePiHW( _PulseAPI ):
         """
         self.stop()
         with open( os.path.join( '/sys/class/pwm',
-                                _hwPulseChip(),
-                                'unexport' ), 'w' ) as f:
+                                 _hwPulseChip(),
+                                 'unexport' ), 'w' ) as f:
             f.write( str( self.__channel ) )
         return
 
@@ -185,7 +185,7 @@ class _PulsePiHW( _PulseAPI ):
         return
 
     @property
-    def dutyCycle( self ) -> float:
+    def dutyCycle( self ):
         # Python bu? Doesn't recognize implementation in parent class
         return super().dutyCycle
 
@@ -196,13 +196,7 @@ class _PulsePiHW( _PulseAPI ):
                cycle.
         @param value new duty cycle to use 0 <= value <= 1
         """
-        if value > 1 and value <= 100:
-            self._dutyCycle = value / 100.
-        else:
-            self._dutyCycle = value
-        if self._dutyCycle < 0 or self._dutyCycle > 1:
-            raise GPIOError( 'Wrong duty cycle specified: {0}'
-                             .format( value ) )
+        self._computeParams( self._frequency, value, self._bursts )
         self.__writeDevice( 'duty_cycle',
                             self.__periodNs * self._dutyCycle )
         return
@@ -224,17 +218,30 @@ class _PulsePiHW( _PulseAPI ):
                                  .format( value ) )
         except AttributeError:
             pass
-        if float( value ) > 5000000:
+        if float( value ) > 5_000_000:
             raise GPIOError( 'frequency {0} exceeds max frequency for hardware '
                              'pulse mode'.format( value ) )
         elif float( value ) < 0.1:
             raise GPIOError( 'frequency {0} below min frequency for hardware '
                              'pulse mode'.format( value ) )
-        self._frequency = float( value )
-        self._orgFreq = value
-        self._period = 1 / self._frequency
+        self._computeParams( value, self._dutyCycle, self._bursts )
         self.__periodNs = self._period * 1000000000
         self.__writeDevice( 'duty_cycle', 0 )
         self.__writeDevice( 'period', self.__periodNs )
         self.__writeDevice( 'duty_cycle', self.__periodNs * self._dutyCycle )
+        return
+
+    @property
+    def bursts( self ):
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().bursts
+  
+    @bursts.setter
+    def bursts( self, value ):
+        """!
+        @brief setter of the bursts property.  Requires re-start!
+        @param value new number of impulses to use in a burst
+        """
+        self.stop()
+        self._computeParams( self._frequency, self._dutyCycle, value )
         return

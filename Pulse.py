@@ -40,10 +40,11 @@
 from GPIO_AL.tools import isPico, isHWpulsePin
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL._PulseAPI import _PulseAPI
+from GPIO_AL.GPIOError import GPIOError
 
 if isPico():
     # MicroPython silently ignores type hints without the need to import typing
-    from GPIO_AL._PulsePicoHW import _PulsePicoHW
+    from _PulsePicoHW import _PulsePicoHW
 else:
     from typing import Union, Optional
     from GPIO_AL._PulsePiHW import _PulsePiHW
@@ -65,9 +66,13 @@ class Pulse( _PulseAPI ):
     Raspbian (Debian) operating system is not a real-time operating system, and
     pulse parameters for software-generated pulses are therefore not guaranteed 
     to be stable and not meant for precise measurements.  In particular, if the 
-    pulses are used to control servo motors, software-generated pulses can cause
+    software-generated pulses are used to control servo motors, this can cause
     the motors to move erratically, especially under heavy CPU load on a 
     Raspberry Pi.
+
+    Note that the constructor of this class will set all pulse parameters, but
+    it will not start the series of impulses.  To start the pulse, us the method
+    start.
     
     This module can provide a list of pins that support hardware-generated 
     pulses, if they exist and the needed modules are loaded.  Minimal and 
@@ -121,11 +126,17 @@ class Pulse( _PulseAPI ):
     sets the frequency of the pulse to whatever the variable value contains, 
     which is assumed to be be in Hz.
     
-    When operating in burst mode, there are a few additional restrictions.  The 
-    time the bursts can last is a minimum of 0.75 ms in hardware mode; in 
-    software mode there is no restriction.  Additionally, the maximal frequency
-    in burst mode is limited to 10 kHz in hardware mode; in software mode, all 
-    frequency that this mode can operate with are also available in burst mode.
+    When operating in burst mode, there are a few additional restrictions.  On 
+    the Raspberry Pi, the bursts can last a minimum of 0.75 ms in hardware mode;
+    in software mode there is no restriction.  Additionally, the maximal 
+    frequency in burst mode is limited on the Raspberry Pi to 10 kHz in hardware
+    mode; in software mode, all frequency that this mode can operate with are 
+    also available in burst mode.  On the Raspberry Pi Pico, all pulses will be
+    generated in hardware mode.  The maximum frequency there is about 5 MHz and
+    the minimum frequency is 10 Hz.  When creating bursts, the maximum frequency 
+    is 1 kHz on the Raspberry Pi Pico due to limitations of the Timer class in
+    microPython.
+
     Please note that in hardware mode the burst mechanism is controlled via 
     software timing and all restrictions with respect to software timing on 
     non-real-time operating systems apply for hardware bursts too.
@@ -135,10 +146,10 @@ class Pulse( _PulseAPI ):
     """
 
     def __init__( self,
-                  pulsePin: Union[int, str, PinIO],
+                  pulsePin: Union[int, str,PinIO],
                   frequency: Union[float,object],
-                  dutyCycle: Optional[float]=0.5,
-                  bursts: Optional[int]=None ):
+                  dutyCycle: float=0.5,
+                  bursts: Optional[Union[int, None]]=None ):
         """!
         @brief Constructor - sets up parameters and determines mode (hard- or
                software)
@@ -153,6 +164,8 @@ class Pulse( _PulseAPI ):
         @param bursts number of impulses to generate or None for continuous
                       operation (default: None)
         """
+        if isinstance( pulsePin, PinIO ) and isPico():
+            raise GPIOError( 'Pulse does not accept PinIO objects on Pico' )
         self.__actor = None
         if isinstance( pulsePin, PinIO ) or not isHWpulsePin( pulsePin ):
             self.__actor = _PulseSW( pulsePin, frequency, dutyCycle, bursts )
@@ -188,6 +201,8 @@ class Pulse( _PulseAPI ):
     def __exit__( self, excType, excValue, excTraceback ):
         """!
         @brief Exit method for context management.
+
+        All parameters will be ignored.
         @param excType type of exception ending the context
         @param excValue value of the exception ending the context
         @param excTraceback traceback of exception ending the context
@@ -211,7 +226,7 @@ class Pulse( _PulseAPI ):
         """!
         @brief Method to start any pulse.
         """
-        self.__actor.start()
+        self.__actor.start() # type: ignore
         return
 
     def stop( self ):
@@ -228,7 +243,7 @@ class Pulse( _PulseAPI ):
         @brief Works as read/write property to get the current duty cycle.
         @return current duty cycle
         """
-        return self.__actor.dutyCycle
+        return self.__actor.dutyCycle # type: ignore
 
     @dutyCycle.setter
     def dutyCycle( self, value: float ):
@@ -237,7 +252,7 @@ class Pulse( _PulseAPI ):
                cycle
         @param value new duty cycle to use 0 <= value <= 1
         """
-        self.__actor.dutyCycle = value
+        self.__actor.dutyCycle = value # type: ignore
         return
 
     @property
@@ -247,7 +262,7 @@ class Pulse( _PulseAPI ):
         @return current frequency in Hz as a float (or PObject if that was 
                 provided)
         """
-        return self.__actor.frequency
+        return self.__actor.frequency # type: ignore
   
     @frequency.setter
     def frequency( self, value: Union[float,object] ):
@@ -255,7 +270,24 @@ class Pulse( _PulseAPI ):
         @brief setter of the frequency read/write property.
         @param value pulse frequency in Hz or a PObject with unit Hz
         """
-        self.__actor.frequency = value
+        self.__actor.frequency = value # type: ignore
+        return
+
+    @property
+    def bursts( self ) -> int:
+        """!
+        @brief Implements read property of frequency.
+        @return current number of impulses in a burst
+        """
+        return self.__actor.bursts # type: ignore
+  
+    @bursts.setter
+    def bursts( self, value: Union[int,None] ):
+        """!
+        @brief setter of the frequency read/write property.  Requires re-start!
+        @param value number of impulses in burst
+        """
+        self.__actor.bursts = value # type: ignore
         return
 
 

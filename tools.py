@@ -2,7 +2,7 @@
 ##
 # @file       tools.py
 #
-# @version    1.0.0
+# @version    2.0.0
 #
 # @par Purpose
 # This module provides common tools used throughout this package.
@@ -14,7 +14,7 @@
 # W. Ekkehard Blanz <Ekkehard.Blanz@gmail.com>
 #
 # @copyright
-# Copyright (C) 2021 - 2024 W. Ekkehard Blanz\n
+# Copyright (C) 2021 - 2025 W. Ekkehard Blanz\n
 # See NOTICE.md and LICENSE.md files that come with this distribution.
 
 # File history:
@@ -22,6 +22,7 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Wed Dec 25 2021 | Ekkehard Blanz | consolidated from other files
+#   Fri Feb 14 2025 | Ekkehard Blanz | major overhaul
 #                   |                |
 #
 
@@ -92,7 +93,7 @@ if isPico():
                                 'Please run pinout to see which pins correspond'
                                 ' to which GP lines.'
                                 .format( pinArg, _GPIO_PIN_MIN, _GPIO_PIN_MAX,
-                                        _GPIO_LINE_MIN, _GPIO_LINE_MAX ) )
+                                         _GPIO_LINE_MIN, _GPIO_LINE_MAX ) )
         elif isinstance( pinArg, str ):
             try:
                 if pinArg.startswith( 'GP' ):
@@ -110,16 +111,16 @@ if isPico():
                                 'Please run pinout to see which pins correspond'
                                 ' to which GPIO lines.'
                                 .format( pinArg, _GPIO_LINE_MIN, _GPIO_LINE_MAX,
-                                        _GPIO_PIN_MIN, _GPIO_PIN_MAX ) )
+                                         _GPIO_PIN_MIN, _GPIO_PIN_MAX ) )
         else:
             raise ValueError( '\n\nwrong pin argument given: {0}'
-                                .format( pinArg ) )
+                              .format( pinArg ) )
         return retval
 else:
     # the following data and functions are not needed for the Raspberry Pi Pico
 
     # --------------------------------------------------------------------------
-    # This secion encapsulates the mapping of GPIO header pins to GPIO lines.  
+    # This section encapsulates the mapping of GPIO header pins to GPIO lines.  
     # Change only this section whenever that changes.
     # Currently, this is the proper mapping of GPIO header pins to GPIO lines
     _convList = [-9, -2, -3, 2, -3, 3, -1, 4, 14, -1, 15, 17, 18, 27, -1, 22, 
@@ -169,7 +170,7 @@ else:
                                 'Please run pinout to see which pins correspond'
                                 ' to which GPIO lines.'
                                 .format( pinArg, _GPIO_PIN_MIN, _GPIO_PIN_MAX,
-                                        _GPIO_LINE_MIN, _GPIO_LINE_MAX ) )
+                                         _GPIO_LINE_MIN, _GPIO_LINE_MAX ) )
         elif isinstance( pinArg, str ):
             try:
                 if pinArg.startswith( 'GPIO' ):
@@ -187,7 +188,7 @@ else:
                                 'Please run pinout to see which pins correspond'
                                 ' to which GPIO lines.'
                                 .format( pinArg, _GPIO_LINE_MIN, _GPIO_LINE_MAX,
-                                        _GPIO_PIN_MIN, _GPIO_PIN_MAX ) )
+                                         _GPIO_PIN_MIN, _GPIO_PIN_MAX ) )
         else:
             raise ValueError( '\n\nwrong pin argument given: {0}'
                                 .format( pinArg ) )
@@ -212,7 +213,7 @@ def argToPin( pinArg: Union[int, str] ) -> int:
         if _convList[retval] == line:
             return retval
     raise ValueError( '\n\nwrong pin argument given: {0}'
-                        .format( pinArg ) )
+                      .format( pinArg ) )
 
 def cpuInfo() -> dict:
     """!
@@ -313,7 +314,7 @@ def gpioChipPath( line: int ) -> str:
         raise ValueError( '\n\ncannot find GPIO chip for line GPIO{0}\n'
                           '(line may be in use)'.format( line ) )
 
-def _hwPulseChip() -> int:
+def _hwPulseChip() -> str:
     """!
     @brief internal function to obtain the PWM chip number of a given Raspberry 
     Pi.
@@ -341,7 +342,7 @@ def hwPWMlines() -> list:
         import os
         configPath = '/boot/firmware/config.txt'
         if os.path.getmtime( configPath ) > psutil.boot_time():
-            raise GPIOError( 'config.txt was modified since last reboot\n'
+            raise ValueError( 'config.txt was modified since last reboot\n'
                               'please reboot your system and try again' )
                             
         configModified = False
@@ -365,11 +366,14 @@ def isHWpulsePin( pin: Union[int, str] ) -> bool:
                in GPIO header, GPIO{n} is line number)
     @return True if given pin is capable of HW pulses, False otherwise
     """
-    if not isPico() and not os.path.isdir( '/sys/class/pwm/{0}'
-                                            .format( _hwPulseChip() ) ):
-        # pwm-2chan module not loaded - no pin can produce HW pulses
-        return False
-        
+    if not isPico():
+        # on the RB Pi, we need to check whether the correct module is loaded
+        import os
+        if not isPico() and not os.path.isdir( '/sys/class/pwm/{0}'
+                                                .format( _hwPulseChip() ) ):
+            # pwm-2chan module not loaded - no pin can produce HW pulses
+            return False
+            
     return argToLine( pin ) in hwPWMlines()
 
 

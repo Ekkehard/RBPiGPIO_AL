@@ -41,28 +41,27 @@ if isPico():
     IntEnum = object
     class ABCMeta:
         pass
-    def abstractmethod(f):
+    def abstractmethod( f ):
         return f
     # MicroPython silently ignores type hints without the need to import typing
 else:
-    from abc import ABCMeta, abstractmethod
+    from abc import ABCMeta, abstractmethod # type: ignore
     from enum import Enum, IntEnum
     from typing import Union, Optional
 
     
-class _PinIOAPI( ABCMeta ):
+class _PinIOAPI( metaclass=ABCMeta ):
     """!
     @brief Abstract base class provides API for pin I/O classes.
 
-    NOTE: metaclass=ABCMeta has been replaced by just ABCMeta inheritance to make
-    also work under MicroPython.
+    #TODO Need to find way to not break this metaclass in microPython.
     """
 
     # Enums are provided in the API so children have them.
     # They are copied to the main class so clients have easy access to them.
 
     ## Pin operation mode as an Enum
-    class _Mode( Enum ):
+    class _Mode( Enum ): # type: ignore
         ## Input mode without resistors pulling up or down
         INPUT = 0
         ## Input mode with pullup resistor
@@ -76,7 +75,7 @@ class _PinIOAPI( ABCMeta ):
         OPEN_DRAIN = 4
 
     ## Signal level as an IntEnum
-    class _Level( IntEnum ):
+    class _Level( IntEnum ): # type: ignore
         ## Low voltage level
         LOW = 0
         ## High voltage level
@@ -95,12 +94,12 @@ class _PinIOAPI( ABCMeta ):
     else:
         import gpiod
         ## Get trigger edge Enum directly from gpiod
-        _Edge = gpiod.line.Edge
+        _Edge = gpiod.line.Edge # type: ignore
 
     def __init__( self, 
                   pin: Union[int, str], 
                   mode: _Mode, 
-                  callback: Optional[callable]=None, 
+                  callback: Optional[callable]=None,  # type: ignore
                   edge: Optional[_Edge]=None,
                   force: Optional[bool]=False ):
         """!
@@ -213,7 +212,7 @@ class _PinIOAPI( ABCMeta ):
         """!
         @brief Works as read-only property to get the name of callback function
                as a string.
-        @return callback function name or empty string
+        @return callback function name or 'None'
         """
         if self._clbk is not None:
             return self._clbk.__name__
@@ -232,7 +231,7 @@ class _PinIOAPI( ABCMeta ):
 
     @property
     @abstractmethod
-    def level( self ) -> _Level:
+    def level( self ) -> _Level: # type: ignore
         """!
         @brief Works as read/write property to get the current voltage level
                of a Pin as a PinIO.Level type.
@@ -242,7 +241,7 @@ class _PinIOAPI( ABCMeta ):
 
     @level.setter
     @abstractmethod
-    def level( self, level: _Level ):
+    def level( self, level: Union[_Level,int] ):
         """!
         @brief Works as the setter of a read/write property to set the Pin to a
                given voltage level.

@@ -150,7 +150,7 @@ class PinIO( _PinIOAPI ):
     def __init__( self, 
                   pin: Union[int, str], 
                   mode: Mode, 
-                  callback: Optional[callable]=None, 
+                  callback: Optional[callable]=None,  # type: ignore
                   edge: Optional[Edge]=None,
                   force: Optional[bool]=False ):
         """!
@@ -173,15 +173,17 @@ class PinIO( _PinIOAPI ):
         self.__open = False
         # instantiate actor
         if isPico():
-            self.__actor = _PinIOPico( pin, mode, callback, edge, force )
+            self.__actor = \
+                PinIOPico( pin, mode, callback, edge, force ) # type: ignore
         else:
-            self.__actor = _PinIOPi( pin, mode, callback, edge, force )
+            self.__actor = \
+                _PinIOPi( pin, mode, callback, edge, force ) # type: ignore
 
         # for output modes drive "meaningful" levels and set self.__actLevel
         if self.mode == self.Mode.OUTPUT:
-            self.level = self.Level.LOW
+            self.level = self.Level.LOW # type: ignore
         elif self.mode == self.Mode.OPEN_DRAIN:
-            self.level = self.Level.HIGH
+            self.level = self.Level.HIGH # type: ignore
         self.__open = True
         return
 
@@ -234,7 +236,7 @@ class PinIO( _PinIOAPI ):
         @brief Close the Pin - set it to input (high impedance) without pulling
                up or down.  Terminates event loop thread if running.
         """
-        if self.__open:
+        if self.__open and self.__actor:
             self.__actor.close()
         self.__open = False
         return
@@ -243,49 +245,61 @@ class PinIO( _PinIOAPI ):
         """!
         @brief toggle the pin level.
         """
-        self.__actor.toggle()
+        if self.__actor: self.__actor.toggle()
         return
 
     @property
-    def pin( self ) -> int:
+    def pin( self ) -> Union[int,None]:
         """!
         @brief Works as read-only property to get the GPIO header pin number
         associated with this class.
-        @return GPIO header pin number associated with this class
+        @return GPIO header pin number associated with this class (or None)
         """
-        return self.__actor.pin
+        if self.__actor:
+            return self.__actor.pin
+        else:
+            return None
 
 
     @property
-    def line( self ) -> int:
+    def line( self ) -> Union[int,None]:
         """!
         @brief Works as read-only property to get the GPIO line number
         associated with this class.
-        @return GPIO line number associated with this class
+        @return GPIO line number associated with this class (or None)
         """
-        return self.__actor.line
+        if self.__actor:
+            return self.__actor.line
+        else:
+            return None
 
 
     @property
-    def mode( self ) -> Mode:
+    def mode( self ) -> Union[Mode,None]:
         """!
         @brief Works as read-only property to get I/O mode of that Pin as an
                int.
         @return mode PinIO.Mode.INPUT,  PinIO.Mode.INPUT_PULLUP,
                      PinIO.Mode.INPUT_PULLDOWN, PinIO.Mode.OUTPUT or 
-                     PinIO.Mode.OPEN_DRAIN
+                     PinIO.Mode.OPEN_DRAIN (or None)
         """
-        return self.__actor.mode
+        if self.__actor:
+            return self.__actor.mode
+        else:
+            return None
 
 
     @property
-    def callback( self ) -> str:
+    def callback( self ) -> Union[str,None]:
         """!
         @brief Works as read-only property to get the name of callback function
                as a string.
         @return callback function name or empty string
         """
-        return self.__actor.callback
+        if self.__actor:
+            return self.__actor.callback
+        else:
+            return None
 
 
     @property
@@ -300,13 +314,16 @@ class PinIO( _PinIOAPI ):
 
 
     @property
-    def level( self ) -> Level:
+    def level( self ) -> Union[Level,None]:
         """!
         @brief Works as read/write property to get the current voltage level
                of a Pin as a PinIO.Level type.
         @return PinIO.Level.HIGH or PinIO.Level.LOW
         """
-        return self.__actor.level
+        if self.__actor:
+            return self.__actor.level
+        else:
+            return None
 
 
     @level.setter

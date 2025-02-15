@@ -39,17 +39,17 @@ from GPIO_AL.tools import lineToStr, isPico, argToLine
 if isPico():
     class ABCMeta:
         pass
-    def abstractmethod(f):
+    def abstractmethod( f ):
         return f
     # MicroPython silently ignores type hints without the need to import typing
     Enum = object
 else:
-    from abc import ABCMeta, abstractmethod
+    from abc import ABCMeta, abstractmethod # type: ignore
     from typing import Union, Optional
     from enum import Enum
 
     
-class _PulseAPI( ABCMeta ):
+class _PulseAPI( metaclass=ABCMeta ):
     """!
     @brief Abstract base class provides API for pulse classes.
 
@@ -57,36 +57,51 @@ class _PulseAPI( ABCMeta ):
     also work under MicroPython.
     """
 
-    class _Mode( Enum ):
+    class _Mode( Enum ): # type: ignore
         HARDWARE = 0
         SOFTWARE = 1
 
     def __init__( self,
                   pulsePin: Union[int,str,PinIO],
                   frequency: Union[float,object],
-                  dutyCycle: Optional[float]=0.5,
-                  bursts: Optional[int]=None ):
+                  dutyCycle: float=0.5,
+                  bursts: Optional[Union[int, None]]=None ):
         """!
         @brief Constructor - sets up common parameter for both modes.
         @param pulsePin integer with pin number in GPIO header, string with
-                        GPIO<lineNumber> or PinIO object.
+                        GPIO<lineNumber> or PinIO object (not on Pico).
         @param frequency pulse frequency in Hz or a PObject with unit Hz
         @param dutyCycle 0 <= dutyCycle <= 1 duty cycle of pulse (default: 0.5)
         @param bursts number of impulses to generate or None for continuous
                       (default: None)
         """
         self._mode = None # to be overwritten by child
-        self._bursts = bursts
         self._pulsePin = pulsePin
         self._line = argToLine( pulsePin )
+        self._computeParams( frequency, dutyCycle, bursts )
+        return
+    
+    def _computeParams( self,
+                        frequency: Union[float,object],
+                        dutyCycle: float,
+                        bursts: Union[int, None] ):
+        """!
+        @brief (Re)compute essential parameters from user-supplied ones.
+               Initially, and whenever some of them get changed.
+        @param frequency pulse frequency in Hz or a PObject with unit Hz
+        @param dutyCycle 0 <= dutyCycle <= 1 duty cycle of pulse (default: 0.5)
+        @param bursts number of impulses to generate or None for continuous
+                      (default: None)
+        """
+        self._bursts = bursts
         try:
-            if str( frequency.unit ) != 'Hz':
+            if str( frequency.unit ) != 'Hz': # type: ignore
                 raise GPIOError( 'Wrong frequency object specified: {0}'
                                  .format( frequency ) )
         except AttributeError:
             pass
         self._orgFreq = frequency
-        self._frequency = float( frequency )
+        self._frequency = float( frequency ) # type: ignore
         self._dutyCycle = float( dutyCycle )
         if dutyCycle > 1 and dutyCycle <= 100:
             self._dutyCycle = dutyCycle / 100.
@@ -112,7 +127,7 @@ class _PulseAPI( ABCMeta ):
         @brief String representation of this class - returns all settable
                parameters.
         """
-        return 'pin: {0}, line: {2}, frequency: {2}, duty cycle: {3}, ' \
+        return 'pin: {0}, line: {1}, frequency: {2}, duty cycle: {3}, ' \
                'bursts: {4}, mode: {5}' \
                .format( self._pulsePin,
                         lineToStr( self._line ),
@@ -157,7 +172,7 @@ class _PulseAPI( ABCMeta ):
         pass
 
     @property
-    def frequency( self ) -> float:
+    def frequency( self ) -> Union[float, object]:
         """!
         @brief read property to get frequency to be implemented by child.
         @return current frequency as originally
@@ -168,7 +183,24 @@ class _PulseAPI( ABCMeta ):
     @abstractmethod
     def frequency( self, value: Union[float, object] ):
         """!
-        @brief setter of a frequency property to be implemented by child.
+        @brief setter of the frequency property to be implemented by child.
         @param value pulse frequency in Hz or a PObject with unit Hz
+        """
+        pass
+
+    @property
+    def bursts( self ) -> Union[int, None]:
+        """!
+        @brief read property to get frequency to be implemented by child.
+        @return current number of impulses in a burst
+        """
+        return self._bursts
+  
+    @bursts.setter
+    @abstractmethod
+    def bursts( self, value: int ):
+        """!
+        @brief setter of the burst property to be implemented by child.
+        @param value number of impulses in a burst
         """
         pass

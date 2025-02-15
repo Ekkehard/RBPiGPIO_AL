@@ -50,16 +50,12 @@ class _PulseSW( _PulseAPI ):
         @param pulsePin integer with pin number in GPIO header or string with
                         GPIO<lineNumber>
         @param frequency in Hz as float or PObject with unit Hz
-        @param dutyCycle duty cycle 0 < dutyCylce < 1
-        @param bursts number of burts or None for continuous operation
+        @param dutyCycle duty cycle 0 <= dutyCylce <= 1
+        @param bursts number of bursts or None for continuous operation
         """
         self.__swTimer = None
         self.__pin = None
         self.__burstCount = 0
-        super().__init__( pulsePin, frequency, dutyCycle, bursts )
-        self._mode = self._Mode.SOFTWARE
-        if self._bursts is None:
-            self._bursts = -1
         if isinstance( pulsePin, PinIO ):
             if pulsePin.mode != PinIO.Mode.OUTPUT and \
                pulsePin.mode != PinIO.Mode.OPEN_DRAIN:
@@ -67,8 +63,12 @@ class _PulseSW( _PulseAPI ):
                                   'mode' )
             self.__pin = pulsePin
         else:
-            # TODO can we initialize that at level LOW?
-            self.__pin = PinIO( pulsePin, PinIO.Mode.OUTPUT )
+            self.__pin = PinIO( pulsePin, PinIO.Mode.OUTPUT ) # type: ignore
+            
+        super().__init__( pulsePin, frequency, dutyCycle, bursts )
+        self._mode = self._Mode.SOFTWARE
+        if self._bursts is None:
+            self._bursts = -1
         self.__done = False
         return
         
@@ -81,7 +81,7 @@ class _PulseSW( _PulseAPI ):
         """
         self.stop()
         if not isinstance( self._pulsePin, PinIO ):
-            # We did not get the PinIO object fomr someone else
+            # We did not get the PinIO object from someone else
             # so we have to destroy it ourselves
             if self.__pin:
                 self.__pin = None
@@ -92,7 +92,7 @@ class _PulseSW( _PulseAPI ):
     def __str__( self ):
         """!
         @brief String representation of this class - returns all settable
-               parametrs.
+               parameters.
         """
         if self._bursts == -1:
             bursts = None
@@ -112,7 +112,7 @@ class _PulseSW( _PulseAPI ):
         if self.__done:
             return
         self.__nextTrigger += self._highTime
-        self.__pin.level = PinIO.Level.HIGH
+        self.__pin.level = PinIO.Level.HIGH # type: ignore
         self.__swTimer = threading.Timer( self.__nextTrigger - time.time(),
                                           self.__runLow )
         self.__swTimer.start()
@@ -126,7 +126,7 @@ class _PulseSW( _PulseAPI ):
         if self.__done:
             return
         self.__nextTrigger += self._lowTime
-        self.__pin.level = PinIO.Level.LOW
+        self.__pin.level = PinIO.Level.LOW # type: ignore
         if self.__burstCount == self._bursts:
             self.__done = True
         self.__swTimer = threading.Timer( self.__nextTrigger - time.time(),
@@ -159,7 +159,7 @@ class _PulseSW( _PulseAPI ):
             self.__swTimer.cancel()
             self.__swTimer = None
         if self.__pin:
-            self.__pin.level = PinIO.Level.LOW
+            self.__pin.level = PinIO.Level.LOW # type: ignore
         return
 
     @property
@@ -174,22 +174,15 @@ class _PulseSW( _PulseAPI ):
                cycle
         @param value new duty cycle to use 0 <= value <= 1
         """
-        if self.__burstTime:
+        if self._bursts and not self.__done:
             raise GPIOError( 'Cannot set duty cycle during a burst in SW mode' )
-        if value > 1 and value <= 100:
-            self._dutyCycle = value / 100.
-        else:
-            self._dutyCycle = value
-        if self._dutyCycle < 0 or self._dutyCycle > 1:
-            raise GPIOError( 'Wrong duty cycle specified: {0}'
-                             .format( dutyCycle ) )
+        self._computeParams( self._frequency, value, self._bursts )
         if self._dutyCycle == 0: 
-            self.__pin.level = PinIO.Level.LOW
+            self.__pin.level = PinIO.Level.LOW # type: ignore
         elif self._dutyCycle == 1:
-            self.__pin.level = PinIO.Level.HIGH
+            self.__pin.level = PinIO.Level.HIGH # type: ignore
         else:
-            self.__high = 1. / self._frequency * self._dutyCycle
-            self.__low = 1. / self._frequency * (1. - self._dutyCycle)
+            pass
         return
 
     @property
@@ -200,7 +193,7 @@ class _PulseSW( _PulseAPI ):
     @frequency.setter
     def frequency( self, value ):
         """!
-        @brief setter of a freqyency property.
+        @brief setter of a frequency property.
         @param value new duty cycle to use 0 <= value <= 1
         """
         try:
@@ -212,10 +205,21 @@ class _PulseSW( _PulseAPI ):
         if float( value ) > 2000:
             raise GPIOError( 'frequency {0} exceeds max frequency for '
                              'software mode'.format( value ) )
-        self._frequency = float( value )
-        self._orgFreq = value
-        self._period = 1. / self._frequency
-        self.__high = self._period * self._dutyCycle
-        self.__low = self._period * (1. - self._dutyCycle)
+        self._computeParams( value, self._dutyCycle, self._bursts )
+        return
+
+    @property
+    def bursts( self ):
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().bursts
+  
+    @bursts.setter
+    def bursts( self, value ):
+        """!
+        @brief setter of the bursts property.  Requires re-start!
+        @param value new number of impulses to use in a burst
+        """
+        self.stop()
+        self._computeParams( self._frequency, self._dutyCycle, value )
         return
 

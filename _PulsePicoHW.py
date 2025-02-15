@@ -32,8 +32,8 @@
 #                   |                |
 
 from machine import PWM, Pin, Timer
-from GPIO_AL.GPIOError import GPIOError
-from GPIO_AL._PulseAPI import _PulseAPI
+from GPIOError import GPIOError
+from _PulseAPI import _PulseAPI
 
 class _PulsePicoHW( _PulseAPI ):
     """!
@@ -48,65 +48,89 @@ class _PulsePicoHW( _PulseAPI ):
                   frequency,
                   dutyCycle,
                   bursts ):
+        """!
+        @brief Constructor - sets up parameters.
+        @param pulsePin integer with pin number in GPIO header or string with
+                        GPIO<lineNumber>
+        @param frequency in Hz as float or PObject with unit Hz
+        @param dutyCycle duty cycle 0 <= dutyCylce <= 1
+        @param bursts number of bursts or None for continuous operation
+        """
 
         super().__init__( pulsePin, frequency, dutyCycle, bursts )
         self._mode = self._Mode.HARDWARE
+        self.__pinObj = None
         self.__pwmObj = None
-        self.__burstTimer = None
-        shortestBurstTime = 100000 # TODO figure that out
-        if self._bursts:
-            # this time must be in ms
+        self.__burstTimerObj = None
+        self.__burstTime = None
+        if bursts:
+            if self._frequency > 1000:
+                raise GPIOError( 'pulse frequency {0} Hz exceeds maximal '
+                                 'frequency of 1 kHz for bursts for Pico '
+                                 'under microPython'
+                                 .format( self._frequency ) )
+
+            # burst times must be in ms for the Pico Timer under microPico
+            shortestBurstTime = 2
             self.__burstTime = \
-                int( self._bursts * self._period - self._lowTime / 2000 )
+                round( (self._bursts * self._period  # type: ignore
+                        - self._lowTime / 2)  * 1000. )
             if self.__burstTime < shortestBurstTime:
-                raise GPIOError( 'Time bursts must last longer than {0} s'
-                                 .format( shortestBurstTime ) )
-            self.__burstTime -= shortestBurstTime
+                raise GPIOError( 'Bursts must last longer than {0} ms'
+                                .format( shortestBurstTime ) )
+        self.__pinObj = Pin( self._line )
+        self.__pwmObj = PWM( self.__pinObj )
         return
 
     def __del__( self ):
         """!
-        @brief Destructor - stops everything and even unexports the pwm device
-               for this channel on the Pi.
+        @brief Destructor - stops everything and even deinits the PWM device.
         """
         self.stop()
-        self.__pwmObj = None
+        if self.__pwmObj:
+            self.__pwmObj.deinit()
+            self.__pwmObj = None
+        if self.__pinObj:
+            # Pin object has no deinit method - we force its destructor upon
+            # next garbage collection
+            self.__pinObj = None
+        if self.__burstTimerObj:
+            self.__burstTimerObj.deinit()
+            self.__burstTimerObj = None
         return
 
     def start( self ):
         """!
         @brief Method to start a HW pulse.
         """
-        
-        self.__pwmObj = PWM( Pin( self._line ), 
-                             freq=self._frequency, 
-                             duty_u16=round( 65535 * self._dutyCycle ) )
+        self.__pwmObj.freq( round( self._frequency ) ) # type: ignore
         if self.__burstTime:
-            self.__burstTimer = Timer.init( Timer.ONE_SHOT,
-                                            period=self.__burstTime,
-                                            callback=self.__stop )
+            self.__burstTimerObj = Timer()
+            self.__burstTimerObj.init( mode=Timer.ONE_SHOT,
+                                       period=int( self.__burstTime ),
+                                       callback=self.__stop )
+        self.__pwmObj.duty_u16( round( 65535 * self._dutyCycle ) ) # type: ignore
         return
 
     def stop( self ):
         """!
-        @brief Method to stop the HW pulse; destroys the burst timer object if
-               present.
+        @brief Method to stop the HW pulse - sets duty cycle to 0.
         """
-        if self.__burstTimer:
-            self.__burstTimer.deinit()
-        self.__pwmObj.deinit()
+        if self.__pwmObj:
+            self.__pwmObj.duty_u16( 0 )
         return
     
     def __stop( self, timerObj ):
         """!
         @brief Method to serve as a callback for the burst timer.
-        @param needs timer object as a parameter
+        @param as a callback function needs timer object as a parameter
+               which will be ignored
         """
         self.stop()
         return
 
     @property
-    def dutyCycle( self ) -> float:
+    def dutyCycle( self ):
         # Python bug? Doesn't recognize implementation in parent class
         return super().dutyCycle
 
@@ -117,14 +141,8 @@ class _PulsePicoHW( _PulseAPI ):
                cycle.
         @param value new duty cycle to use 0 <= value <= 1
         """
-        if value > 1 and value <= 100:
-            self._dutyCycle = value / 100.
-        else:
-            self._dutyCycle = value
-        if self._dutyCycle < 0 or self._dutyCycle > 1:
-            raise GPIOError( 'Wrong duty cycle specified: {0}'
-                             .format( value ) )
-        self.__pwmObj.duty_u16( round( 65535 * self._dutyCycle ) )
+        self._computeParams( self._frequency, value, self._bursts )
+        self.__pwmObj.duty_u16( round( 65535*self._dutyCycle ) ) # type: ignore
         return
 
     @property
@@ -138,16 +156,21 @@ class _PulsePicoHW( _PulseAPI ):
         @brief setter of the frequency property.
         @param value new frequency to use
         """
-        try:
-            if str( value.unit ) != 'Hz':
-                raise GPIOError( 'Wrong frequency object specified: {0}'
-                                 .format( value ) )
-        except AttributeError:
-            pass
-        self._orgFreq = value
-        self._frequency = float( value )
-        try:
-            self.__pwmObj.freq( self._frequency )
-        except:
-            raise GPIOError( 'Wrong frequency specified: {0}'.format( value ) )
+        self._computeParams( value, self._dutyCycle, self._bursts )
+        self.__pwmObj.freq( round( self._frequency ) ) # type: ignore
+        return
+
+    @property
+    def bursts( self ):
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().bursts
+  
+    @bursts.setter
+    def bursts( self, value ):
+        """!
+        @brief setter of the bursts property.  Requires re-start!
+        @param value new number of impulses to use in a burst
+        """
+        self.stop()
+        self._computeParams( self._frequency, self._dutyCycle, value )
         return
