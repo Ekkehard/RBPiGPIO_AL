@@ -59,7 +59,7 @@ class _I2CbusPico( _I2CbusAPI ):
     ## overburden the CPU with tasks the hardware can do
     DEFAULT_MODE = _I2CbusAPI._Mode.HARDWARE
     ## Number of I/O attempts in I/O methods before throwing an exception
-    ATTEMPTS = 1
+    ATTEMPTS = 2
     ## Default frequency for I<sup>2</sup>C bus communications on the
     ## Raspberry Pi Pico is 100 kHz
     DEFAULT_I2C_FREQ = 100000
@@ -97,11 +97,11 @@ class _I2CbusPico( _I2CbusAPI ):
             self.__i2cObj = machine.I2C( i2cId,
                                          sda=machine.Pin( self._sdaLine ),
                                          scl=machine.Pin( self._sclLine ),
-                                         freq=self._frequency )
+                                         freq=round( self._frequency ) )
         else:
             self.__i2cObj = machine.SoftI2C( sda=machine.Pin( self._sdaLine ),
                                              scl=machine.Pin( self._sclLine ),
-                                             freq=self._frequency )
+                                             freq=round( self._frequency ) )
         self.__open = True
         return
 

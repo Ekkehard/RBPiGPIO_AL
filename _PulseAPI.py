@@ -52,8 +52,6 @@ else:
 class _PulseAPI( ABC ):
     """!
     @brief Abstract base class provides API for pulse classes.
-
-    #TODO Need to find way to not break this metaclass in microPython.
     """
 
     class _Mode( Enum ): # type: ignore
@@ -76,7 +74,7 @@ class _PulseAPI( ABC ):
         """
         self._mode = None # to be overwritten by child
         self._pulsePin = pulsePin
-        self._line = argToLine( pulsePin )
+        self._line = argToLine( pulsePin ) # type: ignore
         self._computeParams( frequency, dutyCycle, bursts )
         return
     

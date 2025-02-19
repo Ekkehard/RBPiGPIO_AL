@@ -31,9 +31,10 @@ _PLATFORM = None
         
 def platform() -> str:
     """!
-    @brief Obtain the name of the platform we are running under.
-    @return content of /sys/firmware/devicetree/base/model or Raspberry Pi Pico
-    (otherwise something like 'Raspberry Pi 3 Model B Rev 1.2'
+    @brief Obtain the name of the platform we are running on.
+    @return content of /sys/firmware/devicetree/base/model on the Pi or the 
+            result of uname()[4] on the Raspberry Pi Pico (usually something 
+            like 'Raspberry Pi 3 Model B Rev 1.2')
     """
     global _PLATFORM
     if not _PLATFORM:
@@ -48,7 +49,7 @@ def platform() -> str:
                            encoding="utf-8" ) as f:
                     _PLATFORM = f.read()
             except FileNotFoundError:
-                raise ValueError( 'Not running on a Raspberry Pi' )
+                raise ValueError( 'Not running on a Raspberry Pi or Pico' )
     return _PLATFORM
 
 
@@ -56,6 +57,7 @@ def platform() -> str:
 isPico = lambda: platform().find( 'Pico' ) != -1
 
 ## isPico2() returns True if the host is specifically a Raspberry Pi Pico 2
+## This requires that the correct build of the microPython interpreter is loaded
 isPico2 = lambda: platform().find( 'Pico2' ) != -1
 
 ## isPi5() returns True if the host is a Raspberry Pi 5
@@ -65,7 +67,7 @@ isPi5 = lambda: platform().find( 'Pi 5' ) != -1
 
 # header/board pins and their mapping to line numbers differ between Pi and Pico
 if isPico():
-    # Currently, this is the proper mapping of header pins to Pico lines
+    # Currently, this is the proper mapping of board pins to Pico GP lines
     _convList = [-9, 0, 1, -1, 2, 3, 4, 5, -1, 6, 7, 8, 9, -1, 10, 11, 12,
                  13, -1, 14, 15, 16, 17, -1, 18, 19, 20, 21, -1, 22, -2, 26, 
                  27, -1, 28, -3, -4, -5, -6, -1, -7, -8]
@@ -79,8 +81,6 @@ if isPico():
     _pinConfig = 'board'
 else:
     # This section encapsulates the mapping of header pins to GPIO lines.  
-    # Change only this section whenever that changes.
-    # Currently, this is the proper mapping of  header pins to GPIO lines
     _convList = [-9, -2, -3, 2, -3, 3, -1, 4, 14, -1, 15, 17, 18, 27, -1, 22, 
                  23, -4, 24, 10, -1, 9, 25, 11, 8, -1, 7, -5, 6, 5, -1, 6, 12, 
                  13, -1, 19, 16, 26, 20, -1, 21]
@@ -103,7 +103,7 @@ def cpuInfo() -> dict:
             numCores - number of processor cores
             processor - name of processor architecture
             bitDepth - bit depth of this architecture
-            chip - name of the CPU chip
+            chip - name of the CPU/SoC chip
     """
     global _CPU_INFO
 

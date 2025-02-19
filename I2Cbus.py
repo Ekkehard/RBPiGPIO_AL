@@ -155,7 +155,7 @@ class I2Cbus( _I2CbusAPI ):
         self.__actor = None
         
         if isPico():
-            from GPIO_AL._I2CbusPico import _I2CbusPico
+            from _I2CbusPico import _I2CbusPico
             self.__actor = _I2CbusPico( *args, **kwargs )
         else:
             # for RB Pis we must get or infer mode as we'll call specific actors
@@ -374,8 +374,6 @@ class I2Cbus( _I2CbusAPI ):
                 lastException = e
         raise GPIOError( 'exceeded {0} attempts '.format( self.__actor.attempts )
                          + 'in readByte ({0})'.format( lastException ) )
-        self.__actor.writeBlockReg( i2cAddress, register, block )
-        return
         
     def writeBlockReg( self, i2cAddress: int, register: int, block: list ):
         """!
