@@ -90,7 +90,7 @@ else:
     _GPIO_LINE_MAX = 27
     _GPIO_PIN_MIN = 1
     _GPIO_PIN_MAX = 40
-    _gpioRumpName = 'GP'
+    _gpioRumpName = 'GPIO'
     _pinConfig = 'header'
 
 
@@ -178,7 +178,7 @@ def argToLine( pinArg: Union[int, str] ) -> int:
     elif isinstance( pinArg, str ):
         try:
             if pinArg.startswith( _gpioRumpName ):
-                retval = int( pinArg[-2:] )
+                retval = int( pinArg.replace( _gpioRumpName, '' ) )
                 if retval < _GPIO_LINE_MIN or retval > _GPIO_LINE_MAX: 
                     raise IndexError
             else:

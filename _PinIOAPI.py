@@ -36,18 +36,19 @@ from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL.tools import isPico, argToPin, argToLine, lineToStr, isHWpulsePin
 
 if isPico():
-    import machine
-    Enum = object
-    IntEnum = object
+    import machine # type: ignore
     class ABC:
         pass
-    def abstractmethod( f ):
-        return f
+    def abstractmethod( funcobj ):
+        return funcobj
+    Enum = object
+    IntEnum = object
     # MicroPython silently ignores type hints without the need to import typing
 else:
     from abc import ABC, abstractmethod # type: ignore
     from enum import Enum, IntEnum
     from typing import Union, Optional
+    from collections.abc import Callable
 
     
 class _PinIOAPI( ABC ):
@@ -77,10 +78,10 @@ class _PinIOAPI( ABC ):
         ## Low voltage level
         LOW = 0
         ## High voltage level
+
         HIGH = 1
 
     if isPico():
-        import machine # type: ignore
         ## Trigger edge as an Enum
         class _Edge( IntEnum ): # type: ignore
             ## Trigger on falling edge
@@ -88,8 +89,8 @@ class _PinIOAPI( ABC ):
             ## Trigger on rising edge
             RISING = machine.Pin.IRQ_RISING # type: ignore
             ## Trigger on both edges whenever signal changes
-            BOTH = machine.Pin.IRQ_FALLING | # type: ignore \
-                   machine.Pin.IRQ_RISING # type: ignore
+            BOTH = machine.Pin.IRQ_FALLING # type: ignore
+            BOTH |= machine.Pin.IRQ_RISING # type: ignore
     else:
         import gpiod
         ## Get trigger edge Enum directly from gpiod
@@ -98,7 +99,7 @@ class _PinIOAPI( ABC ):
     def __init__( self, 
                   pin: Union[int, str], 
                   mode: _Mode, 
-                  callback: Optional[callable]=None,  # type: ignore
+                  callback: Optional[Callable]=None,
                   edge: Optional[_Edge]=None,
                   force: Optional[bool]=False ):
         """!
@@ -142,7 +143,7 @@ class _PinIOAPI( ABC ):
     @abstractmethod
     def __del__( self ):
         """!
-        @brief Destructor.  To be implemented by child.
+        @brief Destructor.
         """
         pass
         

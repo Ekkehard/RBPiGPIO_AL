@@ -57,7 +57,7 @@ else:
     # the following data and functions are not needed for the Raspberry Pi Pico
     import gpiod
     if int( gpiod.__version__.split( '.' )[0] ) < 2 or \
-       (int( gpiod.__version__.split( '.' )[0] ) > 1 and \
+       (int( gpiod.__version__.split( '.' )[0] ) == 2 and \
         int( gpiod.__version__.split( '.' )[1] ) < 2):
         raise ValueError( 'GPIO_AL requires gpiod version 2.2 or higher' )
     from GPIO_AL._PinIOPi import _PinIOPi
