@@ -187,7 +187,7 @@ def argToLine( pinArg: Union[int, str] ) -> int:
             raise ValueError( '\n\nwrong line argument specified: {0}\n'
                             'If the argument is given as a string, it needs'
                             ' to be of the form \'{3}<n>\''
-                            'where n ranges from {1} to {2}\nand represents'
+                            'where n ranges from {1} to {2} and represents'
                             ' a {3} line number.\n'
                             .format( pinArg, _GPIO_LINE_MIN, _GPIO_LINE_MAX,
                                      _gpioRumpName ) )
