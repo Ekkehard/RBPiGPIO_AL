@@ -89,22 +89,6 @@ class _PulseSW( _PulseAPI ):
             self.__swTimer = None
         return
 
-    def __str__( self ):
-        """!
-        @brief String representation of this class - returns all settable
-               parameters.
-        """
-        if self._bursts == -1:
-            bursts = None
-        else:
-            bursts = self._bursts
-        return 'pin: {0}, frequency: {1}, duty cycle: {2}, bursts: {3}, ' \
-               'mode: SOFTWARE' \
-               .format( self._pulsePin,
-                        self._orgFreq,
-                        self._dutyCycle,
-                        bursts )
-
     def __runHigh( self ):
         """!
         @brief internal function to handle the "high" part of a software pulse.
@@ -223,3 +207,12 @@ class _PulseSW( _PulseAPI ):
         self._computeParams( self._frequency, self._dutyCycle, value )
         return
 
+    @property
+    def pin( self ) -> int:
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().pin # type: ignore
+    
+    @property
+    def line( self ) -> str:
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().line

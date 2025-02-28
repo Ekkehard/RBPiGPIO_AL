@@ -68,7 +68,7 @@ class _I2CPiHW( _I2CbusAPI ):
         """!
         @brief Constructor for class _PiHWI2C.
         @param sdaPin GPIO Pin number for I<sup>2</sup>C data
-        @param sclPin GPIO Pin number for I<sup>2</sup>C cloc
+        @param sclPin GPIO Pin number for I<sup>2</sup>C clock
         @param mode operational mode
         @param frequency I<sup>2</sup>C frequency in Hz
         @param attempts number of read or write attempts before throwing an
@@ -83,7 +83,7 @@ class _I2CPiHW( _I2CbusAPI ):
 
         super().__init__( sdaPin, sclPin, mode, frequency, attempts, usePEC )
         # if bit banging buses are left open they cause problems even for
-        # ahardware I2C operations
+        # hardware I2C operations
         if not isPi5():
             # This assumes that software I2C is handled via pigpio
             # TODO once we got our own software I2C, this can go away

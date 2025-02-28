@@ -34,7 +34,7 @@
 
 from GPIO_AL.PinIO import PinIO
 from GPIO_AL.GPIOError import GPIOError
-from GPIO_AL.tools import lineToStr, isPico, argToLine
+from GPIO_AL.tools import lineToStr, isPico, argToLine, argToPin
 
 if isPico():
     class ABC:
@@ -125,12 +125,12 @@ class _PulseAPI( ABC ):
                parameters.
         """
         return 'pin: {0}, line: {1}, frequency: {2}, duty cycle: {3}, ' \
-               'bursts: {4}, mode: {5}' \
-               .format( self._pulsePin,
-                        lineToStr( self._line ),
-                        self._orgFreq,
-                        self._dutyCycle,
-                        self._bursts,
+               'bursts: {4}, mode: Pulse.{5}' \
+               .format( self.pin,
+                        self.line,
+                        self.frequency,
+                        self.dutyCycle,
+                        self.bursts,
                         str( self._mode ).replace( '_', '' ) )
             
     @abstractmethod
@@ -163,7 +163,7 @@ class _PulseAPI( ABC ):
     def dutyCycle( self, value: float ):
         """!
         @brief Works as the setter of a read/write property to set the duty
-               cycle
+               cycle to be implemented by child.
         @param value new duty cycle to use 0 <= value <= 1
         """
         pass
@@ -191,7 +191,11 @@ class _PulseAPI( ABC ):
         @brief read property to get frequency to be implemented by child.
         @return current number of impulses in a burst
         """
-        return self._bursts
+        if self._bursts is not None and self._bursts <= 0:
+            value = None
+        else:
+            value = self._bursts
+        return value
   
     @bursts.setter
     @abstractmethod
@@ -201,3 +205,23 @@ class _PulseAPI( ABC ):
         @param value number of impulses in a burst
         """
         pass
+
+    @property
+    def pin( self ) -> Union[int, str, PinIO, None]:
+        """!
+        @brief read property to get the pin number
+        @return pin number
+        """
+        if isinstance( self._pulsePin, PinIO ):
+            value = self._pulsePin.pin
+        else:
+            value = argToPin( self._pulsePin )
+        return value
+    
+    @property
+    def line( self ) -> str:
+        """!
+        @brief read property to get the line as a string
+        @return line as a string
+        """
+        return lineToStr( self._line )

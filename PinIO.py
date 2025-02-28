@@ -249,7 +249,7 @@ class PinIO( _PinIOAPI ):
         return
 
     @property
-    def pin( self ) -> Union[int,None]:
+    def pin( self ) -> Union[int,None]: # type: ignore
         """!
         @brief Works as read-only property to get the GPIO header pin number
         associated with this class.
@@ -262,7 +262,7 @@ class PinIO( _PinIOAPI ):
 
 
     @property
-    def line( self ) -> Union[int,None]:
+    def line( self ) -> Union[int,None]: # type: ignore
         """!
         @brief Works as read-only property to get the GPIO line number
         associated with this class.

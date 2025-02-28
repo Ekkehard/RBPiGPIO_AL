@@ -34,6 +34,7 @@ import time
 import threading
 from typing import Union
 from GPIO_AL.tools import isPi5, argToLine, _hwPulseChip
+from GPIO_AL import PinIO
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._PulseAPI import _PulseAPI
 
@@ -117,7 +118,6 @@ class _PulsePiHW( _PulseAPI ):
             f.write( str( self.__channel ) )
         return
 
-    
 
     def __writeDevice( self, device, param ):
         """!
@@ -245,3 +245,13 @@ class _PulsePiHW( _PulseAPI ):
         self.stop()
         self._computeParams( self._frequency, self._dutyCycle, value )
         return
+
+    @property
+    def pin( self ) ->int:
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().pin # type: ignore
+    
+    @property
+    def line( self ) -> str:
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().line

@@ -302,6 +302,22 @@ class Pulse( _PulseAPI ):
         self.__actor.bursts = value # type: ignore
         return
 
+    @property
+    def pin( self ) -> int:
+        """!
+        @brief read property to get the pin number
+        @return pin number
+        """
+        return self.__actor.pin # type: ignore
+    
+    @property
+    def line( self ) -> str:
+        """!
+        @brief read property to get the line as a string
+        @return line as a string
+        """
+        return self.__actor.line # type: ignore
+
 
 
 if "__main__" == __name__:

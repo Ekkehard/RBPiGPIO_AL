@@ -32,6 +32,7 @@
 #                   |                |
 
 from machine import PWM, Pin, Timer
+from GPIO_AL import PinIO
 from GPIOError import GPIOError
 from _PulseAPI import _PulseAPI
 
@@ -174,3 +175,13 @@ class _PulsePicoHW( _PulseAPI ):
         self.stop()
         self._computeParams( self._frequency, self._dutyCycle, value )
         return
+
+    @property
+    def pin( self ) -> int:
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().pin # type: ignore
+    
+    @property
+    def line( self ) -> str:
+        # Python bug? Doesn't recognize implementation in parent class
+        return super().line
