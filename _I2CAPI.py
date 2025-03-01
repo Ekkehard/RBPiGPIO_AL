@@ -1,9 +1,9 @@
-# Python Implementation: _I2CbusAPI
+# Python Implementation: _I2CAPI
 # -*- coding: utf-8 -*-
 ##
-# @file       _I2CbusAPI.py
+# @file       _I2CAPI.py
 #
-# @version    4.0.0
+# @version    2.0.0
 #
 # @par Purpose
 # Provides API for all flavors of the I2C bus software.
@@ -35,7 +35,7 @@
 
 from GPIO_AL.tools import argToLine
 from GPIO_AL.GPIOError import GPIOError
-from GPIO_AL.tools import isPico
+from GPIO_AL.tools import isPico, lineToStr
 
 if isPico():
     class ABC:
@@ -50,7 +50,7 @@ else:
     from enum import Enum
 
 
-class _I2CbusAPI( ABC ):
+class _I2CAPI( ABC ):
     """!
     @brief Abstract base class provides API for I<sup>2</sup>C classes.
 
@@ -76,15 +76,15 @@ class _I2CbusAPI( ABC ):
                   usePEC: bool ):
         """!
         @brief Constructor
-        @param sdaPin header pin or GPIO line number for I<sup>2</sup>C data 
-               (default GPIO2 on Raspberry Pi and 8 on Raspberry Pi Pico).
+        @param sdaPin header pin number or GPIO line string for I<sup>2</sup>C 
+               data (default GPIO2 on Raspberry Pi and 8 on Raspberry Pi Pico).
                Ints are interpreted as header pin numbers, strings starting with
                GPIO as line numbers.
-        @param sclPin header pin or GPIO line number for I<sup>2</sup>C clock 
-               (default GPIO3 on Raspberry Pi and 9 on Raspberry Pi Pico).
+        @param sclPin header pin number or GPIO line string for I<sup>2</sup>C 
+               clock (default GPIO3 on Raspberry Pi and 9 on Raspberry Pi Pico).
                Ints are interpreted as header pin numbers, strings starting with
                GPIO as line numbers.
-        @param mode one of I2Cbus.Mode.HARDWARE or I2Cbus.Mode.SOFTWARE
+        @param mode one of I2C.Mode.HARDWARE or I2C.Mode.SOFTWARE
         @param frequency I<sup>2</sup>C frequency in Hz (default 75 kHz for
                Software mode and 100 kHz for hardware mode and Raspberry Pi 
                Pico in all modes).  This parameter is ignored for Raspberry Pi 
@@ -101,7 +101,7 @@ class _I2CbusAPI( ABC ):
         self._mode = mode
         self._usePEC = usePEC
         try:
-            if str( frequency.unit ) != 'Hz':
+            if str( frequency.unit ) != 'Hz': # type: ignore
                 raise GPIOError( 'Wrong frequency object specified: {0}'
                                  .format( frequency ) )
         except AttributeError:
@@ -123,7 +123,7 @@ class _I2CbusAPI( ABC ):
         @brief String representing of initialization parameters used by this 
                class.
         """
-        return 'sda Pin: GPIO{0}, scl Pin: GPIO{1}, mode: {2}, f: {3} kHz,\n'\
+        return 'sda line: {0}, scl line: {1}, mode: I2C.{2}, f: {3} kHz,\n'\
                'num. attempts: {4}, PEC: {5}' \
                .format( self.sda,
                         self.scl,
@@ -133,24 +133,24 @@ class _I2CbusAPI( ABC ):
                         self.usePEC )
     
     @property
-    def sda( self ) -> int:
+    def sda( self ) -> str:
         """!
-        @brief Works as read-only property to get the sda line number.
+        @brief Works as read-only property to get the sda line string.
         """
-        return self._sdaLine
+        return lineToStr( self._sdaLine )
 
     @property
-    def scl( self ) -> int:
+    def scl( self ) -> str:
         """!
-        @brief Works as read-only property to get the scl line number.
+        @brief Works as read-only property to get the scl line string.
         """
-        return self._sclLine
+        return lineToStr( self._sclLine )
 
     @property
     def mode( self ) -> _Mode:
         """!
         @brief Works as read-only property to get the I<sup>2</sup>C bus mode
-               (I2Cbus.Mode.HARDWARE or I2Cbus.Mode.SOFTWARE).
+               (I2C.Mode.HARDWARE or I2C.Mode.SOFTWARE).
         """
         return self._mode
 
@@ -179,7 +179,7 @@ class _I2CbusAPI( ABC ):
     @abstractmethod
     def close( self ):
         """!
-        @brief On Raspberry Pis using pigpio, it is important to call this 
+        @brief On Raspberry Pis using pigpio, it is very important to call this
                method to properly close the pigpio object in software mode.
         """
         pass
@@ -204,31 +204,31 @@ class _I2CbusAPI( ABC ):
         return manufacturerId, deviceId, dieRev
 
     @abstractmethod
-    def readByte( self, i2cAddress: int ) -> int: # type: ignore
+    def readByte( self, i2cAddress: int ) -> int:
         """!
         @brief Read a single general byte from an I<sup>2</sup>C device.
         @param i2cAddress int address of I<sup>2</sup>C device to be read from
         @return int with byte read
         """
-        pass
+        return 0
 
     @abstractmethod
     def readByteReg( self, 
                      i2cAddress: int, 
-                     register: int ) -> int: # type: ignore
+                     register: int ) -> int:
         """!
         @brief Read a single byte from an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
         @param register device register to read from as an int
         @return int with byte read
         """
-        pass
+        return 0
 
     @abstractmethod
     def readBlockReg( self,
                       i2cAddress: int,
                       register: int,
-                      length: int ) -> list: # type: ignore
+                      length: int ) -> list:
         """!
         @brief Read a block of bytes from an I<sup>2</sup>C device register.
         @param i2cAddress address of I<sup>2</sup>C device to be read from
@@ -236,7 +236,7 @@ class _I2CbusAPI( ABC ):
         @param length number of bytes to be read
         @return list of ints with bytes read
         """
-        pass
+        return []
 
     @abstractmethod
     def writeQuick( self, i2cAddress: int ):
@@ -267,7 +267,7 @@ class _I2CbusAPI( ABC ):
         pass
 
     @abstractmethod
-    def writeBlockReg( self, i2cAddress: int, register: int, block: int ):
+    def writeBlockReg( self, i2cAddress: int, register: int, block: list ):
         """!
         @brief Write a block of bytes to an I<sup>2</sup>C device starting at
                register.

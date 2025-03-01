@@ -1,25 +1,15 @@
-# Python Implementation: _I2CbusPico
+# Python Implementation: _I2CPico
 # -*- coding: utf-8 -*-
 ##
-# @file       _I2CbusPico.py
+# @file       _I2CPico.py
 #
-# @version    4.0.0
+# @version    2.0.0
 #
 # @par Purpose
 # Provides I2Cbus code for Raspberry Pi Pico - hardware only, software not 
 # needed.
 #
 # This code has been tested on a Raspberry Pi Pico.
-#
-# @par Comments
-# This is Python 3 code!  PEP 8 guidelines are decidedly NOT followed in some
-# instances, and guidelines provided by "Coding Style Guidelines" a "Process
-# Guidelines" document from WEB Design are used instead where the two differ,
-# as the latter span several programming languages and are therefore applicable
-# also for projects that require more than one programming language; it also
-# provides consistency across hundreds of thousands of lines of legacy code.
-# Doing so, ironically, is following PEP 8 which speaks highly of the wisdom of
-# the authors of PEP 8.
 #
 # @par Known Bugs
 # None
@@ -39,13 +29,10 @@
 #                   |                |
 #
 
-from GPIO_AL._I2CbusAPI import _I2CbusAPI
-from GPIO_AL.GPIOError import GPIOError
-from GPIO_AL.tools import isPico
-
+from GPIO_AL._I2CAPI import _I2CAPI
 import machine
 
-class _I2CbusPico( _I2CbusAPI ):
+class _I2CPicoHW( _I2CAPI ):
     """!
     @brief Class dedicated to I2C hardware and software operations on the
            Raspberry Pi Pico.
@@ -57,7 +44,7 @@ class _I2CbusPico( _I2CbusAPI ):
     DEFAULT_CLOCK_PIN = 9
     ## Default operating mode on the Pico is hardware so as not to
     ## overburden the CPU with tasks the hardware can do
-    DEFAULT_MODE = _I2CbusAPI._Mode.HARDWARE
+    DEFAULT_MODE = _I2CAPI._Mode.HARDWARE
     ## Number of I/O attempts in I/O methods before throwing an exception
     ATTEMPTS = 2
     ## Default frequency for I<sup>2</sup>C bus communications on the
@@ -65,12 +52,12 @@ class _I2CbusPico( _I2CbusAPI ):
     DEFAULT_I2C_FREQ = 100000
 
     def __init__( self,
-                  sdaPin=DEFAULT_DATA_PIN,
-                  sclPin=DEFAULT_CLOCK_PIN,
-                  mode=DEFAULT_MODE,
-                  frequency=DEFAULT_I2C_FREQ,
-                  attempts=ATTEMPTS,
-                  usePEC=False ):
+                  sdaPin,
+                  sclPin,
+                  mode,
+                  frequency,
+                  attempts,
+                  usePEC ):
         """!
         @brief Constructor for class PicoI2Cbus.
         @param sdaPin GPIO Pin number for I<sup>2</sup>C data
@@ -84,24 +71,20 @@ class _I2CbusPico( _I2CbusAPI ):
         super().__init__( sdaPin, sclPin, mode, frequency, attempts, usePEC )
         self._usePEC = False
 
-        if mode == self._Mode.HARDWARE:
 
-            if self._sclLine == 3 or self._sclLine == 7 or \
-               self._sclLine == 11 or self._sclLine == 15 or \
-               self._sclLine == 19 or self._sclLine == 27:
-                i2cId = 1
-            else:
-                # Error checking is provided by the machine.I2C constructor
-                # so we just default to 0 for all other Pins
-                i2cId = 0
-            self.__i2cObj = machine.I2C( i2cId,
-                                         sda=machine.Pin( self._sdaLine ),
-                                         scl=machine.Pin( self._sclLine ),
-                                         freq=round( self._frequency ) )
+        if self._sclLine == 3 or self._sclLine == 7 or \
+            self._sclLine == 11 or self._sclLine == 15 or \
+            self._sclLine == 19 or self._sclLine == 27:
+            i2cId = 1
         else:
-            self.__i2cObj = machine.SoftI2C( sda=machine.Pin( self._sdaLine ),
-                                             scl=machine.Pin( self._sclLine ),
-                                             freq=round( self._frequency ) )
+            # Error checking is provided by the machine.I2C constructor
+            # so we just default to 0 for all other Pins
+            i2cId = 0
+        self.__i2cObj = machine.I2C( i2cId,
+                                     sda=machine.Pin( self._sdaLine ),
+                                     scl=machine.Pin( self._sclLine ),
+                                     freq=round( self._frequency ) )
+        
         self.__open = True
         return
 
