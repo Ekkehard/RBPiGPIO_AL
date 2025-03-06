@@ -52,18 +52,29 @@ def platform() -> str:
                 raise ValueError( 'Not running on a Raspberry Pi or Pico' )
     return _PLATFORM
 
+def isPico() -> bool:
+    """!
+    @brief Determine whether we run on a Raspberry Pi Pico
+    @return True if we run on a Pico - False otherwise
+    """
+    return platform().find( 'Pico' ) != -1
 
-## isPico() returns True if the host is any Raspberry Pi Pico
-isPico = lambda: platform().find( 'Pico' ) != -1
+def isPico2() -> bool:
+    """!
+    @brief Determine if the host is specifically a Raspberry Pi Pico 2.
+    
+    This requires that the correct build of the microPython interpreter is 
+    loaded.
+    @return True if host is a Pico2 - False otherwise
+    """
+    return platform().find( 'Pico2' ) != -1
 
-## isPico2() returns True if the host is specifically a Raspberry Pi Pico 2
-## This requires that the correct build of the microPython interpreter is loaded
-isPico2 = lambda: platform().find( 'Pico2' ) != -1
-
-## isPi5() returns True if the host is a Raspberry Pi 5
-isPi5 = lambda: platform().find( 'Pi 5' ) != -1
-
-
+def isPi5() -> bool:
+    """!
+    @brief Determine if the host is a Raspberry Pi 5.
+    @return True if host is a RB Pi 5 - False otherwise.
+    """
+    return platform().find( 'Pi 5' ) != -1
 
 # header/board pins and their mapping to line numbers differ between Pi and Pico
 if isPico():

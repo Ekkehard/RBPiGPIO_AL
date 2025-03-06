@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['failedattempts_0',['failedAttempts',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a79455579373514270ea69412e937b352',1,'GPIO_AL::I2Cbus::I2Cbus']]],
-  ['frequency_1',['frequency',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a177ea7d077e8fc1f506f947889c8e644',1,'GPIO_AL.I2Cbus.I2Cbus.frequency()'],['../classGPIO__AL_1_1Pulse_1_1Pulse.html#a8375ad2a0dfd01e517af5424825735ac',1,'GPIO_AL.Pulse.Pulse.frequency(self)'],['../classGPIO__AL_1_1Pulse_1_1Pulse.html#a5cd754af2b5071460486342712c6735e',1,'GPIO_AL.Pulse.Pulse.frequency(self, Union[float, object] value)']]]
+  ['dutycycle_0',['dutyCycle',['../class_g_p_i_o___a_l_1_1_pulse_1_1_pulse.html#a53a244aaef637336dedee990984f38ff',1,'GPIO_AL.Pulse.Pulse.dutyCycle(self)'],['../class_g_p_i_o___a_l_1_1_pulse_1_1_pulse.html#a8574d5f7d962381f810d138f3fd24a21',1,'GPIO_AL.Pulse.Pulse.dutyCycle(self, float value)']]]
 ];

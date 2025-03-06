@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['dutycycle_0',['dutyCycle',['../classGPIO__AL_1_1Pulse_1_1Pulse.html#a53a244aaef637336dedee990984f38ff',1,'GPIO_AL.Pulse.Pulse.dutyCycle(self)'],['../classGPIO__AL_1_1Pulse_1_1Pulse.html#a153704ea0c1eae5ca5cd3f707cb3e436',1,'GPIO_AL.Pulse.Pulse.dutyCycle(self, float value)']]]
+  ['callback_0',['callback',['../class_g_p_i_o___a_l_1_1_pin_i_o_1_1_pin_i_o.html#a0e4729a0f3b0d337d4f1a5e7a5fa84f7',1,'GPIO_AL::PinIO::PinIO']]],
+  ['clearfailedattempts_1',['clearFailedAttempts',['../class_g_p_i_o___a_l_1_1_i2_c_1_1_i2_c.html#ac4200f872330e3c46013faa6f9aacf3c',1,'GPIO_AL::I2C::I2C']]],
+  ['close_2',['close',['../class_g_p_i_o___a_l_1_1_i2_c_1_1_i2_c.html#a98ce5213a5bfb9032d3e27cd6dd0afba',1,'GPIO_AL.I2C.I2C.close()'],['../class_g_p_i_o___a_l_1_1_pin_i_o_1_1_pin_i_o.html#ad0865b95f49aec4ccacaefb6e8cb7e6f',1,'GPIO_AL.PinIO.PinIO.close()']]],
+  ['cpuinfo_3',['cpuInfo',['../tools_8py.html#af507ba242f9c172a91cbd5fe1055419c',1,'GPIO_AL::tools']]]
 ];

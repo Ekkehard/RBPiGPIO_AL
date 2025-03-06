@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['scl_0',['scl',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a3320901ab0bf281c74b1f2abe3e54a59',1,'GPIO_AL::I2Cbus::I2Cbus']]],
-  ['sda_1',['sda',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a7879df5e3acb029c08b3e7cebefaa5be',1,'GPIO_AL::I2Cbus::I2Cbus']]],
-  ['severity_2',['severity',['../classGPIO__AL_1_1GPIOError_1_1GPIOError.html#ad4585292f189d190082c999dd13fcb97',1,'GPIO_AL::GPIOError::GPIOError']]],
-  ['start_3',['start',['../classGPIO__AL_1_1Pulse_1_1Pulse.html#a282c25e52ca031527a8ef142da45aab1',1,'GPIO_AL::Pulse::Pulse']]],
-  ['stop_4',['stop',['../classGPIO__AL_1_1Pulse_1_1Pulse.html#ae94b7d8c0597907fc8c7935025d54f24',1,'GPIO_AL::Pulse::Pulse']]]
+  ['readblockreg_0',['readBlockReg',['../class_g_p_i_o___a_l_1_1_i2_c_1_1_i2_c.html#ad96fec98d6a00b047bc33c715ac4436c',1,'GPIO_AL::I2C::I2C']]],
+  ['readbyte_1',['readByte',['../class_g_p_i_o___a_l_1_1_i2_c_1_1_i2_c.html#a429460ff5b4e4ab0a4c58fb38e2b171f',1,'GPIO_AL::I2C::I2C']]],
+  ['readbytereg_2',['readByteReg',['../class_g_p_i_o___a_l_1_1_i2_c_1_1_i2_c.html#ade56f8c746957ff69a1f7efc91fd3b81',1,'GPIO_AL::I2C::I2C']]],
+  ['readid_3',['readId',['../class_g_p_i_o___a_l_1_1_i2_c_1_1_i2_c.html#a8a302e5d107da14644c9c46f0b13872a',1,'GPIO_AL::I2C::I2C']]]
 ];

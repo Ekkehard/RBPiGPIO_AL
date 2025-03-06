@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mode_0',['Mode',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a3e26484cd425edbf16b99248d5bb42c1',1,'GPIO_AL.I2Cbus.I2Cbus.Mode()'],['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a1bbfafc615418ec33a7f53393a8c41a6',1,'GPIO_AL.PinIO.PinIO.Mode()']]]
+  ['warning_0',['WARNING',['../class_g_p_i_o___a_l_1_1_g_p_i_o_error_1_1_g_p_i_o_error_1_1_severity.html#a77af9f64cf5145c2d4efefc40f575d71',1,'GPIO_AL::GPIOError::GPIOError::Severity']]]
 ];

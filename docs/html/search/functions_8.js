@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['level_0',['level',['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a3a330b575992c4e1b74bc54e5660a210',1,'GPIO_AL.PinIO.PinIO.level(self)'],['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a8c392b86342032fa8f8f3f36c91ad58a',1,'GPIO_AL.PinIO.PinIO.level(self, Level level)']]],
-  ['line_1',['line',['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a53753a6ce01f3cbcf735650f87acfcd6',1,'GPIO_AL::PinIO::PinIO']]],
-  ['linetostr_2',['lineToStr',['../tools_8py.html#a6668311001c1d2fce995e55526b54f09',1,'GPIO_AL::tools']]]
+  ['ishwi2cpinpair_0',['isHWI2CPinPair',['../tools_8py.html#a9a65b6d1129c7934351b2eb9ff70e250',1,'GPIO_AL::tools']]],
+  ['ishwpulsepin_1',['isHWpulsePin',['../tools_8py.html#af63c3a6ef6bc479c497fb1109c88a56b',1,'GPIO_AL::tools']]],
+  ['ispi5_2',['isPi5',['../tools_8py.html#aae7d6fdc51452bee944b6af93fd53b9f',1,'GPIO_AL::tools']]],
+  ['ispico_3',['isPico',['../tools_8py.html#a2a5d06ba5b22918f5746b0d19b7f4bb5',1,'GPIO_AL::tools']]],
+  ['ispico2_4',['isPico2',['../tools_8py.html#a1b6f1f150bf52772118b2d0091a4dcf3',1,'GPIO_AL::tools']]]
 ];

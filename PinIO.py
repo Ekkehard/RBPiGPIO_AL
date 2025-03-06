@@ -51,7 +51,7 @@ from GPIO_AL.tools import isPico
 # determine platform and import appropriate module for GPIO access
 if isPico():
     # MicroPython silently ignores type hints without the need to import typing
-    from _PinIOPico import _PinIOPico
+    from GPIO_AL._PinIOPico import _PinIOPico
 else:
     from typing import Union, Optional
     # the following data and functions are not needed for the Raspberry Pi Pico

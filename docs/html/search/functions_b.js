@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['readblockreg_0',['readBlockReg',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#aff5a3f8edbb2330c5c9970be2fb1cea1',1,'GPIO_AL::I2Cbus::I2Cbus']]],
-  ['readbyte_1',['readByte',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#aa92b469e40d3d57f68872e5c2dafcc25',1,'GPIO_AL::I2Cbus::I2Cbus']]],
-  ['readbytereg_2',['readByteReg',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#a1979fc832d95cf2f731b5c3f2d003543',1,'GPIO_AL::I2Cbus::I2Cbus']]],
-  ['readid_3',['readId',['../classGPIO__AL_1_1I2Cbus_1_1I2Cbus.html#abb4995ade10a38032f7066170ac41669',1,'GPIO_AL::I2Cbus::I2Cbus']]]
+  ['pin_0',['pin',['../class_g_p_i_o___a_l_1_1_pin_i_o_1_1_pin_i_o.html#a4099d081c9ececf1d75502a632a376d4',1,'GPIO_AL.PinIO.PinIO.pin()'],['../class_g_p_i_o___a_l_1_1_pulse_1_1_pulse.html#a5c0284dd7d18eb2151c6ed0e43edcd66',1,'GPIO_AL.Pulse.Pulse.pin()']]],
+  ['platform_1',['platform',['../tools_8py.html#a7d4c7b35d7f88cdfae19336fe5bf1491',1,'GPIO_AL::tools']]]
 ];

@@ -33,6 +33,10 @@
 #   Thu Jan 23 2025 | Ekkehard Blanz | now also works on a Raspberry Pi 5
 #   Mon Jan 27 2025 | Ekkehard Blanz | split into _I2CbusAPI.py, I2Cbus.py.
 #                   |                | _PiI2Cbus.py, and _PicoI2Cbus.py
+#   Mon Mar 03 2025 | Ekkehard Blanz | renamed into I2C.py _I2CAPI.py,
+#                   |                | _I2PicoHW.py, _I2CPicoSW.py,
+#                   |                | _I2CPiHW.py, and _I2CPiSW.py
+#   Wed Mar 05 2025 | Ekkehard Blanz | added warning to documentation
 #                   |                |
 #
 
@@ -47,18 +51,36 @@ if not isPico():
 class I2C( _I2CAPI ):
     """!
     @brief Class to handle I<sup>2</sup>C bus communication.
+    
+    I<sup>2</sup>C bus communication is a sore point on the Raspberry Pi.  This 
+    is because on Raspberries other than the RB Pi 5 and Pico it just doesn't 
+    work!  The reason is the Broadcom BCM2835 chip, which Raspberry Pis 0, 3, 
+    and 4 use for hardware I<sup>2</sup>C.  It is broken and does not correctly 
+    support clock stretching.  This is fixed on the Raspberry Pi 5; the Pico 
+    never was plagued by this.  The remedy usually applied is to use 
+    "bit-banging," i.e. software-controlled pulses for I<sup>2</sup>C 
+    communication.  Unfortunately, software-controlled pulses are not very 
+    stable and cannot operate at the speeds that most I<sup>2</sup>C devices 
+    expect the pulses to be delivered.  Moreover, the pigpio software used for 
+    bit banging appears to be less than robust and sometimes results in 
+    Exceptions due to accessing elements of None-type objects.  Therefore, also 
+    I<sup>2</sup>C in software mode does not work very reliably and not at all 
+    on the Raspberry Pi 5.  If I<sup>2</sup>C bus communication is a 
+    requirement, the user is strongly advised to use a Raspberry Pi Pico or a 
+    Raspberry Pi 5 or higher.  For more details and implication on this software 
+    see below. 
 
     The GPIO Pins on the Raspberry Pi are GPIO2 for I<sup>2</sup>C data and
     GPIO3 for I<sup>2</sup>C clock for hardware I<sup>2</sup>C and freely
     selectable for software I<sup>2</sup>C (bit banging); on the Raspberry Pi
     Pico, the GPIO Pins for I<sup>2</sup>C communication are also freely
-    selectable under software I<sup>2</sup>C, they are restricted to GPIO1 for
-    data and GPIO2 for clock, GPIO4 for data and GPIO5 for clock, GPIO6
-    for data and GPIO7 for clock, GPIO9 for data and GPIO10 for clock,
-    GPIO11 for data and GPIO12 for clock, GPIO14 for data and GPIO15 for
-    clock, GPIO16 for data and GPIO17 for clock, GPIO19 for data and GPIO20 for
-    clock, GPIO21 for data and GPIO22 for clock, GPIO24 for data and GPIO25 for
-    clock, GPIO26 for data and GPIO27 for clock, or GPIO31 for data and GPIO32
+    selectable under software I<sup>2</sup>C, they are restricted to GP1 for
+    data and GP2 for clock, GP4 for data and GP5 for clock, GP6
+    for data and GP7 for clock, GP9 for data and GP10 for clock,
+    GP11 for data and GP12 for clock, GP14 for data and GP15 for
+    clock, GP16 for data and GP17 for clock, GP19 for data and GP20 for
+    clock, GP21 for data and GP22 for clock, GP24 for data and GP25 for
+    clock, GP26 for data and GP27 for clock, or GP31 for data and GP32
     for clock.
 
     Since many targets can be connected on an I<sup>2</sup>C bus, one I2C
@@ -82,7 +104,7 @@ class I2C( _I2CAPI ):
     Also, on Raspberry Pi systems other than the Raspberry Pi 5 running under 
     an operating system, the pigpiod daemon needs to run to use the software 
     mode, which is strongly recommended on Raspberry Pis other than Raspberry 
-    Pi 5 (see below).  Either use
+    Pi 5 (see above).  Either use
     @code
         sudo pigpiod
     @endcode
@@ -94,29 +116,29 @@ class I2C( _I2CAPI ):
     Raspberry Pi 5 pigpio no longer works, and therefore software mode is
     currently not available there.
 
-    It is worth noting that the defaults for the operating mode are different
-    between different systems.  This is because either the Broadcom BCM2835 
-    chip, which the Raspberry Pi 3 uses for hardware I<sup>2</sup>C, or the 
-    standard Raspberry Pi driver smbus2 is broken and does not (reliably) 
-    support clock stretching when requested by a target.  This was found through
+    It is worth noting that because of the problems with the Broadcom BCM2835 
+    chip mentioned above, the defaults for the operating mode are different for 
+    different systems.  The problems with that chip were found through
     experimentation and measurements and also confirmed online at
-    https://www.advamation.com/knowhow/raspberrypi/rpi-i2c-bug.html.  The
-    software mode supports clock stretching properly on the Raspberry Pi 3.
-    Naturally, the software-generated I<sup>2</sup>C clock on a non-real-time
-    OS is not very consistent, but targets will tolerate a non-consistent
-    clock better, albeit not always completely, than a broken clock-stretch
-    mechanism when they need it.  Therefore, the default operating mode on a
-    Raspberry Pi 3 is software, but since other systems work just fine with
+    https://www.advamation.com/knowhow/raspberrypi/rpi-i2c-bug.html.  The pigpio
+    software mode supports clock stretching properly on the Raspberry Pi 0, 3, 
+    and 4, but pigpio is broken on the Raspberry Pi 5.  Therefore, software
+    mode is not supported on the Raspberry Pi 5.  Naturally, even when 
+    supported, the software-generated I<sup>2</sup>C clock on a non-real-time OS 
+    is not very consistent, but targets will tolerate a non-consistent clock 
+    better, albeit not always completely, than a broken clock-stretch mechanism 
+    when they need it.  Therefore, the default operating mode on a Raspberry Pi 
+    0, 3, and 4 is software, but since other systems work just fine with 
     hardware I<sup>2</sup>C, the default operating mode there is hardware to 
     free the CPU from the task of generating I<sup>2</sup>C signals.  This 
     software still allows the caller to select hardware mode also on the 
-    Raspberry Pi 3, but the user is strongly advised to make sure that no target
-    on the I<sup>2</sup>C bus requires clock stretching in such cases.
+    Raspberry Pi 0, 3, and 4, but the user is strongly advised to make sure that 
+    no target on the I<sup>2</sup>C bus requires clock stretching in such cases.
     Moreover, the user is much more likely to run into error conditions on a 
-    Raspberry Pi 3 I<sup>2</sup>C bus than on any other system, and it is a very
-    good idea to write "robust" code that checks error conditions continuously 
-    and deals with them appropriately when the I<sup>2</sup>C bus and clock 
-    stretching has to be used on a Raspberry Pi 3, even in software mode.
+    Raspberry Pi 0, 3, and 4 I<sup>2</sup>C bus than on any other system, and it 
+    is a very good idea to write "robust" code that checks error conditions 
+    continuously and deals with them appropriately on a Raspberry Pi other than 
+    5 (and above) and Pico, even in software mode.
     """
     
     ## Operating mode either Mode.HARDWARE or Mode.SOFTWARE as Enum

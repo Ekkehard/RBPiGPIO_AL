@@ -25,12 +25,25 @@
 # package, however, does rely on the packages gpiod for direct bit-I/O and 
 # SMBus2 for the I<sup>2</sup>C bus interface since these packages follow the 
 # same philosophy, gpiod, in fact is the Python binding of libgpiod, which is a 
-# standard Linux library.
+# standard Linux library.  On Raspberry Pis 0, 3, and 4, we still rely
+# reluctantly on pgpio (and its companion demon pgpiod) for software
+# I<sup>2</sup>C bus support, which is one of the packages that broke in the
+# transition to the Raspberry Pi 5 hardware.  See the documentation of class I2C
+# for more details.
 #
 # This package consists of three major parts, general Bit-I/O, pulse generation,
 # and serial bus communication.  Currently, only the I<sup>2</sup>C bus is 
 # supported in the third part, but more busses will be implemented as the need 
 # arises.
+#
+# Throughout this package, GPIO "pins" can be referred to by their integer
+# header pin numbers in case of the Raspberry Pis 0, 3, 4, and 5 (and above), or
+# integer board pin numbers in case of a Raspberry Pi Pico.  These pin numbers
+# are always Python ints.  It is very common, however, to refer to these pins by
+# their GPIO (or GP in case of the Raspberry Pi Pico) line numbers, i.e. GPIO1,
+# GPIO2, ... on the Raspberry Pis or GP1, GP2, ... on the Raspberry Pi Pico.
+# When using this scheme, the line numbers are always Python strings with the
+# prefix 'GPIO' on the Raspberry Pis and 'GP' on the Raspberry Pi Pico.
 #
 # This code has been tested on a Raspberry Pi 0, 3, 4 and 5 and a Raspberry Pi 
 # Pico.
@@ -38,13 +51,13 @@
 # @version    2.0.0
 #
 # @par Comments
-# This is Python 3 code!  PEP 8 guidelines are decidedly NOT followed in some
-# instances, and guidelines provided by "Coding Style Guidelines" a "Process
-# Guidelines" document from WEB Design are used instead where the two differ,
-# as the latter span several programming languages and are therefore also 
-# applicable to projects that require more than one programming language; it 
-# also provides consistency across hundreds of thousands of lines of legacy 
-# code.  Doing so, ironically, is following PEP 8, which speaks highly of the 
+# This is Python 3 code!  However, PEP 8 guidelines are decidedly NOT followed
+# in some instances, and guidelines provided by "Coding Style Guidelines" a
+# "Process Guidelines" document from WEB Design are used instead where the two
+# differ, as the latter span several programming languages and are therefore
+# also applicable to projects that require more than one programming language;
+# it also provides consistency across hundreds of thousands of lines of legacy
+# code.  Doing so, ironically, is following PEP 8, which speaks highly of the
 # wisdom of the authors of PEP 8.
 # @par Known Bugs
 # None

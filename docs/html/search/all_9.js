@@ -1,7 +1,10 @@
 var searchData=
 [
-  ['level_0',['level',['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a3a330b575992c4e1b74bc54e5660a210',1,'GPIO_AL.PinIO.PinIO.level(self)'],['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a8c392b86342032fa8f8f3f36c91ad58a',1,'GPIO_AL.PinIO.PinIO.level(self, Level level)']]],
-  ['level_1',['Level',['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a81693660d30415c505c19c39539dbf02',1,'GPIO_AL::PinIO::PinIO']]],
-  ['line_2',['line',['../classGPIO__AL_1_1PinIO_1_1PinIO.html#a53753a6ce01f3cbcf735650f87acfcd6',1,'GPIO_AL::PinIO::PinIO']]],
-  ['linetostr_3',['lineToStr',['../tools_8py.html#a6668311001c1d2fce995e55526b54f09',1,'GPIO_AL::tools']]]
+  ['i2c_0',['I2C',['../class_g_p_i_o___a_l_1_1_i2_c_1_1_i2_c.html',1,'GPIO_AL::I2C']]],
+  ['i2c_2epy_1',['I2C.py',['../_i2_c_8py.html',1,'']]],
+  ['ishwi2cpinpair_2',['isHWI2CPinPair',['../tools_8py.html#a9a65b6d1129c7934351b2eb9ff70e250',1,'GPIO_AL::tools']]],
+  ['ishwpulsepin_3',['isHWpulsePin',['../tools_8py.html#af63c3a6ef6bc479c497fb1109c88a56b',1,'GPIO_AL::tools']]],
+  ['ispi5_4',['isPi5',['../tools_8py.html#aae7d6fdc51452bee944b6af93fd53b9f',1,'GPIO_AL::tools']]],
+  ['ispico_5',['isPico',['../tools_8py.html#a2a5d06ba5b22918f5746b0d19b7f4bb5',1,'GPIO_AL::tools']]],
+  ['ispico2_6',['isPico2',['../tools_8py.html#a1b6f1f150bf52772118b2d0091a4dcf3',1,'GPIO_AL::tools']]]
 ];

@@ -44,17 +44,11 @@ from GPIO_AL.GPIOError import GPIOError
 
 if isPico():
     # MicroPython silently ignores type hints without the need to import typing
-    from _PulsePicoHW import _PulsePicoHW # type: ignore
-    class _PulseSW:
-        pass
-    class _PulsePiHW:
-        pass
+    from GPIO_AL._PulsePicoHW import _PulsePicoHW # type: ignore
 else:
     from typing import Union, Optional
     from GPIO_AL._PulsePiHW import _PulsePiHW # type: ignore
     from GPIO_AL._PulseSW import _PulseSW # type: ignore
-    class _PulsePicoHW:
-        pass
 
 
 class Pulse( _PulseAPI ):
@@ -152,10 +146,10 @@ class Pulse( _PulseAPI ):
     """
 
     def __init__( self,
-                  pulsePin: Union[int, str,PinIO],
+                  pulsePin: Union[int,str,PinIO],
                   frequency: Union[float,object],
-                  dutyCycle: float=0.5,
-                  bursts: Optional[Union[int, None]]=None ):
+                  dutyCycle: Optional[float]=0.5,
+                  bursts: Optional[int]=None ):
         """!
         @brief Constructor - sets up parameters and determines mode (hard- or
                software)
@@ -164,7 +158,7 @@ class Pulse( _PulseAPI ):
         @param pulsePin I/O header pin or GPIO line number to generate pulses 
                on.  Can be an integer header pin number or a string of the form
                GPIO<m> on the Raspberry Pi or GP<m> on the Pico where m 
-               represents the line number
+               represents the line number or even a PinIO object
         @param frequency pulse frequency in Hz as float or PObject with unit Hz
         @param dutyCycle 0 <= dutyCycle <= 1 duty cycle of pulse (default: 0.5)
         @param bursts number of impulses to generate or None for continuous
