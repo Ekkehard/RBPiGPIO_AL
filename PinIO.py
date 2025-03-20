@@ -174,7 +174,7 @@ class PinIO( _PinIOAPI ):
         # instantiate actor
         if isPico():
             self.__actor = \
-                PinIOPico( pin, mode, callback, edge, force ) # type: ignore
+                _PinIOPico( pin, mode, callback, edge, force ) # type: ignore
         else:
             self.__actor = \
                 _PinIOPi( pin, mode, callback, edge, force ) # type: ignore

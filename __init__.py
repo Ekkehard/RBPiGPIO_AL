@@ -23,18 +23,18 @@
 # file interfaces in the hope, that they prove to be more stable than register-
 # based operations and generally does not rely on other packages to do so.  This 
 # package, however, does rely on the packages gpiod for direct bit-I/O and 
-# SMBus2 for the I<sup>2</sup>C bus interface since these packages follow the 
-# same philosophy, gpiod, in fact is the Python binding of libgpiod, which is a 
-# standard Linux library.  On Raspberry Pis 0, 3, and 4, we still rely
-# reluctantly on pgpio (and its companion demon pgpiod) for software
-# I<sup>2</sup>C bus support, which is one of the packages that broke in the
-# transition to the Raspberry Pi 5 hardware.  See the documentation of class I2C
-# for more details.
+# SMBus2 for the I<sup>2</sup>C bus interface, and gpiozero for the indirect 
+# analog input functionality since these packages follow the same philosophy,
+# gpiod, in fact is just the Python binding of libgpiod, which is a standard 
+# Linux library.  On Raspberry Pis 0, 3, and 4, we still rely reluctantly on 
+# pgpio (and its companion demon pgpiod) for software I<sup>2</sup>C bus 
+# support, which is one of the packages that broke in the transition to the 
+# Raspberry Pi 5 hardware.  See the documentation of class I2C for more details.
 #
-# This package consists of three major parts, general Bit-I/O, pulse generation,
-# and serial bus communication.  Currently, only the I<sup>2</sup>C bus is 
-# supported in the third part, but more busses will be implemented as the need 
-# arises.
+# This package consists of four major parts, digital Bit-I/O, analog bit input,
+# pulse generation, and serial bus communication.  Currently, only the 
+# I<sup>2</sup>C bus is supported in the fourth part, but more busses will be 
+# implemented as the need arises.
 #
 # Throughout this package, GPIO "pins" can be referred to by their integer
 # header pin numbers in case of the Raspberry Pis 0, 3, 4, and 5 (and above), or
@@ -82,17 +82,14 @@ level code, including user space Python device drivers, should run and use the
 common API of the GPIO_AL shared by all Raspberry Pi architectures without 
 modifications on all those architectures.
 
-This package consists of three major parts, general Bit-I/O, pulse generation,
-and serial bus communication.  The first part is subdivided into single bit and
-parallel I/O, the second one in software and hardware-generated pulses, and the
-third one provides software to handle standard serial busses.  Currently, only 
-the I<sup>2</sup>C bus is supported, but more busses will be implemented as the 
-need arises.
+This package consists of four major parts, digital Bit-I/O, analog input, pulse 
+generation, and serial bus communication. 
 """
 
 from .GPIOError import GPIOError
 from .PinIO import PinIO
 from .Pulse import Pulse
+from .AnalogInput import AnalogInput
 from .I2C import I2C
 from .tools import platform, isPico, isPi5, cpuInfo, isHWpulsePin, hwPWMlines, \
                    hwI2CLinePairs, isHWI2CPinPair
@@ -100,6 +97,6 @@ from .tools import platform, isPico, isPi5, cpuInfo, isHWpulsePin, hwPWMlines, \
 
 
 __version__ = '2.0.0'
-__all__ = ['GPIOError', 'PinIO', 'Pulse', 'I2C', 'platform', 'isPico', 
-           'isPi5', 'cpuInfo', 'isHWpulsePin', 'hwPWMlines', 'hwI2CLinePairs',
-           'isHWI2CPinPair']
+__all__ = ['GPIOError', 'PinIO', 'Pulse', 'I2C', 'AnalogInput',
+           'platform', 'isPico', 'isPi5', 'cpuInfo', 'isHWpulsePin', 
+           'hwPWMlines', 'hwI2CLinePairs', 'isHWI2CPinPair']
