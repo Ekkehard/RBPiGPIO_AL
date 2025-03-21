@@ -58,9 +58,9 @@ class AnalogInput( _AnalogInputAPI ):
     level code to be used on all Raspberry Pi models without significant 
     modification.  The only difference between using an external ADC and the
     built-in ADC of the Raspberry Pi Pico is that the external ADC channel must 
-    be specified where the Pico requires a Pin or line number.  This class uses
-    the gpiozero library for the Raspberry Pis other than the Pico internally, 
-    and hence supports all ADC chips supported by gpiozero.
+    be specified where the Pico requires a Pin number or GP(IO) line string.  
+    This class uses the gpiozero library for the Raspberry Pis other than the 
+    Pico internally, and hence supports all ADC chips supported by gpiozero.
 
     On Raspberry Pis without built-in ADC, the supported external ADC chips are 
     MCP3002, MCP3004, MCP3008, MCP3201, MCP3202, MCP3204, MCP3208, MCP3301, 
@@ -69,7 +69,8 @@ class AnalogInput( _AnalogInputAPI ):
     SCLK (GPIO11) are used for communication with the ADC chip.  The chipEnable 
     parameter is used to specify the SPI chip enable line number using CE0 
     (GPIO8) and CE1 (GPIO7).  These pins must therefore be connected to the 
-    appropriate pins on the ADC chip as shown in the following table.
+    appropriate pins on the ADC chip as shown in the following table which uses
+    the MCP3008 as an example for the second column numbers.
     <table border="1" >
     <caption>Connection of MCP3x0y chips to Raspberry Pi other than Pico
              --- these chips have 10+x bits resolution and y analog input 
@@ -82,10 +83,10 @@ class AnalogInput( _AnalogInputAPI ):
         <th>Description</th>
     </tr>
     <tr>
-        <td>CH<n> (n = 0...y-1)</td>
+        <td>CH<m> (m = 0...y-1)</td>
         <td><n> (n = 1...8)</td>
-        <td>not connected</td>
-        <td>not connected</td>
+        <td>not connected to RB Pi</td>
+        <td>not connected to RB Pi</td>
         <td>Analog input channel connected to sensor</td>
     </tr>
     <tr>

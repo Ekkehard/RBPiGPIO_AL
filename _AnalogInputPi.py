@@ -45,9 +45,6 @@ class _AnalogInputPi( _AnalogInputAPI ):
         @param pin I/O header pin number or GP line
         """
         self.__deviceObj = None
-        self.__chip = chip
-        self.__channel = channel
-        self.__chipEnable = chipEnable
         if chip == 'MCP3001':
             self.__deviceObj = gpiozero.MCP3001( channel=channel, 
                                                  select_pin=chipEnable )
@@ -83,6 +80,15 @@ class _AnalogInputPi( _AnalogInputAPI ):
                                                  select_pin=chipEnable )
         else:
             raise GPIOError( 'unknown ADC chip' )
+        self.__chip = chip
+
+        if channel < 0 or channel >= int( chip[6] ):
+            raise GPIOError( 'invalid channel for chip {0}'.format( chip ) )
+        self.__channel = channel
+
+        if chipEnable < 0 or chipEnable > 1:
+            raise GPIOError( 'invalid chip enable pin {0}'.format( chipEnable ) )
+        self.__chipEnable = chipEnable
 
         return
 
