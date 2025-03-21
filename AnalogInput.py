@@ -33,8 +33,6 @@
 
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._AnalogInputAPI import _AnalogInputAPI
-from GPIO_AL._AnalogInputPi import _AnalogInputPi
-from GPIO_AL._AnalogInputPico import _AnalogInputPico
 from GPIO_AL.tools import isPico
 
 # determine platform and import appropriate module for GPIO access
@@ -64,26 +62,111 @@ class AnalogInput( _AnalogInputAPI ):
     the gpiozero library for the Raspberry Pis other than the Pico internally, 
     and hence supports all ADC chips supported by gpiozero.
 
-    On Raspberry Pis other than the Pico, the supported ADC chips are MCP3002,
-    MCP3004, MCP3008, MCP3201, MCP3202, MCP3204, MCP3208, MCP3301, MCP3302, or 
-    MCP3302.  These chips use the SPI protocol to communicate with the Raspberry
-    Pi.  The general SPI pins MOSI (GPIO10), MISO (GPIO9) and SCLK (GPIO11) are 
-    used for communication with the ADC chip.  The chipEnable parameter is used
-    to specify the SPI chip enable line number using CE0 (GPIO8) and CE1 (GPIO7).
-    These pins must therefore be connected to the appropriate pins on the ADC
-    chip.
+    On Raspberry Pis without built-in ADC, the supported external ADC chips are 
+    MCP3002, MCP3004, MCP3008, MCP3201, MCP3202, MCP3204, MCP3208, MCP3301, 
+    MCP3302, or MCP3304.  These chips use the SPI protocol to communicate with 
+    the Raspberry Pi.  The general GPIO SPI pins MOSI (GPIO10), MISO (GPIO9) and
+    SCLK (GPIO11) are used for communication with the ADC chip.  The chipEnable 
+    parameter is used to specify the SPI chip enable line number using CE0 
+    (GPIO8) and CE1 (GPIO7).  These pins must therefore be connected to the 
+    appropriate pins on the ADC chip as shown in the following table.
+    <table border="1" >
+    <caption>Connection of MCP3x0y chips to Raspberry Pi other than Pico
+             --- these chips have 10+x bits resolution and y analog input 
+             channels</caption>
+    <tr>
+        <th>MCP3x0y Signal</th>
+        <th>MCP3008 Pin Number</th>
+        <th>RB Pi Line</th>  
+        <th>RBPi Header Pin Number</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>CH<n> (n = 0...y-1)</td>
+        <td><n> (n = 1...8)</td>
+        <td>not connected</td>
+        <td>not connected</td>
+        <td>Analog input channel connected to sensor</td>
+    </tr>
+    <tr>
+        <td>DGND</td>
+        <td>9</td>
+        <td>GND</td>
+        <td>6, 9, 14, 20, 25, 30, 34, or 39</td>
+        <td>Digital ground</td>
+    </tr>
+    <tr>
+        <td><SPAN STYLE="text-decoration:overline">CS</SPAN>/SHDN</td>
+        <td>10</td>
+        <td>GPIO7/CE1 or GPIO8/CE0</td>
+        <td>24 or 26</td>
+        <td>SPI chip select 0 or 1 / shutdown input 0 or 1</td>
+    </tr>
+    <tr>
+        <td>D<sub>IN</sub></td>
+        <td>11</td>
+        <td>GPIO10/MOSI</td>
+        <td>19</td>
+        <td>SPI MOSI</td>
+    </tr>
+    <tr>
+        <td>D<sub>OUT</sub></td>
+        <td>12</td>
+        <td>GPIO9/MISO</td>
+        <td>21</td>
+        <td>SPI MISO</td>
+    </tr>
+    <tr>
+        <td>CLK</td>
+        <td>13</td>
+        <td>GPIO11/SCLK</td>
+        <td>23</td>
+        <td>SPI clock</td>
+    </tr>
+    <tr>
+        <td>AGND</td>
+        <td>14</td>
+        <td>GND</td>
+        <td>6, 9, 14, 20, 25, 30, 34, or 39</td>
+        <td>Analog ground</td>
+    </tr>
+    <tr>
+        <td>V<sub>REF</sub></td>
+        <td>15</td>
+        <td>3.3V</td>
+        <td>1 or 17</td>
+        <td>3.3 V analog reference voltage</td>
+    </tr>
+    <tr>
+        <td>V<sub>DD</sub></td>
+        <td>16</td>
+        <td>3.3V</td>
+        <td>1 or 17</td>
+        <td>3.3 V digital supply voltage</td>
+    </tr>
+    </table>
 
-    Pins' voltage levels are examined via a getter for the level property of 
-    this class, i.e. if myDevice is a AnalogInput object via the statement
+    
+    As the Raspberry Pi Pico does not need an external ADC chip, the chipEnable 
+    as well as the chip parameter are ignored there.
+
+    The voltage levels at the ADC pins are examined via a getter for the level 
+    property of  this class, i.e. if myDevice is an AnalogInput object the 
+    statement
     @code
         value = myDevice.level
     @endcode
-    to examine the pin's voltage level as an integer between 0 and 
-    myDevice.maxLevel and store it in the variable value.
+    is used to examine the ADC input pin's voltage level as an integer between 0
+    and  myDevice.maxLevel and store it in the variable value.  The value of
+    myDevice.maxLevel is dependent on the ADC used, but is always 1023
+    for 10-bit ADCs (e.g. MCP3002, MCP3004, MCP3008), 4095 for 12-bit ADCs
+    (e.g. MCP3201, MCP3202, MCP3204, MCP3208), and 8191 for 13-bit ADCs (e.g. 
+    MCP3301, MCP3302, MCP3304).  On the Raspberry Pi Pico, it is always 65535.
 
-    CAUTION: Make sure you are only using voltages at any input pins of the ADC 
-    that do not exceed the allowed level for your device.  Otherwise, permanent 
-    damage to the ADC chip may occur.
+    CAUTION: Make sure you are only using voltages at any input pins of the ADC,
+    external or built-in, that do not exceed the allowed level for your device.
+    Otherwise, permanent  damage to the ADC chip or the Raspberry Pi Pico may 
+    occur.
     """
 
     def __init__( self, 
@@ -92,16 +175,17 @@ class AnalogInput( _AnalogInputAPI ):
                   chip: Optional[str]='MCP3008' ):
         """!
         @brief Constructor - initializes the class.
-        @param either ADC channel or I/O board pin or GP line number on the 
-               Pico.  Can be an integer channel or board pin number or a string
+        @param channelOrPin either ADC integer channel or on the Pico I/O board 
+               pin or GP line number.
+               Can be an integer ADC channel number or on the Pico a board pin number or a string
                of the form GP<m> on the Pico where m represents the line number
         @param chipEnable can be either 0 or 1 for the SPI chip enable (defaults
                to 0 - ignored on the Pico)
-        @param chip (can be 'MCP3002', 'MCP3004', 'MCP3008', 'MCP3201', 
+        @param chip can be 'MCP3002', 'MCP3004', 'MCP3008', 'MCP3201', 
                'MCP3202', 'MCP3204', 'MCP3208', 'MCP3301', 'MCP3302', or 
-               'MCP3302', defaults to 'MCP3008' - ignored on the Pico)
+               'MCP3304' (defaults to 'MCP3008' - ignored on the Pico)
         """
-        self.__open = False
+        self.__actor = None
         # instantiate actor
         if isPico():
             self.__actor = \
@@ -109,7 +193,6 @@ class AnalogInput( _AnalogInputAPI ):
         else:
             self.__actor = \
                 _AnalogInputPi( channelOrPin, chipEnable, chip ) # type: ignore
-        self.__open = True
         return
 
     def __del__( self ):
@@ -122,7 +205,6 @@ class AnalogInput( _AnalogInputAPI ):
         Closes the pin and terminates the event loop thread if running.
         """
         self.close()
-        self.__actor = None
         return
 
     def  __enter__( self ):
@@ -154,34 +236,37 @@ class AnalogInput( _AnalogInputAPI ):
 
     def close( self ):
         """!
-        @brief Close the Pin - set it to input (high impedance) without pulling
-               up or down.
+        @brief Close the ADC pin - set this pin or all SPI pins to input (high 
+               impedance) without pulling up or down.
         """
-        if self.__open and self.__actor:
-            self.__actor.close()
-        self.__open = False
+        if self.__actor:
+            try:
+                self.__actor.close()
+            except Exception:
+                pass
+        self.__actor = None
         return
 
     @property
     def level( self ) -> int:
         """!
-        @brief Works as read property to get the current voltage level
+        @brief Works as read property to get the current ADC level
                of a Pin or ADC chip input as an int.
-        @return int between 0 and maxLevel representing the voltage level
+        @return int between 0 and maxLevel representing the ADC level
         """
-        if self.__actor:
-            return self.__actor.level
-        else:
-            return 0
+        if self.__actor is None:
+            raise GPIOError( 'Analog Input is not initialized' )
+        return self.__actor.level
         
     @property
     def maxLevel( self ) -> int:
         """!
         @brief Works as read property to get the maximal value that the level
                property can return.
+        @return maximal value the level property can return as an int
         """
-        if not self.__actor:
-            raise GPIOError( 'Analog Input actor is not initialized' )
+        if self.__actor is None:
+            raise GPIOError( 'Analog Input is not initialized' )
         return self.__actor.maxLevel
 
 

@@ -50,40 +50,39 @@ class _AnalogInputPi( _AnalogInputAPI ):
         self.__chipEnable = chipEnable
         if chip == 'MCP3001':
             self.__deviceObj = gpiozero.MCP3001( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3002':
             self.__deviceObj = gpiozero.MCP3002( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3004': 
             self.__deviceObj = gpiozero.MCP3004( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3008':
             self.__deviceObj = gpiozero.MCP3008( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3201':
             self.__deviceObj = gpiozero.MCP3201( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3202':
             self.__deviceObj = gpiozero.MCP3202( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3204':
             self.__deviceObj = gpiozero.MCP3204( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3208':
             self.__deviceObj = gpiozero.MCP3208( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3301':
             self.__deviceObj = gpiozero.MCP3301( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3302':
             self.__deviceObj = gpiozero.MCP3302( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         elif chip == 'MCP3304':
             self.__deviceObj = gpiozero.MCP3304( channel=channel, 
-                                                 chip_enable=chipEnable )
+                                                 select_pin=chipEnable )
         else:
-            raise GPIOError( 'unknown chip' )
-        self._open = True
+            raise GPIOError( 'unknown ADC chip' )
 
         return
 
@@ -99,7 +98,8 @@ class _AnalogInputPi( _AnalogInputAPI ):
         @brief String representation of this class - returns all settable
                parameters.  Can be overwritten by child.
         """
-        return 'analog input via ADC chip {0} chip enable: {1}, channel: {2}' \
+        return 'analog input via ADC chip {0} chip enable: {1}, ' \
+               'analog input channel: {2}' \
                .format( self.__chip, self.__chipEnable, self.__channel )
 
     def close( self ):
@@ -110,17 +110,17 @@ class _AnalogInputPi( _AnalogInputAPI ):
         properly and leaves the associated pins in input mode.
         TODO check that!
         """
-        if self._open and self.__deviceObj is not None:
+        if self.__deviceObj is not None:
             self.__deviceObj.close()
-        self._open = False
+        self.__deviceObj = None
         return
 
     @property
     def level( self ):
         """!
-        @brief Works as read property to get the current voltage level
+        @brief Works as read property to get the current ADC level
                of an ADC channel
-        @return voltage level as int between 0 and maxLevel
+        @return ADC level as int between 0 and maxLevel
         """
         if self.__deviceObj is None:
             raise GPIOError( 'device not open' )
@@ -129,9 +129,9 @@ class _AnalogInputPi( _AnalogInputAPI ):
     @property
     def maxLevel( self ) -> int:
         """!
-        @brief Works as read property to get the maximum voltage level
+        @brief Works as read property to get the maximum ADC level
                of a Pin.
-        @return maximum voltage level
+        @return maximum ADC level
         """
         if self.__deviceObj is None:
             raise GPIOError( 'device not open' )

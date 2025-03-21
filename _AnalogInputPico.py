@@ -79,9 +79,9 @@ class _AnalogInputPico( _AnalogInputAPI ):
     @property
     def level( self ) -> int:
         """!
-        @brief Works as read property to get the current voltage level
+        @brief Works as read property to get the current ADC level
                of a Pin.
-        @return current voltage level between 0 and maxLevel
+        @return current ADC level between 0 and maxLevel
         """
         if not self.__adcObj:
             raise GPIOError( 'ADC object not initialized' )
@@ -90,8 +90,8 @@ class _AnalogInputPico( _AnalogInputAPI ):
     @property
     def maxLevel( self ) -> int:
         """!
-        @brief Works as read property to get the maximum voltage level
+        @brief Works as read property to get the maximum ADC level
                of a Pin.
-        @return maximum voltage level
+        @return maximum ADC level
         """
         return 65535

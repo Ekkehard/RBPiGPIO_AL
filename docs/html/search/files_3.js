@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['pinio_2epy_0',['PinIO.py',['../_pin_i_o_8py.html',1,'']]],
-  ['pulse_2epy_1',['Pulse.py',['../_pulse_8py.html',1,'']]]
+  ['i2c_2epy_0',['I2C.py',['../I2C_8py.html',1,'']]]
 ];
