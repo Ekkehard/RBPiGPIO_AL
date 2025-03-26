@@ -61,16 +61,20 @@ class AnalogInput( _AnalogInputAPI ):
     be specified where the Pico requires a Pin number or GP(IO) line string.  
     This class uses the gpiozero library for the Raspberry Pis other than the 
     Pico internally, and hence supports all ADC chips supported by gpiozero.
+    .
 
     On Raspberry Pis without built-in ADC, the supported external ADC chips are 
     MCP3002, MCP3004, MCP3008, MCP3201, MCP3202, MCP3204, MCP3208, MCP3301, 
     MCP3302, or MCP3304.  These chips use the SPI protocol to communicate with 
-    the Raspberry Pi.  The general GPIO SPI pins MOSI (GPIO10), MISO (GPIO9) and
-    SCLK (GPIO11) are used for communication with the ADC chip.  The chipEnable 
-    parameter is used to specify the SPI chip enable line number using CE0 
-    (GPIO8) and CE1 (GPIO7).  These pins must therefore be connected to the 
-    appropriate pins on the ADC chip as shown in the following table which uses
-    the MCP3008 as an example for the second column numbers.
+    the Raspberry Pi.  They provide a maximal sample rate of about 20 kHz (if 
+    the software can keep up) and a resolution of 10, 12 or 13 bits.
+    
+    The general GPIO SPI pins MOSI (GPIO10), MISO (GPIO9) and SCLK (GPIO11) are
+    used for communication with these ADC chips.  The chipEnable parameter is 
+    used to specify the SPI chip enable line number using CE0 (GPIO8) and CE1 
+    (GPIO7).  These pins must therefore be connected to the appropriate pins on 
+    the ADC chip as shown in the following table which uses the MCP3008 as an 
+    example for the second column numbers.
     <table border="1" >
     <caption>Connection of MCP3x0y chips to Raspberry Pi other than Pico
              --- these chips have 10+x bits resolution and y analog input 
@@ -147,12 +151,15 @@ class AnalogInput( _AnalogInputAPI ):
     </tr>
     </table>
 
+    It is important to note that apart from specifying the intended target ADC 
+    chip, the chipEnable is an active signal of the SPI protocol and cannot be
+    static or hard-wired on a particular ADC chip, even if there is only one.
     
     As the Raspberry Pi Pico does not need an external ADC chip, the chipEnable 
     as well as the chip parameter are ignored there.
 
     The voltage levels at the ADC pins are examined via a getter for the level 
-    property of  this class, i.e. if myDevice is an AnalogInput object the 
+    property of this class, i.e. if myDevice is an AnalogInput object, the 
     statement
     @code
         value = myDevice.level
@@ -237,8 +244,9 @@ class AnalogInput( _AnalogInputAPI ):
 
     def close( self ):
         """!
-        @brief Close the ADC pin - set this pin or all SPI pins to input (high 
-               impedance) without pulling up or down.
+        @brief Close the ADC pin or chip - set this pin or all SPI pins (except 
+        for the chipEnable pins) to input (high impedance) without pulling up or
+        down.
         """
         if self.__actor:
             try:

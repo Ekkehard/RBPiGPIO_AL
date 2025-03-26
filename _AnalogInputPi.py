@@ -47,37 +47,37 @@ class _AnalogInputPi( _AnalogInputAPI ):
         self.__deviceObj = None
         if chip == 'MCP3001':
             self.__deviceObj = gpiozero.MCP3001( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3002':
             self.__deviceObj = gpiozero.MCP3002( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3004': 
             self.__deviceObj = gpiozero.MCP3004( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3008':
             self.__deviceObj = gpiozero.MCP3008( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3201':
             self.__deviceObj = gpiozero.MCP3201( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3202':
             self.__deviceObj = gpiozero.MCP3202( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3204':
             self.__deviceObj = gpiozero.MCP3204( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3208':
             self.__deviceObj = gpiozero.MCP3208( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3301':
             self.__deviceObj = gpiozero.MCP3301( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3302':
             self.__deviceObj = gpiozero.MCP3302( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         elif chip == 'MCP3304':
             self.__deviceObj = gpiozero.MCP3304( channel=channel, 
-                                                 select_pin=chipEnable )
+                                                 device=chipEnable )
         else:
             raise GPIOError( 'unknown ADC chip' )
         self.__chip = chip
@@ -102,19 +102,25 @@ class _AnalogInputPi( _AnalogInputAPI ):
     def __str__( self ) -> str:
         """!
         @brief String representation of this class - returns all settable
-               parameters.  Can be overwritten by child.
+               parameters.
         """
-        return 'analog input via ADC chip {0} chip enable: {1}, ' \
-               'analog input channel: {2}' \
-               .format( self.__chip, self.__chipEnable, self.__channel )
+        if self.__deviceObj is None:
+            raise GPIOError( 'device not open' )
+        return 'analog input via ADC chip {0} (resolution: {1} bits) ' \
+               'analog input channel: {2}, chip enable: {3}, ' \
+               .format( self.__chip,
+                        self.__deviceObj.bits, 
+                        self.__channel, 
+                        self.__chipEnable )
 
     def close( self ):
         """!
         @brief Close an ADC on Raspberry Pi.
 
-        Let's keep our fingers crossed that gpiozero closes the SPI device 
-        properly and leaves the associated pins in input mode.
-        TODO check that!
+        Gpiozero closes the SPI device properly and leaves the associated pins 
+        that can also be used as regular GPIO pins in input mode.  The CE0 and 
+        CE1 pins are not used by the GPIO library and are left in output mode 
+        and pulled high when not in use by any SPI software.
         """
         if self.__deviceObj is not None:
             self.__deviceObj.close()
