@@ -54,14 +54,15 @@ class AnalogInput( _AnalogInputAPI ):
     this capability must use external Analog-to-Digital-Converter (ADC) hardware
     to provide it.  But since many sensors one might want to connect to a 
     Raspberry Pi provide analog outputs, this class provides a common API for 
-    analog input for all Raspberry Pi models, thus allowing the same higher-
-    level code to be used on all Raspberry Pi models without significant 
-    modification.  The only difference between using an external ADC and the
-    built-in ADC of the Raspberry Pi Pico is that the external ADC channel must 
-    be specified where the Pico requires a Pin number or GP(IO) line string.  
+    analog input for all Raspberry Pi models, where needed with the help of 
+    external ADC chips, thus allowing the same higher-level code to be used on 
+    all Raspberry Pi models without significant modification.  The only 
+    difference between using an external ADC and the built-in ADC of the 
+    Raspberry Pi Pico is that the channel of external ADC chip must be specified
+    where the Pico requires a Pin number or GP(IO) line string.
+
     This class uses the gpiozero library for the Raspberry Pis other than the 
     Pico internally, and hence supports all ADC chips supported by gpiozero.
-    .
 
     On Raspberry Pis without built-in ADC, the supported external ADC chips are 
     MCP3002, MCP3004, MCP3008, MCP3201, MCP3202, MCP3204, MCP3208, MCP3301, 
@@ -156,7 +157,9 @@ class AnalogInput( _AnalogInputAPI ):
     static or hard-wired on a particular ADC chip, even if there is only one.
     
     As the Raspberry Pi Pico does not need an external ADC chip, the chipEnable 
-    as well as the chip parameter are ignored there.
+    parameter as well as the chip parameter are ignored there.  The pins that 
+    support ADC on the Pico are 31 (GP26/ADC0), 32 (GP27/ADC1), and 34 
+    (GP28/ADC2).
 
     The voltage levels at the ADC pins are examined via a getter for the level 
     property of this class, i.e. if myDevice is an AnalogInput object, the 
