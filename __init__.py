@@ -31,7 +31,7 @@
 # support, which is one of the packages that broke in the transition to the 
 # Raspberry Pi 5 hardware.  See the documentation of class I2C for more details.
 #
-# This package consists of four major parts, digital Bit-I/O, analog bit input,
+# This package consists of four major parts, digital Bit-I/O, analog input,
 # pulse generation, and serial bus communication.  Currently, only the 
 # I<sup>2</sup>C bus is supported in the fourth part, but more busses will be 
 # implemented as the need arises.
