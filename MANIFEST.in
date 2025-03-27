@@ -1,0 +1,3 @@
+include GPIO_AL/requirements.txt
+include GPIO_AL/*.md
+include GPIO_AL/*.py

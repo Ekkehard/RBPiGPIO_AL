@@ -1,0 +1,3 @@
+gpiod>=2.2
+gpiozero
+setuptools
