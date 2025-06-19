@@ -28,12 +28,21 @@
 #      Date         | Author         | Modification
 #  -----------------+----------------+------------------------------------------
 #   Wed Mar 19 2025 | Ekkehard Blanz | created
+#   Mon Jun 16 2025 | Ekkehard Blanz | added voltage property
 #                   |                |
 #
 
 from GPIO_AL.GPIOError import GPIOError
 from GPIO_AL._AnalogInputAPI import _AnalogInputAPI
 from GPIO_AL.tools import isPico
+
+hasVoltage = False
+try:
+    from PObjects import Voltage
+    hasVoltage = True
+except ModuleNotFoundError:
+    hasVoltage = False
+
 
 # determine platform and import appropriate module for GPIO access
 if isPico():
@@ -280,6 +289,29 @@ class AnalogInput( _AnalogInputAPI ):
         if self.__actor is None:
             raise GPIOError( 'Analog Input is not initialized' )
         return self.__actor.maxLevel
+        
+    if hasVoltage:
+        @property
+        def voltage( self ) -> Voltage: # type: ignore
+            """!
+            @brief Works as read property to get the current voltage at a pin or
+                ADC chip input as a float.
+            @return float between 0.0 and 3.3 representing the voltage at the pin
+            """
+            if self.__actor is None:
+                raise GPIOError( 'Analog Input is not initialized' )
+            return Voltage( 3.3 * self.__actor.level / self.__actor.maxLevel ) # type: ignore
+    else:    
+        @property
+        def voltage( self ) -> float:
+            """!
+            @brief Works as read property to get the current voltage at a pin or
+                ADC chip as a float.
+            @return float between 0.0 and 3.3 representing the voltage at the pin
+            """
+            if self.__actor is None:
+                raise GPIOError( 'Analog Input is not initialized' )
+            return 3.3 * self.__actor.level / self.__actor.maxLevel
 
 
 #  main program - NO Unit Test - Unit Test is in separate file
